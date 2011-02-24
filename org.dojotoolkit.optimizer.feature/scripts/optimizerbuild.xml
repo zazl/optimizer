@@ -64,8 +64,8 @@
               cleanPluginBuild="true"/>        
 		<ant antfile="${workspace.dir}/org.dojotoolkit.optimizer.feature/scripts/assemble.xml" target="assemble" inheritall="false">
 			<property name="target.dir" value="${target.dir}"/>
-			<property name="workspace.dir" value="${basedir}/../workspace"/>
-			<property name="targetplatform.dir" value="${basedir}/../targetplatform"/>
+			<property name="workspace.dir" value="${workspace.dir}"/>
+			<property name="targetplatform.dir" value="${targetplatform.dir}"/>
 			<property name="dojo.dir" value="${targetplatform.dir}/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
 			<property name="equinox.dir" value="${targetplatform.dir}/equinox-SDK-3.6/plugins"/>
 		</ant>
