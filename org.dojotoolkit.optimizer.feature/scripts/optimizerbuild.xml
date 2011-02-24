@@ -3,7 +3,7 @@
 	<import file="${basedir}/org.ant4eclipse_1.0.0.M4/macros/a4e-pde-macros.xml" />
     
 	<property name="target.dir" value="${basedir}/optimizer"/>
-	<property name="workspace.dir" value="${basedir}/../workspace"/>
+	<property name="workspace.dir" value="${basedir}/../zazl"/>
 	<property name="targetplatform.dir" value="${basedir}/../targetplatform"/>
 	
     <ant4eclipse:targetPlatform id="optimizerTarget">
