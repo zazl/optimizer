@@ -1,0 +1,83 @@
+<project name="assemble" basedir=".." default="assemble">
+    <!-- Properties -->
+	<property
+		name="target.dir"
+		value="${basedir}/bin/build.artifacts"/>
+	
+	<property
+		name="workspace.dir"
+		value="${basedir}/.."/>
+	
+	<property
+		name="dojo.dir"
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
+	
+	<property
+		name="json.dir"
+		value="${workspace.dir}/../targetplatform/json/plugins/org.json_1.0.0"/>
+	
+	<property
+		name="uglifyjs.dir"
+		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.0"/>
+	
+	<property
+		name="equinox.dir"
+		value="${workspace.dir}/../targetplatform/equinox-SDK-3.6/plugins"/>
+	
+	<!-- Export the feature -->
+	<target name="assemble">
+		<mkdir dir="${target.dir}/package"/>
+		<mkdir dir="${target.dir}/package/warlib"/>
+		<jar destfile="${target.dir}/package/warlib/jsonjs.jar">
+			<zipfileset dir="${json.dir}/json" prefix="json"/>
+		</jar>
+		<jar destfile="${target.dir}/package/warlib/uglifyjs.jar">
+			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
+		</jar>
+		<copy todir="${target.dir}/package/warlib">
+	        <fileset dir="${equinox.dir}">
+	            <include name="javax.servlet_2.5.0*.jar"/>
+	            <include name="org.mortbay.jetty.server_6.*.jar"/>
+	            <include name="org.mortbay.jetty.util_6.*.jar"/>
+	        </fileset>
+	        <fileset dir="${target.dir}/plugins">
+	            <include name="*.jar"/>
+	        </fileset>
+		</copy>
+		<war destfile="${target.dir}/package/optimizerjsp.war" webxml="${workspace.dir}/org.dojotoolkit.optimizer.samples/optimizerjsp_web.xml">
+			<zipfileset dir="${dojo.dir}/dojo" prefix="dojo"/>
+			<zipfileset dir="${dojo.dir}/dijit" prefix="dijit"/>
+			<zipfileset dir="${dojo.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_compressor.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_optimizer.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
+				<include name="org.dojotoolkit.json*.jar"/> 
+				<include name="org.dojotoolkit.optimizer*.jar"/> 
+				<include name="org.dojotoolkit.compressor*.jar"/> 
+				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
+				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="org.dojotoolkit.server.util*.jar"/> 
+				<include name="json*.jar"/> 
+				<include name="uglifyjs*.jar"/> 
+				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
+			</zipfileset>	
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/test" prefix="test"/>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
+			<fileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples">
+				<include name="persongrid.jsp"/>
+			</fileset>
+		</war>
+	</target>
+
+	<!-- Clean up the target directory -->
+	<target name="clean">
+		<delete	dir="${target.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+</project>

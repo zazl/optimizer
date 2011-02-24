@@ -1,0 +1,78 @@
+<project name="optimizerbuild" default="build" xmlns:ant4eclipse="antlib:org.ant4eclipse">
+	<taskdef uri="antlib:org.ant4eclipse" resource="org/ant4eclipse/antlib.xml" />
+	<import file="${basedir}/org.ant4eclipse_1.0.0.M4/macros/a4e-pde-macros.xml" />
+    
+	<property name="target.dir" value="${basedir}/optimizer"/>
+	<property name="workspace.dir" value="${basedir}/../workspace"/>
+	<property name="targetplatform.dir" value="${basedir}/../targetplatform"/>
+	
+    <ant4eclipse:targetPlatform id="optimizerTarget">
+        <location dir="${targetplatform.dir}/equinox-SDK-3.6"/>
+        <location dir="${targetplatform.dir}/dojo"/>
+        <location dir="${targetplatform.dir}/http-client"/>
+        <location dir="${targetplatform.dir}/json"/>
+        <location dir="${targetplatform.dir}/jsp"/>
+        <location dir="${targetplatform.dir}/requirejs"/>
+        <location dir="${targetplatform.dir}/rhino"/>
+        <location dir="${targetplatform.dir}/shrinksafe"/>
+        <location dir="${targetplatform.dir}/uglifyjs"/>
+    </ant4eclipse:targetPlatform> 		
+    
+	<target name="build" depends="clean">
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.prereqs.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              clearDestination="true"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.server.util.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.rt.v8.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.compressor.v8.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.compressor.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.optimizer.v8.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+        <buildFeature workspaceDirectory="${workspace.dir}"
+              projectName="org.dojotoolkit.optimizer.feature"
+              targetplatformid="optimizerTarget"
+              destination="${target.dir}"
+              packagePluginSourcesAsJar="false"
+              cleanPluginBuild="true"/>        
+		<ant antfile="${workspace.dir}/org.dojotoolkit.optimizer.feature/scripts/assemble.xml" target="assemble" inheritall="false">
+			<property name="target.dir" value="${target.dir}"/>
+			<property name="workspace.dir" value="${basedir}/../workspace"/>
+			<property name="targetplatform.dir" value="${basedir}/../targetplatform"/>
+			<property name="dojo.dir" value="${targetplatform.dir}/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
+			<property name="equinox.dir" value="${targetplatform.dir}/equinox-SDK-3.6/plugins"/>
+		</ant>
+	</target>
+	
+	<target name="clean">
+		<delete	dir="${target.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+</project>

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Optimizer
+Bundle-SymbolicName: org.dojotoolkit.optimizer
+Bundle-Version: 1.0.0.qualifier
+Import-Package: org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.server.util.rhino
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.dojotoolkit.optimizer
+Require-Bundle: org.json;bundle-version="1.0.0"

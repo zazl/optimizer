@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Shrinksafe
+Bundle-SymbolicName: org.dojotoolkit.compressor.shrinksafe
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.dojotoolkit.compressor,
+ org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.shrinksafe,
+ org.mozilla.javascript,
+ org.dojotoolkit.server.util.osgi
+Export-Package: org.dojotoolkit.compressor.shrinksafe
+Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
+Export-DojoService: org.dojotoolkit.compressor.JSCompressorFactory;impl=org.dojotoolkit.compressor.shrinksafe.ShrinksafeJSCompressorFactory;id=ShrinksafeJSCompressor

@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Uglifyjs V8
+Bundle-SymbolicName: org.dojotoolkit.compressor.uglifyjs.v8
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.dojotoolkit.compressor.uglifyjs;bundle-version="1.0.0"
+Import-Package: org.dojotoolkit.compressor,
+ org.dojotoolkit.json,
+ org.dojotoolkit.rt.v8,
+ org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.server.util.osgi
+Export-Package: org.dojotoolkit.compressor.uglifyjs.v8
+Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
+Export-DojoService: org.dojotoolkit.compressor.JSCompressorFactory;impl=org.dojotoolkit.compressor.uglifyjs.v8.V8UglifyJSCompressorFactory;id=V8UglifyJSCompressor

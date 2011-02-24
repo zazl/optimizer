@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Uglify Rhino
+Bundle-SymbolicName: org.dojotoolkit.compressor.uglifyjs.rhino
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.dojotoolkit.compressor,
+ org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.server.util.rhino,
+ org.mozilla.javascript,
+ org.dojotoolkit.server.util.osgi
+Require-Bundle: org.dojotoolkit.compressor.uglifyjs;bundle-version="1.0.0"
+Export-Package: org.dojotoolkit.compressor.uglifyjs.rhino
+Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
+Export-DojoService: org.dojotoolkit.compressor.JSCompressorFactory;impl=org.dojotoolkit.compressor.uglifyjs.rhino.RhinoUglifyJSCompressorFactory;id=RhinoUglifyJSCompressor
