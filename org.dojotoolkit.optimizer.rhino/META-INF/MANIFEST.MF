@@ -8,8 +8,7 @@ Require-Bundle: org.dojotoolkit.optimizer;bundle-version="1.0.0"
 Import-Package: org.dojotoolkit.json,
  org.dojotoolkit.server.util.resource,
  org.dojotoolkit.server.util.rhino,
- org.mozilla.javascript,
- org.dojotoolkit.server.util.osgi
+ org.mozilla.javascript
 Export-Package: org.dojotoolkit.optimizer.rhino
 Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
 Export-DojoService: org.dojotoolkit.optimizer.JSOptimizerFactory;impl=org.dojotoolkit.optimizer.rhino.RhinoJSOptimizerFactory;id=RhinoJSOptimizer

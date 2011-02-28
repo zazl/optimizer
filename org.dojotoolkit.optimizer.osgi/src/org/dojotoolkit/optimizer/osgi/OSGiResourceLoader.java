@@ -5,7 +5,6 @@
 */
 package org.dojotoolkit.optimizer.osgi;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,10 +25,6 @@ public class OSGiResourceLoader extends JSCompressorResourceLoader {
 		super(jsCompressorFactory, ignoreList);
 		this.bundleContext = bundleContext;
 		this.bundleIds = bundleIds;
-	}
-	
-	public URL getResource(String path) throws IOException {
-		return _getResource(normalizePath(path));
 	}
 
 	protected URL _getResource(String path) {

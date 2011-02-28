@@ -25,10 +25,6 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		this.servletContext = servletContext;
 	}
 	
-	public URL getResource(String path) throws IOException {
-		return _getResource(normalizePath(path));
-	}
-
 	protected URL _getResource(String path) throws IOException {
 		URL url = servletContext.getResource(path);
 		if (url != null) {
