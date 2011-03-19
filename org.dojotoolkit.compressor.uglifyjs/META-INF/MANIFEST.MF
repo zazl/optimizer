@@ -3,4 +3,5 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Uglifyjs
 Bundle-SymbolicName: org.dojotoolkit.compressor.uglifyjs
 Bundle-Version: 1.0.0.qualifier
-Require-Bundle: org.uglifyjs;bundle-version="1.0.0"
+Require-Bundle: org.uglifyjs,
+ org.dojotoolkit.server.util.js;bundle-version="1.0.0"

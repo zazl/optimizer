@@ -5,14 +5,19 @@
 */
 package org.dojotoolkit.optimizer.servlet;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,36 +27,48 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSOptimizer;
+import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.Localization;
-import org.dojotoolkit.optimizer.Util;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
+import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
-public class JSHandler {
+public abstract class JSHandler {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
-	private static final String NAMESPACE_PREFIX = "dojo.registerModulePath('";
-	private static final String NAMESPACE_MIDDLE = "', '";
-	private static final String NAMESPACE_SUFFIX = "');\n";
+	
+	public static final String AMD_HANDLER_TYPE = "amd";
+	public static final String SYNCLOADER_HANDLER_TYPE = "syncloader";
 	
 	protected JSOptimizer jsOptimizer = null;
 	protected ResourceLoader resourceLoader = null;
+	protected Map<String, Object> config = null;
 	protected String[] bootstrapModules = null;
 	protected String[] debugBootstrapModules = null;
 	
-	public JSHandler() {
+	public JSHandler(String configFileName) {
+		try {
+			config = loadHandlerConfig(configFileName);
+		} catch (IOException e) {
+			logger.logp(Level.SEVERE, getClass().getName(), "JSHandler", "IOException while attempting to load ["+configFileName+"]", e);
+		}
 	}
 
-	public void initialize(ResourceLoader resourceLoader, JSOptimizer jsOptimizer, String[] bootstrapModules, String[] debugBootstrapModules) {
+	@SuppressWarnings("unchecked")
+	public void initialize(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, JSOptimizerFactory jsOptimizerFactory) {
 		this.resourceLoader = resourceLoader;
-		this.jsOptimizer = jsOptimizer;
-		this.bootstrapModules = bootstrapModules;
-		this.debugBootstrapModules = debugBootstrapModules;
+		jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
+		List<String> bootstrapModuleList = (List<String>)config.get("bootstrapModules");
+		bootstrapModules = new String[bootstrapModuleList.size()];
+		bootstrapModules = bootstrapModuleList.toArray(bootstrapModules);
+		List<String> debugBootstrapModuleList = (List<String>)config.get("debugBootstrapModules");
+		debugBootstrapModules = new String[debugBootstrapModuleList.size()];
+		debugBootstrapModules = debugBootstrapModuleList.toArray(debugBootstrapModules);
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String[] modules = null;
-		JSNamespace[] namespaces = null;
 		String modulesParam = request.getParameter("modules");
 		String url = request.getPathInfo();
 		if (url != null && url.startsWith("/_javascript")) {
@@ -70,28 +87,11 @@ public class JSHandler {
 			gzip = true;
 		}
 		
-		String namespacesParam = request.getParameter("namespaces");
-		if (namespacesParam != null) {
-			List<JSNamespace> namespaceList = new ArrayList<JSNamespace>();
-			StringTokenizer st = new StringTokenizer(namespacesParam, ",");
-			while (st.hasMoreTokens()) {
-				String[] namespace = st.nextToken().split(":");
-				if (namespace.length > 1) {
-					JSNamespace jsNamespace = new JSNamespace();
-					jsNamespace.namespace = namespace[0];
-					jsNamespace.prefix = namespace[1];
-					namespaceList.add(jsNamespace);
-				}
-			}
-			namespaces = new JSNamespace[namespaceList.size()];
-			namespaces = namespaceList.toArray(namespaces);
-		}
-		
 		response.setContentType("text/javascript; charset=UTF-8");
 		
+		JSAnalysisData analysisData = null;
 		if (modulesParam != null) {
 			modules = getModuleList(modulesParam);
-			JSAnalysisData analysisData;
 			try {
 				analysisData = jsOptimizer.getAnalysisData(modules);
 				if (logger.getLevel() == Level.FINE) {
@@ -129,83 +129,38 @@ public class JSHandler {
 					response.setDateHeader("Expires", calendar.getTimeInMillis());
 				}
 			}
- 			Writer osw = null;
- 			GZIPOutputStream gz = null;
- 			try {
-	 			if (gzip) {
-	 				response.setHeader("Content-Encoding","gzip");
-	                gz = new GZIPOutputStream(response.getOutputStream());
-		 			osw = new BufferedWriter(new OutputStreamWriter(gz, "UTF-8"));
-	 			} else {
-		 			osw = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-	 			}
-	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-		 			osw.write(resourceLoader.readResource(bootstrapModulePath));
-	 			}
-	 			if (namespaces != null) {
-	 				for (JSNamespace jsNamespace : namespaces) {
-	 					String s = NAMESPACE_PREFIX+jsNamespace.namespace+NAMESPACE_MIDDLE+jsNamespace.prefix+NAMESPACE_SUFFIX; 
-	 					osw.write(s);
-	 				}
-	 			}
-				
-				List<Localization> localizations = analysisData.getLocalizations();
-				if (localizations.size() > 0) {
-					try {
-						Util.writeLocalizations(resourceLoader, osw, localizations, request.getLocale());
-					} catch (IOException e) {
-						logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+modulesParam+"]", e);
-						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-						return true;
-					}
-				}
-				
-				String[] dependencies = analysisData.getDependencies();
-				
-				for (String dependency : dependencies) {
-					String contentElement = resourceLoader.readResource(Util.normalizePath(dependency));
-					if (contentElement != null) {
-						osw.write(contentElement);
-					}
-				}
- 			} catch (IOException e) {
-				logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+modulesParam+"]", e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-				return true;
- 			} finally {
- 				osw.flush();
- 	 			if (gzip) {
- 	 				gz.close();
- 	 			}
- 			}
-		} else {
+		}
+		Writer osw = null;
+		GZIPOutputStream gz = null;
+		try {
  			if (gzip) {
  				response.setHeader("Content-Encoding","gzip");
- 				OutputStream os = response.getOutputStream();
-                GZIPOutputStream gz=new GZIPOutputStream(os);
-	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-	 				gz.write(resourceLoader.readResource(bootstrapModulePath).getBytes("UTF-8"));
-	 			}
-	 			if (namespaces != null) {
-	 				for (JSNamespace jsNamespace : namespaces) {
-	 					String s = NAMESPACE_PREFIX+jsNamespace.namespace+NAMESPACE_MIDDLE+jsNamespace.prefix+NAMESPACE_SUFFIX; 
-	 					gz.write(s.getBytes("UTF-8"));
-	 				}
-	 			}
-                gz.close();
+                gz = new GZIPOutputStream(response.getOutputStream());
+	 			osw = new BufferedWriter(new OutputStreamWriter(gz, "UTF-8"));
  			} else {
-	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-	 				response.getWriter().write(resourceLoader.readResource(bootstrapModulePath));
-	 			}
-	 			if (namespaces != null) {
-	 				for (JSNamespace jsNamespace : namespaces) {
-	 					response.getWriter().write(NAMESPACE_PREFIX+jsNamespace.namespace+NAMESPACE_MIDDLE+jsNamespace.prefix+NAMESPACE_SUFFIX); 
-	 				}
-	 			}
+	 			osw = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
+ 			}
+ 			for (String bootstrapModulePath: bootstrapModulePaths) {
+	 			osw.write(resourceLoader.readResource(bootstrapModulePath));
+ 			}
+ 			customHandle(request, osw, analysisData);
+		} catch (IOException e) {
+			logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+modulesParam+"]", e);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+		} finally {
+			osw.flush();
+ 			if (gzip) {
+ 				gz.close();
  			}
 		}
         return true;
 	}
+	
+	public JSOptimizer getJSOptimizer() {
+		return jsOptimizer;
+	}
+	
+	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException;
 	
 	private String[] getModuleList(String modulesParam) {
 		String[] modules = null;
@@ -219,8 +174,20 @@ public class JSHandler {
 		return modules;
 	}
 	
-	public class JSNamespace {
-		public String namespace = null;
-		public String prefix = null;
+	
+	@SuppressWarnings("unchecked")
+	protected static Map<String, Object> loadHandlerConfig(String handlerConfigFileName) throws IOException {
+		Map<String, Object> handlerConfig = null;
+		URL handlerConfigURL = JSHandler.class.getClassLoader().getResource(handlerConfigFileName);
+		InputStream is = null;
+		Reader r = null;
+		try {
+			is = handlerConfigURL.openStream();
+			r = new BufferedReader(new InputStreamReader(is));
+			handlerConfig = (Map<String, Object>)JSONParser.parse(r);
+		} finally {
+			if (is != null) { try { is.close(); } catch (IOException e) {}}
+		}
+		return handlerConfig;
 	}
 }

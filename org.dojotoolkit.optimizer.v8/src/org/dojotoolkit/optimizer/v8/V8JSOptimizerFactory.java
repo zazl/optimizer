@@ -5,6 +5,8 @@
 */
 package org.dojotoolkit.optimizer.v8;
 
+import java.util.Map;
+
 import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
@@ -12,7 +14,8 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class V8JSOptimizerFactory implements JSOptimizerFactory {
 
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum) {
-		return new V8JSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum);
+	@SuppressWarnings("rawtypes")
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+		return new V8JSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
 	}
 }

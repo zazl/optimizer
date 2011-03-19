@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.ChecksumCreator;
@@ -23,13 +22,13 @@ import org.dojotoolkit.rt.v8.V8JavaBridge;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
-public class V8JSOptimizer extends CachingJSOptimizer implements JSOptimizer {
+public class V8JSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	protected Map<String, JSAnalysisDataImpl> cache = null;
 	private ResourceLoader resourceLoader = null;
 	private boolean javaChecksum = false;
 
-	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum) {
+	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
 		super();
 		this.resourceLoader = resourceLoader;
 		this.javaChecksum = javaChecksum;
@@ -104,7 +103,7 @@ public class V8JSOptimizer extends CachingJSOptimizer implements JSOptimizer {
 					Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 					localizationList.add(localization);
 				}
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, resourceLoader);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, resourceLoader);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {

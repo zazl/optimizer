@@ -16,20 +16,31 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private String[] dependencies = null;
 	private String checksum = null;
 	private List<Localization> localizations = null;
+	private List<String> textDependencies = null;
+	private List<Map<String, Object>> modulesMissingNames = null;
 	private ResourceLoader resourceLoader = null;
 	private Map<String, Long> timestampLookup = null;
 	
-	public JSAnalysisDataImpl(String[] modules, List<String> dependencies, String checksum, List<Localization> localizations, ResourceLoader resourceLoader) {
+	public JSAnalysisDataImpl(String[] modules, 
+			                  List<String> dependencies, 
+			                  String checksum, 
+			                  List<Localization> localizations, 
+			                  List<String> textDependencies, 
+			                  List<Map<String, Object>> modulesMissingNames,
+			                  ResourceLoader resourceLoader) {
 		timestampLookup = new HashMap<String, Long>();
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
 		int i = 0;
 		for (String dependency : dependencies) {
-			timestampLookup.put(Util.normalizePath(dependency), resourceLoader.getTimestamp(dependency));
-			this.dependencies[i++] = Util.normalizePath(dependency); 
+			String normalized = Util.normalizePath(dependency);
+			timestampLookup.put(normalized, resourceLoader.getTimestamp(dependency));
+			this.dependencies[i++] = normalized; 
 		}
 		this.checksum = checksum;
 		this.localizations = localizations;
+		this.textDependencies = textDependencies;
+		this.modulesMissingNames = modulesMissingNames;
 		this.resourceLoader = resourceLoader;
 	}
 	
@@ -51,6 +62,14 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 
 	public List<Localization> getLocalizations() {
 		return localizations;
+	}
+	
+	public List<String> getTextDependencies() {
+		return textDependencies;
+	}
+	
+	public List<Map<String, Object>> getModulesMissingNames() {
+		return modulesMissingNames;
 	}
 	
 	public boolean isStale() {

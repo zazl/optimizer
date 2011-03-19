@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: V8 AMD Optimizer
+Bundle-SymbolicName: org.dojotoolkit.optimizer.amd.v8
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.dojotoolkit.optimizer;bundle-version="1.0.0"
+Import-Package: org.dojotoolkit.json,
+ org.dojotoolkit.rt.v8,
+ org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.server.util.rhino,
+ org.dojotoolkit.server.util.osgi
+Export-Package: org.dojotoolkit.optimizer.amd.v8
+Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
+Export-DojoService: org.dojotoolkit.optimizer.JSOptimizerFactory;impl=org.dojotoolkit.optimizer.amd.v8.AMDJSOptimizerFactory;id=AMDV8JSOptimizer

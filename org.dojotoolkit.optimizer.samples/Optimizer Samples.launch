@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<setAttribute key="additional_plugins">
+<setEntry value="org.dojotoolkit.optimizer.samples:1.0.0.qualifier:default:true"/>
+<setEntry value="org.eclipse.equinox.http.jetty:2.0.0.v20100503:default:true"/>
+<setEntry value="org.eclipse.equinox.http.servlet:1.1.0.v20100503:default:true"/>
+</setAttribute>
 <booleanAttribute key="append.args" value="true"/>
 <booleanAttribute key="automaticAdd" value="false"/>
 <booleanAttribute key="automaticValidate" value="true"/>
@@ -7,16 +12,29 @@
 <stringAttribute key="checked" value="[NONE]"/>
 <booleanAttribute key="clearConfig" value="true"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Optimizer Samples"/>
+<booleanAttribute key="default" value="false"/>
 <booleanAttribute key="default_auto_start" value="true"/>
 <intAttribute key="default_start_level" value="4"/>
+<stringAttribute key="featureDefaultLocation" value="workspace"/>
+<stringAttribute key="featurePluginResolution" value="workspace"/>
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.zazl.jetty/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=true -DjavaChecksum=true -DcompressorType=uglifyjs -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.dojotoolkit.optimizer,org.json,org.uglifyjs"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.zazl.jetty/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=true -DjavaChecksum=true -DcompressorType=uglifyjs -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.dojotoolkit.optimizer,org.json,org.uglifyjs,org.dojotoolkit.server.util.js -DjsHandlerType=syncloader"/>
 <stringAttribute key="pde.version" value="3.3"/>
+<setAttribute key="selected_features">
+<setEntry value="org.dojotoolkit.compressor.feature:default"/>
+<setEntry value="org.dojotoolkit.optimizer.feature:default"/>
+<setEntry value="org.dojotoolkit.prereq.dojo15:default"/>
+<setEntry value="org.dojotoolkit.prereqs.feature:default"/>
+<setEntry value="org.dojotoolkit.server.util.feature:default"/>
+<setEntry value="org.dojotoolkit.zazl.feature:default"/>
+<setEntry value="org.dojotoolkit.zazl.servlet.osgi.feature:default"/>
+</setAttribute>
 <booleanAttribute key="show_selected_only" value="true"/>
-<stringAttribute key="target_bundles" value="javax.servlet.jsp@default:default,org.dojotoolkit.dojo@default:default,org.eclipse.equinox.common@2:true,org.eclipse.equinox.http.servlet@default:default,org.eclipse.equinox.http.registry@default:default,javax.servlet@default:default,org.apache.jasper@default:default,org.eclipse.equinox.http.jetty@default:default,org.apache.commons.el@default:default,org.mozilla.javascript@default:default,org.dojotoolkit.shrinksafe@default:default,org.json@default:default,org.eclipse.equinox.jsp.jasper.registry@default:default,org.uglifyjs@default:default,org.mortbay.jetty.util@default:default,org.apache.commons.logging*1.1.1.v201005080502@default:default,org.eclipse.osgi.services@default:default,org.eclipse.equinox.jsp.jasper@default:default,org.eclipse.osgi@-1:true,org.mortbay.jetty.server@default:default,org.eclipse.equinox.registry@default:default"/>
+<stringAttribute key="target_bundles" value="org.apache.jasper,javax.servlet@default:default,org.apache.commons.logging*1.1.1.v201005080502@default:default,org.mozilla.javascript@default:default,org.eclipse.equinox.http.registry,org.eclipse.equinox.common@2:true,org.dojotoolkit.dojo*1.5.0@default:default,org.mortbay.jetty.server,org.eclipse.osgi@-1:true,org.json@default:default,javax.servlet.jsp,org.eclipse.osgi.services@default:default,org.eclipse.equinox.http.jetty,org.uglifyjs,org.mortbay.jetty.util,org.dojotoolkit.shrinksafe@default:default,org.eclipse.equinox.jsp.jasper.registry,org.apache.commons.el,org.eclipse.equinox.registry@default:default,org.dojotoolkit.dojo*1.6.0@default:default,org.eclipse.equinox.jsp.jasper,org.eclipse.equinox.http.servlet"/>
 <booleanAttribute key="tracing" value="false"/>
+<booleanAttribute key="useCustomFeatures" value="true"/>
 <booleanAttribute key="useDefaultConfigArea" value="true"/>
-<stringAttribute key="workspace_bundles" value="org.dojotoolkit.rt.v8@default:default,org.dojotoolkit.optimizer.servlet@default:default,org.dojotoolkit.compressor.uglifyjs.v8@default:default,org.dojotoolkit.optimizer.v8@default:default,org.dojotoolkit.compressor@default:default,org.dojotoolkit.optimizer.osgi@default:default,org.dojotoolkit.optimizer@default:default,org.dojotoolkit.compressor.shrinksafe@default:default,org.dojotoolkit.json@default:default,org.dojotoolkit.server.util@default:default,org.dojotoolkit.compressor.uglifyjs@default:default,org.dojotoolkit.compressor.uglifyjs.rhino@default:default,org.dojotoolkit.optimizer.rhino@default:default,org.dojotoolkit.optimizer.samples@default:default"/>
+<stringAttribute key="workspace_bundles" value="org.dojotoolkit.compressor.uglifyjs.rhino,org.dojotoolkit.optimizer.osgi,org.dojotoolkit.compressor.uglifyjs.v8,org.dojotoolkit.json@default:default,org.dojotoolkit.optimizer.v8,org.dojotoolkit.rt.v8@default:default,org.dojotoolkit.server.util@default:default,org.dojotoolkit.optimizer@default:default,org.dojotoolkit.compressor.shrinksafe,org.dojotoolkit.compressor@default:default,org.dojotoolkit.optimizer.servlet,org.dojotoolkit.optimizer.rhino,org.dojotoolkit.optimizer.samples,org.dojotoolkit.compressor.uglifyjs"/>
 </launchConfiguration>

@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.compressor.JSCompressorFactory;
 import org.dojotoolkit.compressor.JSCompressorFactoryImpl;
-import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.JSOptimizerFactoryImpl;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
@@ -26,24 +25,23 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 public class JSServlet extends HttpServlet {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	private static final long serialVersionUID = 1L;
-	private static final String[] ignoreList = new String[] {"/dojo/dojo.js", "^/optimizer/", "^/uglifyjs/", ".*/nls/.*"};
-	public static final String[] bootstrapModules = new String[] {"/dojo/dojo.js", "/dojo/i18n.js"};
-	public static final String[] debugBootstrapModules = new String[] {"/dojo/dojo.js.uncompressed.js", "/dojo/i18n.js"};
 
-	private JSHandler jsHandler = null;
-	protected JSOptimizer jsOptimizer = null;
+	protected JSHandler jsHandler = null;
+	protected JSOptimizerFactory jsOptimizerFactory = null;
 	protected ResourceLoader resourceLoader = null;
 	protected RhinoClassLoader rhinoClassLoader = null;
+	protected boolean javaChecksum = false; 
+	protected String jsHandlerType = null;
 	
-	public JSServlet() {
-		jsHandler = new JSHandler();
-	}
+	public JSServlet() {}
 	
-	public JSServlet(ResourceLoader resourceLoader, JSOptimizer jsOptimizer, RhinoClassLoader rhinoClassLoader) {
+	public JSServlet(ResourceLoader resourceLoader, JSOptimizerFactory jsOptimizerFactory, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, String jsHandlerType) {
 		this();
-		this.jsOptimizer = jsOptimizer;
+		this.jsOptimizerFactory = jsOptimizerFactory;
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
+		this.javaChecksum = javaChecksum;
+		this.jsHandlerType = jsHandlerType;
 	}
 	
 	public void init(ServletConfig config) throws ServletException {
@@ -57,7 +55,7 @@ public class JSServlet extends HttpServlet {
 				if (compressJS != null && compressJS.equalsIgnoreCase("true")) {
 					jsCompressorFactory = new JSCompressorFactoryImpl();
 				}
-				resourceLoader = new ServletResourceLoader(getServletContext(), jsCompressorFactory, ignoreList);
+				resourceLoader = new ServletResourceLoader(getServletContext(), jsCompressorFactory);
 				getServletContext().setAttribute("org.dojotoolkit.ResourceLoader", resourceLoader);
 			}
 		}
@@ -68,21 +66,31 @@ public class JSServlet extends HttpServlet {
 				getServletContext().setAttribute("org.dojotoolkit.RhinoClassLoader", rhinoClassLoader);
 			}
 		}
-		boolean javaChecksum = false;
 		String javaChecksumString = getServletContext().getInitParameter("javaChecksum");
 		if (javaChecksumString != null) {
 			javaChecksum = Boolean.valueOf(javaChecksumString);
 		}
-		if (jsOptimizer == null) {
-			jsOptimizer = (JSOptimizer)getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
-			if (jsOptimizer == null) {
-				JSOptimizerFactory jsOptimizerFactory = new JSOptimizerFactoryImpl();
-				jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum);
-				logger.log(Level.FINE, getClass().getName(), "Using JSOptimizer of type ["+jsOptimizer.getClass().getName()+"]");
+		if (jsOptimizerFactory == null) {
+			jsOptimizerFactory = (JSOptimizerFactory)getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory");
+			if (jsOptimizerFactory == null) {
+				jsOptimizerFactory = new JSOptimizerFactoryImpl();
+				logger.log(Level.FINE, getClass().getName(), "Using JSOptimizer of type ["+jsOptimizerFactory.getClass().getName()+"]");
 			}
 		}
-		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizer", jsOptimizer);
-		jsHandler.initialize(resourceLoader, jsOptimizer, bootstrapModules, debugBootstrapModules);
+		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory", jsOptimizerFactory);
+		if (jsHandlerType == null) {
+			jsHandlerType = getServletContext().getInitParameter("jsHandlerType");
+			if (jsHandlerType == null) {
+				jsHandlerType = JSHandler.SYNCLOADER_HANDLER_TYPE;
+			}
+		}
+		if (jsHandlerType.equals(JSHandler.SYNCLOADER_HANDLER_TYPE)) {
+			jsHandler = new SyncLoaderJSHandler();
+		} else if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
+			jsHandler = new AMDJSHandler("requirejs.json");
+		}
+		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory);
+		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizer", jsHandler.getJSOptimizer());
 	}
 	
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

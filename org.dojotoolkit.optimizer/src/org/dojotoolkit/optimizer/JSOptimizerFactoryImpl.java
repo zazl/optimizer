@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 	private static final String DEFAULT_JS_OPTIMIZER_CLASS = "org.dojotoolkit.optimizer.rhino.RhinoJSOptimizer"; 
 	private Constructor<JSOptimizer> jsOptimizerConstructor = null;
 	
+	@SuppressWarnings("unchecked")
 	public JSOptimizerFactoryImpl() {
 		try {
 			Class<JSOptimizer> jsOptimizerClass = null;
@@ -53,7 +55,7 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 				logger.logp(Level.INFO, getClass().getName(), "JSOptimizerFactoryImpl", "jsOptimizerClassName is default of  ["+DEFAULT_JS_OPTIMIZER_CLASS+"]");
 				jsOptimizerClass = (Class<JSOptimizer>) getClass().getClassLoader().loadClass(DEFAULT_JS_OPTIMIZER_CLASS);
 			}
-			jsOptimizerConstructor = jsOptimizerClass.getConstructor(new Class[] {ResourceLoader.class, RhinoClassLoader.class, boolean.class});
+			jsOptimizerConstructor = jsOptimizerClass.getConstructor(new Class[] {ResourceLoader.class, RhinoClassLoader.class, boolean.class, Map.class});
 		} catch (ClassNotFoundException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "JSOptimizerFactoryImpl", "Implementation of JSOptimizer defined in org_dojotoolkit_optimizer.properties is unavailable", e);
 			throw new IllegalStateException("Implementation of JSOptimizer defined in org_dojotoolkit_optimizer.properties is unavailable");		
@@ -64,10 +66,11 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 		
 	}
 	
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum) {
+	@SuppressWarnings("rawtypes")
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
 		JSOptimizer jsOptimizer = null;
 		try {
-			jsOptimizer = jsOptimizerConstructor.newInstance(new Object[] {resourceLoader, rhinoClassLoader, javaChecksum});
+			jsOptimizer = jsOptimizerConstructor.newInstance(new Object[] {resourceLoader, rhinoClassLoader, javaChecksum, config});
 		} catch (Exception e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "createJSOptimizer", "Exception thrown while creating and instance of "+jsOptimizerConstructor.toString(), e);
 		} 

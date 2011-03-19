@@ -41,14 +41,9 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 		String compressedSrc = null;
 		Context ctx = null; 
 		StringBuffer sb = new StringBuffer();
-		
-        sb.append("loadJS('/uglifyjs/bootstrap.js');\n");
-        sb.append("var jsp = require('/uglifyjs/parse-js');\n"); 
-        sb.append("var pro = require('/uglifyjs/process');\n"); 
-        sb.append("var ast = jsp.parse(readSrc());\n");
-        sb.append("ast = pro.ast_mangle(ast);\n");
-        sb.append("ast = pro.ast_squeeze(ast, {make_seqs: false});\n");
-        sb.append("pro.gen_code(ast);\n");
+        sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
+        sb.append("var compressor = require('uglifyjs/compressor');\n");
+        sb.append("compressor.compress(readSrc(), false);\n");
 		try {
 			ctx = Context.enter();
 			ScriptableObject scope = ctx.initStandardObjects();

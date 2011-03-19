@@ -17,7 +17,7 @@ public class Util {
 	private static String lineSeparator = System.getProperty("line.separator");
 
 	public static void writeLocalizations(ResourceLoader resourceLoader,  Writer w, List<Localization> localizations, Locale locale) throws IOException {
-		w.write(resourceLoader.readResource("/optimizer/localization.js"));
+		w.write(resourceLoader.readResource("/optimizer/syncloader/localization.js"));
 		String localeString = locale.toString();
 		String intermediateLocaleString = null;
 		localeString = localeString.toLowerCase();
@@ -62,13 +62,42 @@ public class Util {
 		w.write(sb.toString());
 	}
 
+	public static void writeAMDLocalizations(ResourceLoader resourceLoader,  Writer w, List<Localization> localizations, Locale locale) throws IOException {
+		String localeString = locale.toString();
+		String intermediateLocaleString = null;
+		localeString = localeString.toLowerCase();
+		if (localeString.indexOf('_') != -1) {
+			localeString = localeString.replace('_', '-');
+			intermediateLocaleString = localeString.substring(0, localeString.indexOf('-'));
+		}
+		//System.out.println("["+localeString+"]["+intermediateLocaleString+"]");
+		for (Localization localization : localizations) {
+			//System.out.println("["+localization.bundlePackage+"]["+localization.modulePath+"]["+localization.bundleName+"]");
+			String rootModule = normalizePath(localization.modulePath+'/'+localization.bundleName);
+			String intermediateModule = null;
+			String fullModule = normalizePath(localization.modulePath+'/'+localeString+'/'+localization.bundleName);
+			if (intermediateLocaleString != null) {
+				intermediateModule = normalizePath(localization.modulePath+'/'+intermediateLocaleString+'/'+localization.bundleName);
+			}
+			String root = resourceLoader.readResource('/'+rootModule+".js");
+			if (root != null) {
+				writeLocalization(w, root, rootModule);
+			}
+			String lang = (intermediateModule == null) ? null : resourceLoader.readResource('/'+intermediateModule+".js");
+			if (lang != null) {
+				writeLocalization(w, lang, intermediateModule);
+			}
+			String langCountry = resourceLoader.readResource('/'+fullModule+".js");
+			if (langCountry != null) {
+				writeLocalization(w, langCountry, fullModule);
+			}
+		}
+	}
+	
 	public static String normalizePath(String path) {
 		try {
 			URI uri = new URI(path);
 			path = uri.normalize().getPath();
-			if (path.charAt(0) != '/') {
-				path = '/'+path;
-			}
 			return path;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -76,4 +105,12 @@ public class Util {
 		}
 	}
 	
+	private static void writeLocalization(Writer w, String content, String moduleName) throws IOException {
+		w.write(content.substring(0, content.indexOf('(')+1));
+		w.write("'");
+		w.write(moduleName);
+		w.write("',");
+		w.write(content.substring(content.indexOf('(')+1));
+		w.write("\n");
+	}
 }

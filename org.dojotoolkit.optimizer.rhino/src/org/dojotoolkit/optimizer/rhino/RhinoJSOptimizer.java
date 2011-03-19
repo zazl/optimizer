@@ -31,7 +31,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 	private ResourceLoader resourceLoader = null;
 	private boolean javaChecksum = false;
 	
-	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum) {
+	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.javaChecksum = javaChecksum;
@@ -84,7 +84,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 				Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 				localizationList.add(localization);
 			}
-			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, resourceLoader);
+			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, resourceLoader);
 		}
 		catch(Throwable t) {
 			logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", t);

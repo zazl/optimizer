@@ -2,8 +2,15 @@
     <!-- Properties -->
 	<property
 		name="features"
-		value="org.dojotoolkit.optimizer.feature,org.dojotoolkit.optimizer.v8.feature,org.dojotoolkit.compressor.feature,org.dojotoolkit.compressor.v8.feature,org.dojotoolkit.rt.v8.feature,org.dojotoolkit.server.util.feature,org.dojotoolkit.prereqs.feature"/>
-	
+		value="org.dojotoolkit.optimizer.feature,
+		       org.dojotoolkit.optimizer.v8.feature,
+		       org.dojotoolkit.compressor.feature,
+		       org.dojotoolkit.compressor.v8.feature,
+		       org.dojotoolkit.rt.v8.feature,
+		       org.dojotoolkit.server.util.feature,
+		       org.dojotoolkit.prereqs.feature,
+               org.dojotoolkit.prereq.dojo15"/>
+
 	<property
 		name="target.dir"
 		value="${basedir}/bin/build.artifacts"/>

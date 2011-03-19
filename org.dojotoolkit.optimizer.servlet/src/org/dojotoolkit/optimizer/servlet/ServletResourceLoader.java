@@ -20,12 +20,15 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	private ServletContext servletContext = null;
 
-	public ServletResourceLoader(ServletContext servletContext, JSCompressorFactory jsCompressorFactory, String[] ignoreList) {
-		super(jsCompressorFactory, ignoreList);
+	public ServletResourceLoader(ServletContext servletContext, JSCompressorFactory jsCompressorFactory) {
+		super(jsCompressorFactory);
 		this.servletContext = servletContext;
 	}
 	
 	protected URL _getResource(String path) throws IOException {
+		if (path.charAt(0) != '/') {
+			path = '/'+path;
+		}
 		URL url = servletContext.getResource(path);
 		if (url != null) {
 			String realPath = servletContext.getRealPath(path);

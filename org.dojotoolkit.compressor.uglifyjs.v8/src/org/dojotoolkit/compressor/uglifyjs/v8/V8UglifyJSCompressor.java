@@ -31,16 +31,10 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 		this.src = src;
 		String compressedSrc = null;
 		StringBuffer sb = new StringBuffer();
-		
-        sb.append("loadJSWithExports = function(uri, exports) { return eval(readText(uri)); };\n");
-        sb.append("eval(readText('/uglifyjs/bootstrap.js'));\n");
-        sb.append("var jsp = require('/uglifyjs/parse-js');\n"); 
-        sb.append("var pro = require('/uglifyjs/process');\n"); 
-        sb.append("var srcObj = eval('('+readSrc({})+')');\n"); 
-        sb.append("var ast = jsp.parse(srcObj.src);\n");
-        sb.append("ast = pro.ast_mangle(ast);\n");
-        sb.append("ast = pro.ast_squeeze(ast, {make_seqs: false});\n");
-        sb.append("'{\"compressedSrc\": '+escapeString(pro.gen_code(ast))+'}';\n");
+        sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
+        sb.append("var compressor = require('uglifyjs/compressor');\n");
+        sb.append("var srcObj = eval('('+readSrc({})+')');\n");
+        sb.append("'{\"compressedSrc\": '+compressor.compress(srcObj.src, true)+'}';\n");
         try {
 			long start = System.currentTimeMillis();
 			Map<String, Object> map = (Map<String, Object>)runScript(sb.toString(), new String[]{"readSrc"});

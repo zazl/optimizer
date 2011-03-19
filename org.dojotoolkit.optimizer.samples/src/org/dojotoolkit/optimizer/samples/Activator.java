@@ -20,9 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.compressor.JSCompressorFactory;
-import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.osgi.OSGiResourceLoader;
+import org.dojotoolkit.optimizer.servlet.JSHandler;
 import org.dojotoolkit.optimizer.servlet.JSServlet;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
@@ -36,12 +36,6 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator {
-	private static String[] ignoreList = new String[] {
-		"/dojo/dojo.js", 
-		"^/optimizer/", 
-		"^/uglifyjs/", 
-		".*/nls/.*"
-	};
 	private ServiceTracker httpServiceTracker = null;
 	private ServiceTracker httpContextExtensionServiceTracker = null;
 	private ServiceTracker jsCompressorFactoryTracker = null;
@@ -64,7 +58,7 @@ public class Activator implements BundleActivator {
 		String compressorType = System.getProperty("compressorType");
 		jsCompressorFactoryTracker = new JSCompressorFactoryServiceTracker(context, useV8, compressorType);
 		jsCompressorFactoryTracker.open();
-		jsOptimizerFactoryServiceTracker = new JSOptimizerFactoryServiceTracker(context, useV8);
+		jsOptimizerFactoryServiceTracker = new JSOptimizerFactoryServiceTracker(context, useV8, System.getProperty("jsHandlerType"));
 		jsOptimizerFactoryServiceTracker.open();
 	}
 
@@ -94,21 +88,19 @@ public class Activator implements BundleActivator {
 			}
 			String[] bundleIds = new String[bundleIdList.size()];
 			bundleIds = bundleIdList.toArray(bundleIds);
-			ResourceLoader resourceLoader = new OSGiResourceLoader(context, bundleIds, jsCompressorFactory, ignoreList);
+			ResourceLoader resourceLoader = new OSGiResourceLoader(context, bundleIds, jsCompressorFactory);
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
+			String jsHandlerType = System.getProperty("jsHandlerType");
 			
-			JSOptimizer jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum);
-			if (jsOptimizer != null) {
-				JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizer, rhinoClassLoader);
-				try {
-					httpService.registerServlet("/_javascript", jsServlet, null, httpContext);
-					httpService.registerServlet("/", new ResourceServlet(resourceLoader), null, httpContext);
-					servletRegistered = true;
-				} catch (ServletException e) {
-					e.printStackTrace();
-				} catch (NamespaceException e) {
-					e.printStackTrace();
-				}
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType);
+			try {
+				httpService.registerServlet("/_javascript", jsServlet, null, httpContext);
+				httpService.registerServlet("/", new ResourceServlet(resourceLoader), null, httpContext);
+				servletRegistered = true;
+			} catch (ServletException e) {
+				e.printStackTrace();
+			} catch (NamespaceException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -181,18 +173,28 @@ public class Activator implements BundleActivator {
 	
 	private class JSOptimizerFactoryServiceTracker extends ServiceTracker {
 		private boolean useV8 = false;
+		private String jsHandlerType = null;
 		
-		public JSOptimizerFactoryServiceTracker(BundleContext context, boolean useV8) {
+		public JSOptimizerFactoryServiceTracker(BundleContext context, boolean useV8, String jsHandlerType) {
 			super(context, JSOptimizerFactory.class.getName(), null);
 			this.useV8 = useV8;
+			this.jsHandlerType = jsHandlerType;
 		}
 		
 		public Object addingService(ServiceReference reference) {
 			String dojoServiceId = null;
-			if (useV8) {
-				dojoServiceId = "V8JSOptimizer";
+			if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
+				if (useV8) {
+					dojoServiceId = "AMDV8JSOptimizer";
+				} else {
+					dojoServiceId = "AMDRhinoJSOptimizer";
+				}
 			} else {
-				dojoServiceId = "RhinoJSOptimizer";
+				if (useV8) {
+					dojoServiceId = "V8JSOptimizer";
+				} else {
+					dojoServiceId = "RhinoJSOptimizer";
+				}
 			}
 			if (dojoServiceId != null && reference.getProperty("dojoServiceId").equals(dojoServiceId)) {
 				jsOptimizerFactory = (JSOptimizerFactory)context.getService(reference);

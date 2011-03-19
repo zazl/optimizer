@@ -21,8 +21,8 @@ public class OSGiResourceLoader extends JSCompressorResourceLoader {
 	private Bundle[] bundles = null;
 	private String[] bundleIds = null;
 
-	public OSGiResourceLoader(BundleContext bundleContext, String[] bundleIds, JSCompressorFactory jsCompressorFactory, String[] ignoreList) {
-		super(jsCompressorFactory, ignoreList);
+	public OSGiResourceLoader(BundleContext bundleContext, String[] bundleIds, JSCompressorFactory jsCompressorFactory) {
+		super(jsCompressorFactory);
 		this.bundleContext = bundleContext;
 		this.bundleIds = bundleIds;
 	}
