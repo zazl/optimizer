@@ -18,7 +18,7 @@
 	
 	<property
 		name="uglifyjs.dir"
-		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_0.9.0"/>
+		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.0"/>
 	
 	<property
 		name="equinox.dir"
