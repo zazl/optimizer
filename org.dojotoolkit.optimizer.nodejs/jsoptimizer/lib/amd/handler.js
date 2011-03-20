@@ -76,7 +76,7 @@ Handler.prototype = {
 		var js = "";
 		
 		for (i = 0; i < analysisData.dependencyList.length; i++) {
-			js += resourceloader.readText(path.normalize(analysisData.dependencyList[i]));
+			js += resourceloader.readText(path.normalize(analysisData.dependencyList[i]+".js"));
 		}
 		var md5Hash = crypto.createHash("md5");
 		md5Hash.update(js);
