@@ -6,35 +6,52 @@
 package org.dojotoolkit.optimizer;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public abstract class CachingJSOptimizer implements JSOptimizer {
+	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	protected Map<String, JSAnalysisDataImpl> cache = null;
+	protected Map<String, Object> lockMap = null;
 	
 	public CachingJSOptimizer() {
-		cache = new HashMap<String, JSAnalysisDataImpl>();
+		cache = Collections.synchronizedMap(new HashMap<String, JSAnalysisDataImpl>());
+		lockMap = new HashMap<String, Object>();
 	}
 	
-	public synchronized JSAnalysisData getAnalysisData(String[] modules) throws IOException {
+	public JSAnalysisData getAnalysisData(String[] modules) throws IOException {
 		String key = getKey(modules);
-		JSAnalysisDataImpl jsAnalysisData = cache.get(key);
-		
-		if (jsAnalysisData == null) {
-			jsAnalysisData = _getAnalysisData(modules, true);
+		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
+		Object lock = null;
+		synchronized (lockMap) {
+			lock = lockMap.get(key);
+			if (lock == null) {
+				lock = new Object();
+				lockMap.put(key, lock);
+			}
+		}
+		JSAnalysisDataImpl jsAnalysisData = null;
+		synchronized (lock) {
+			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in lock");
+			jsAnalysisData = cache.get(key);
+			if (jsAnalysisData == null || jsAnalysisData.isStale()) {
+				jsAnalysisData = _getAnalysisData(modules, true);
+			}
 			cache.put(key, jsAnalysisData);
-		} else if (jsAnalysisData.isStale()) {
-			jsAnalysisData = _getAnalysisData(modules, false);
-			cache.put(key, jsAnalysisData);
+			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
 		}
 		
+		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out");
 		return jsAnalysisData;
 	}
 	
 	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException;
 	
-	private String getKey(String[] keyValues) {
+	private static String getKey(String[] keyValues) {
 		StringBuffer key = new StringBuffer();
 		for (String keyValue : keyValues) {
 			key.append(keyValue);
