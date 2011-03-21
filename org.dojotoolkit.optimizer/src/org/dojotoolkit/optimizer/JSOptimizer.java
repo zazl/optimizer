@@ -6,6 +6,7 @@
 package org.dojotoolkit.optimizer;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Implementations provide access to the analysis information given a list of module ids
@@ -18,4 +19,5 @@ public interface JSOptimizer {
 	 * @throws IOException
 	 */
 	JSAnalysisData getAnalysisData(String[] modules) throws IOException;
+	Map<String, Object> getConfig();
 }

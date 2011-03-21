@@ -24,19 +24,25 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class V8JSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
-	protected Map<String, JSAnalysisDataImpl> cache = null;
+	
 	private ResourceLoader resourceLoader = null;
 	private boolean javaChecksum = false;
+	private Map<String, Object> config = null;
 
-	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		super();
 		this.resourceLoader = resourceLoader;
 		this.javaChecksum = javaChecksum;
+		this.config = config;
 	}
 
 	public JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException {
 		V8OptimizerScriptRunner v8OptimizerScriptRunner = new V8OptimizerScriptRunner(useCache, resourceLoader);
 		return v8OptimizerScriptRunner._getAnalysisData(modules);
+	}
+	
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 	
 	public class V8OptimizerScriptRunner extends V8JavaBridge {

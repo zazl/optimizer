@@ -13,11 +13,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class AMDJSOptimizerFactory implements JSOptimizerFactory {
-	public AMDJSOptimizerFactory() {}
-	
-	@SuppressWarnings("rawtypes")
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		return new AMDJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
 	}
-	
 }

@@ -28,11 +28,11 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 public class AMDJSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer.amd.v8");
 	private ResourceLoader resourceLoader = null;
-	private Map config = null;
+	private Map<String, Object> config = null;
 	private String aliases = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
 
-	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		this.resourceLoader = resourceLoader;
 		this.config = config;
 		AMDOptimizerScriptRunner scriptRunner = new AMDOptimizerScriptRunner(true, resourceLoader);
@@ -44,6 +44,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing aliases from config", e);
 		}
+	}
+	
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 	
 	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException {
@@ -128,7 +132,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			return jsAnalysisData;
 		}
 		
-		public void loadtModulesMissingNames(Map config) {
+		public void loadtModulesMissingNames(Map<String, Object> config) {
 			List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
 			if (implicitDependencies != null) {
 				StringBuffer sb = new StringBuffer();
@@ -150,6 +154,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					long start = System.currentTimeMillis();
 					modulesMissingNames = (List<Map<String, Object>>)runScript(sb.toString());
 					long end = System.currentTimeMillis();
+					config.put("modulesMissingNames", modulesMissingNames);
 					logger.logp(Level.FINE, getClass().getName(), "modulesMissingNames", "time : "+(end-start)+" ms for ["+sb+"]");
 				} catch(Throwable t) {
 					logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+sb+"]", t);

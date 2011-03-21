@@ -1,6 +1,6 @@
 {
 	"bootstrapModules" : ["requirejs/require.js"],
-	"debugBootstrapModules" : ["requirejs/require.js.uncompressed"],
+	"debugBootstrapModules" : ["requirejs/require.js"],
 	"implicitDependencies" : [{
 		"uri": "requirejs/text.js",
 		"id": "text"

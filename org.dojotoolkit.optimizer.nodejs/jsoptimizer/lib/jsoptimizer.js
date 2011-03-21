@@ -12,6 +12,7 @@ resourceloader.addProvider(path.dirname(module.filename));
 
 var configFile = process.argv.length > 4 ? process.argv[4] : "syncloader.json";
 var config = JSON.parse(resourceloader.readText(configFile));
+exports.config = config;
 var handlerModule = config.type === "amd" ? "./amd/handler" : "./syncloader/handler";
 var handler = require(handlerModule).createHandler(config);
 

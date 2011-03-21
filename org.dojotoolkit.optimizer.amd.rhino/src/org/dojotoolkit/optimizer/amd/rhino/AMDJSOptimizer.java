@@ -32,12 +32,11 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 
 	private RhinoClassLoader rhinoClassLoader = null;
 	private ResourceLoader resourceLoader = null;
-	private Map config = null;
+	private Map<String, Object> config = null;
 	private String aliases = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
 	
-	@SuppressWarnings("rawtypes")
-	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.config = config;
@@ -49,6 +48,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing aliases from config", e);
 		}
+	}
+	
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 	
 	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException {
@@ -140,6 +143,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				long end = System.currentTimeMillis();
 				logger.logp(Level.FINE, getClass().getName(), "modulesMissingNames", "time : "+(end-start)+" ms for ["+sb+"]");
 				modulesMissingNames = (List<Map<String, Object>>)JSONParser.parse(new StringReader((String)o));
+				config.put("modulesMissingNames", modulesMissingNames);
 			} catch(Throwable t) {
 				logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+sb+"]", t);
 			}

@@ -141,7 +141,7 @@ public abstract class JSHandler {
 	 			osw = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
  			}
  			for (String bootstrapModulePath: bootstrapModulePaths) {
-	 			osw.write(resourceLoader.readResource(bootstrapModulePath));
+	 			osw.write(resourceLoader.readResource(bootstrapModulePath, !debug));
  			}
  			customHandle(request, osw, analysisData);
 		} catch (IOException e) {

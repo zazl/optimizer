@@ -30,11 +30,17 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 	private RhinoClassLoader rhinoClassLoader = null;
 	private ResourceLoader resourceLoader = null;
 	private boolean javaChecksum = false;
+	private Map<String, Object> config = null;
 	
-	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.javaChecksum = javaChecksum;
+		this.config = config;
+	}
+	
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 	
 	@SuppressWarnings("unchecked")

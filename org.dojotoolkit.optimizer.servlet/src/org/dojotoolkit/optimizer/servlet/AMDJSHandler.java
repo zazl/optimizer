@@ -24,28 +24,35 @@ public class AMDJSHandler extends JSHandler {
 		super(configFileName);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
-		if (analysisData != null) {	
-			@SuppressWarnings("unchecked")
-			List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
-			if (implicitDependencies != null) {
-				for (Map<String, Object> implicitDependency : implicitDependencies) {
-					String uri = (String)implicitDependency.get("uri");
-					String id = (String)implicitDependency.get("id");
-					String implicitDependencyContent = resourceLoader.readResource(Util.normalizePath(uri));
-					if (implicitDependencyContent == null) {
-						throw new IOException("Unable to load implicit dependency ["+implicitDependency+"]");
-					}
-					int missingNameIndex = lookForMissingName(uri, analysisData.getModulesMissingNames());
-					if (missingNameIndex != -1) {
-						StringBuffer modifiedSrc = new StringBuffer(implicitDependencyContent.substring(0, missingNameIndex));
-						modifiedSrc.append("'"+id+"', ");
-						modifiedSrc.append(implicitDependencyContent.substring(missingNameIndex));
-						implicitDependencyContent = modifiedSrc.toString();
-					}
-					writer.write(implicitDependencyContent);
+		boolean debug = (request.getParameter("debug") == null) ? false : Boolean.valueOf(request.getParameter("debug"));
+		List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
+		if (implicitDependencies != null) {
+			for (Map<String, Object> implicitDependency : implicitDependencies) {
+				String uri = (String)implicitDependency.get("uri");
+				String id = (String)implicitDependency.get("id");
+				String implicitDependencyContent = resourceLoader.readResource(Util.normalizePath(uri));
+				if (implicitDependencyContent == null) {
+					throw new IOException("Unable to load implicit dependency ["+implicitDependency+"]");
 				}
+				List<Map<String, Object>> modulesMissingNames = null;
+				if (debug) {
+					modulesMissingNames = (List<Map<String, Object>>)config.get("modulesMissingNames");
+				} else {
+					modulesMissingNames = analysisData.getModulesMissingNames();
+				}
+				int missingNameIndex = lookForMissingName(uri, modulesMissingNames);
+				if (missingNameIndex != -1) {
+					StringBuffer modifiedSrc = new StringBuffer(implicitDependencyContent.substring(0, missingNameIndex));
+					modifiedSrc.append("'"+id+"', ");
+					modifiedSrc.append(implicitDependencyContent.substring(missingNameIndex));
+					implicitDependencyContent = modifiedSrc.toString();
+				}
+				writer.write(implicitDependencyContent);
 			}
+		}
+		if (analysisData != null) {	
 			String suffixCode = (String)config.get("suffixCode");
 			if (suffixCode != null) {
 				writer.write(suffixCode);

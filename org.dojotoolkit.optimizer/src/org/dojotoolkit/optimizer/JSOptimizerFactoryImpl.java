@@ -66,8 +66,7 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 		
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map config) {
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		JSOptimizer jsOptimizer = null;
 		try {
 			jsOptimizer = jsOptimizerConstructor.newInstance(new Object[] {resourceLoader, rhinoClassLoader, javaChecksum, config});
