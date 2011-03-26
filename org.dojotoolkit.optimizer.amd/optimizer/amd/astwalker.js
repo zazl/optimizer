@@ -37,9 +37,11 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 					if (dependencyArg !== undefined) {
 						for (var i = 0; i < dependencyArg.length; i++) {
 							var dependency = dependencyArg[i][1];
+							var keepWalking = true;
 							if (dependency.match("^order!")) {
 								dependency = dependency.substring(6);
 							} else if (dependency.match("^i18n!")) {
+								keepWalking = false;
 								var i18nDependency = dependency.substring(5);
 								var localization = {
 									bundlepackage : i18nDependency,
@@ -57,8 +59,10 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 									localizationList.push(localization);
 								}
 							} else if (dependency.match(".js$")) {
+								keepWalking = false;
 								module.addDependency(dependency);
 							} else if (dependency.match("^text!")) {
+								keepWalking = false;
 								var textDependency = dependency.substring(5);
 								var add = true;
 								for (var k = 0; k < textList.length; k++) {
@@ -70,7 +74,8 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 								if (add) {
 									textList.push(textDependency);
 								}
-							} else if (dependency !== "require" && dependency !== "exports" && dependency.indexOf("!") === -1) {
+							}
+							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency.indexOf("!") === -1) {
 								if (aliases[dependency] !== undefined) {
 									dependency = aliases[dependency];
 								}
