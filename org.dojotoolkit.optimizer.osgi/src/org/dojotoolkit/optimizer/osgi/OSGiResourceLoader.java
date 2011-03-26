@@ -51,6 +51,9 @@ public class OSGiResourceLoader extends JSCompressorResourceLoader {
 			}
 		}
 		logger.logp(Level.FINER, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+		if (url != null) {
+			timestampLookup.put(path, url);
+		}
 		return url;
 	}
 	

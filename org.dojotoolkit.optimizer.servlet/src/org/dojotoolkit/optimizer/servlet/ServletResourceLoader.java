@@ -31,11 +31,6 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		}
 		URL url = servletContext.getResource(path);
 		if (url != null) {
-			String realPath = servletContext.getRealPath(path);
-			if (realPath != null) {
-				File file = new File(realPath);
-				timestampLookup.put(path, file);
-			}
 			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
 			return url;
 		}
@@ -46,6 +41,9 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		}
 		url = getClass().getClassLoader().getResource(path.substring(1));	
 		logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path.substring(1)+"] ["+url+"]");
+		if (url != null) {
+			timestampLookup.put(path, url);
+		}
 		return url;
 	}
 }
