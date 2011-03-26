@@ -39,7 +39,8 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in lock");
 			jsAnalysisData = cache.get(key);
 			if (jsAnalysisData == null || jsAnalysisData.isStale()) {
-				jsAnalysisData = _getAnalysisData(modules, false);
+				boolean useCache = jsAnalysisData == null ? true : !jsAnalysisData.isStale();
+				jsAnalysisData = _getAnalysisData(modules, useCache);
 			}
 			cache.put(key, jsAnalysisData);
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
