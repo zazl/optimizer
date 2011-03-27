@@ -43,7 +43,7 @@ public abstract class JSCompressorResourceLoader extends CachingResourceLoader {
 	}
 
 	protected StringBuffer filter(StringBuffer sb, String path, boolean useCache) throws IOException {
-		if (useCache && doCompress(path)) {
+		if (doCompress(path)) {
 			logger.logp(Level.FINE, getClass().getName(), "filter", "["+path+"] is being compressed");
 			return new StringBuffer(jsCompressor.compress(sb.toString()));
 		} else {
