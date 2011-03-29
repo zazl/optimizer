@@ -51,6 +51,9 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 			throw new IOException("Exception on compress for ["+sb+"] : "+e.getMessage());
 		}
         
+        if (compressedSrc.charAt(compressedSrc.length()-1) == ')') {
+        	compressedSrc += ";";
+        }
 		return compressedSrc;
 	}
 

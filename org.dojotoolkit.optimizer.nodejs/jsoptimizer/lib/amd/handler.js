@@ -40,7 +40,7 @@ Handler.prototype = {
 			this.writeLocalizations(response, analysisData.localizations, utils.getBestFitLocale(request.headers["accept-language"]));
 			for (i = 0; i < analysisData.textList.length; i++) {
 				var textPath = path.normalize(analysisData.textList[i]);
-				var textContent = resourceloader.readText(textPath, false);
+				var textContent = resourceloader.readText(textPath);
 				response.write("define('text!");
 				response.write(textPath);
 				response.write("', function () { return ");
@@ -50,7 +50,7 @@ Handler.prototype = {
 			}
 			for (i = 0; i < analysisData.dependencyList.length; i++) {
 	            var dependencyPath = path.normalize(analysisData.dependencyList[i])+".js";
-	            var content = resourceloader.readText(dependencyPath, false);
+	            var content = resourceloader.readText(dependencyPath);
 	            var missingNameIndex = this.lookForMissingName(analysisData.dependencyList[i], analysisData.missingNamesList);
 	            
 	            if (missingNameIndex !== -1) {

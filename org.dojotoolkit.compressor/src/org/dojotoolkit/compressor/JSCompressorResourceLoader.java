@@ -25,7 +25,8 @@ public abstract class JSCompressorResourceLoader extends CachingResourceLoader {
 		"/dtlapp.js", 
 		"/dtlenv.js", 
 		"/env.js", 
-		".*/nls/.*"
+		".*/nls/.*",
+		"/dojo/_base/html.js"
 	};
 	
 	private JSCompressor jsCompressor = null;

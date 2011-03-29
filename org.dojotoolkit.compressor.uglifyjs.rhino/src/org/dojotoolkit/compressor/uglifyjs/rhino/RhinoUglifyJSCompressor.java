@@ -60,6 +60,9 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 		finally {
 			Context.exit();
 		}
+        if (compressedSrc.charAt(compressedSrc.length()-1) == ')') {
+        	compressedSrc += ";";
+        }
 		return compressedSrc;
 	}
 
