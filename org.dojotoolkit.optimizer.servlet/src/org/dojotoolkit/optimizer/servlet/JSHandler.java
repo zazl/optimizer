@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.json.JSONParser;
+import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
@@ -55,8 +56,16 @@ public abstract class JSHandler {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void initialize(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, JSOptimizerFactory jsOptimizerFactory) {
+		this.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void initialize(ResourceLoader resourceLoader, 
+			               RhinoClassLoader rhinoClassLoader, 
+			               boolean javaChecksum, 
+			               JSOptimizerFactory jsOptimizerFactory, 
+			               List<List<String>> warmupValues) {
 		this.resourceLoader = resourceLoader;
 		jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
 		List<String> bootstrapModuleList = (List<String>)config.get("bootstrapModules");
@@ -65,6 +74,11 @@ public abstract class JSHandler {
 		List<String> debugBootstrapModuleList = (List<String>)config.get("debugBootstrapModules");
 		debugBootstrapModules = new String[debugBootstrapModuleList.size()];
 		debugBootstrapModules = debugBootstrapModuleList.toArray(debugBootstrapModules);
+		if (warmupValues != null && jsOptimizer instanceof CachingJSOptimizer) {
+			for (List<String> modules : warmupValues) {
+				new Thread(new OptimizerRunnable(jsOptimizer, modules)).start();
+			}
+		}
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -190,4 +204,31 @@ public abstract class JSHandler {
 		}
 		return handlerConfig;
 	}
+	
+	public class OptimizerRunnable implements Runnable {
+		private JSOptimizer optimizer = null;
+		private String[] modules = null;
+		private String modulesAsString = "";
+		
+		public OptimizerRunnable(JSOptimizer optimizer, List<String> modules) {
+			this.optimizer = optimizer;
+			this.modules = new String[modules.size()];
+			this.modules = modules.toArray(this.modules);
+			for (String module : modules) {
+				modulesAsString	+= module;
+				modulesAsString += ' ';
+			}
+		}
+		
+		public void run() {
+			try {
+				logger.logp(Level.INFO, getClass().getName(), "run", "Obtaining Optimization Data for ["+modulesAsString+"]");
+				optimizer.getAnalysisData(modules);
+				logger.logp(Level.INFO, getClass().getName(), "run", "Obtained Optimization Data for ["+modulesAsString+"]");
+			} catch (IOException e) {
+				logger.logp(Level.SEVERE, getClass().getName(), "OptimizerRunnable", "IOException while attempting to obtain Optimization Data for ["+modulesAsString+"]", e);
+			}
+		}
+	}
+	
 }

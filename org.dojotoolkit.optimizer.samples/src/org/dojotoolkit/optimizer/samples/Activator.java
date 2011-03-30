@@ -92,7 +92,7 @@ public class Activator implements BundleActivator {
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 			String jsHandlerType = System.getProperty("jsHandlerType");
 			
-			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType);
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null);
 			try {
 				httpService.registerServlet("/_javascript", jsServlet, null, httpContext);
 				httpService.registerServlet("/", new ResourceServlet(resourceLoader), null, httpContext);

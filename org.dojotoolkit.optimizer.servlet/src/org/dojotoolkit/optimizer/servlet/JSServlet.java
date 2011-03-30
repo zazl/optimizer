@@ -6,6 +6,8 @@
 package org.dojotoolkit.optimizer.servlet;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.compressor.JSCompressorFactory;
 import org.dojotoolkit.compressor.JSCompressorFactoryImpl;
+import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.JSOptimizerFactoryImpl;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
@@ -32,18 +35,26 @@ public class JSServlet extends HttpServlet {
 	protected RhinoClassLoader rhinoClassLoader = null;
 	protected boolean javaChecksum = false; 
 	protected String jsHandlerType = null;
+	protected List<List<String>> warmupValues = null;
 	
 	public JSServlet() {}
 	
-	public JSServlet(ResourceLoader resourceLoader, JSOptimizerFactory jsOptimizerFactory, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, String jsHandlerType) {
+	public JSServlet(ResourceLoader resourceLoader, 
+			         JSOptimizerFactory jsOptimizerFactory, 
+			         RhinoClassLoader rhinoClassLoader, 
+			         boolean javaChecksum, 
+			         String jsHandlerType,
+			         List<List<String>> warmupValues) {
 		this();
 		this.jsOptimizerFactory = jsOptimizerFactory;
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.javaChecksum = javaChecksum;
 		this.jsHandlerType = jsHandlerType;
+		this.warmupValues = warmupValues;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
@@ -89,7 +100,15 @@ public class JSServlet extends HttpServlet {
 		} else if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
 			jsHandler = new AMDJSHandler("requirejs.json");
 		}
-		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory);
+		String stringWarmupValues = getServletContext().getInitParameter("optimizerWarmup");
+		if (warmupValues == null && stringWarmupValues != null) {
+			try {
+				warmupValues = (List<List<String>>)JSONParser.parse(new StringReader(stringWarmupValues));
+			} catch (IOException e) {
+				logger.logp(Level.SEVERE, getClass().getName(), "init", "IOException while parsing warmup values", e);
+			}
+		}
+		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, warmupValues);
 		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizer", jsHandler.getJSOptimizer());
 	}
 	
