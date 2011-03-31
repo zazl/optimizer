@@ -42,7 +42,7 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		url = getClass().getClassLoader().getResource(path.substring(1));	
 		logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path.substring(1)+"] ["+url+"]");
 		if (url != null) {
-			timestampLookup.put(path, url);
+			trackURL(path, url);
 		}
 		return url;
 	}
