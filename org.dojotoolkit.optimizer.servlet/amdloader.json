@@ -1,0 +1,16 @@
+{
+	"bootstrapModules" : ["loader/amd/amdloader.js"],
+	"debugBootstrapModules" : ["loader/amd/amdloader.js"],
+	"implicitDependencies" : [{
+		"uri": "loader/amd/text.js",
+		"id": "text"
+	}, {
+		"uri": "loader/amd/i18n.js", 
+		"id": "i18n"
+	}],
+	"aliases" : {
+		"dojo": "dojo/lib/main-browser", 
+		"dijit" : "dijit/lib/main"
+	},
+	"type" : "amd"
+}
