@@ -8,7 +8,38 @@ var resourceloader = require('zazlutil').resourceloader;
 var jsp = require("uglify-js").parser;
 var uglify = require("uglify-js").uglify;
 
-function walker(uri, moduleMap, localizationList, textList, missingNamesList, aliases) {
+function normalize(path) {
+	var segments = path.split('/');
+	var skip = 0;
+
+	for (var i = segments.length; i >= 0; i--) {
+		var segment = segments[i];
+		if (segment === '.') {
+			segments.splice(i, 1);
+		} else if (segment === '..') {
+			segments.splice(i, 1);
+			skip++;
+		} else if (skip) {
+			segments.splice(i, 1);
+			skip--;
+		}
+	}
+	return segments.join('/');
+};
+
+function expand(uri, pathStack) {
+	var isRelative = uri.search(/^\.\/|^\.\.\//) === -1 ? false : true;
+	if (isRelative) {
+		var parentPath = pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
+		parentPath = parentPath.substring(0, parentPath.lastIndexOf('/')+1);
+		uri = parentPath + uri;
+		uri = normalize(uri);
+	}
+	return uri;
+}
+
+function walker(uri, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack) {
+	uri = expand(uri, pathStack);
 	if (moduleMap.get(uri) === undefined) {
 		var src = resourceloader.readText('/'+uri+'.js');
 		if (src === null) {
@@ -60,7 +91,10 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 								}
 							} else if (dependency.match(".js$")) {
 								keepWalking = false;
+								pathStack.push(uri);
+								dependency = expand(dependency, pathStack);
 								module.addDependency(dependency);
+								pathStack.pop();
 							} else if (dependency.match("^text!")) {
 								keepWalking = false;
 								var textDependency = dependency.substring(5);
@@ -75,12 +109,15 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 									textList.push(textDependency);
 								}
 							}
-							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency.indexOf("!") === -1) {
+							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
 								if (aliases[dependency] !== undefined) {
 									dependency = aliases[dependency];
 								}
+								pathStack.push(uri);
+								dependency = expand(dependency, pathStack);
 								module.addDependency(dependency);
-								walker(dependency, moduleMap, localizationList, textList, missingNamesList, aliases);
+								walker(dependency, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack);
+								pathStack.pop();
 							}
 						}
 					}
@@ -90,7 +127,7 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 		    w.walk(ast);
 		});
 	}
-}
+};
 
 exports.walker = walker;
 

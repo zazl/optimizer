@@ -13,7 +13,7 @@ AMDAnalyzer = function(aliases) {
 	} else {
 		this.aliases = aliases;
 	}
-}
+};
 
 AMDAnalyzer.prototype = {
 	_buildDependencyList: function(module, dependencyList, seen) {
@@ -41,7 +41,7 @@ AMDAnalyzer.prototype = {
 		this.missingNamesList = [];
 		this.moduleMap = map.createMap();
 		for (var i = 0; i < modules.length; i++) {
-			astwalker.walker(modules[i], this.moduleMap, this.localizationList, this.textList, this.missingNamesList, this.aliases);
+			astwalker.walker(modules[i], this.moduleMap, this.localizationList, this.textList, this.missingNamesList, this.aliases, []);
 		}
 	},
 	
