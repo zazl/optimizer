@@ -138,7 +138,7 @@ function getMissingNameIndex(src) {
 	w.with_walkers({
 	    "call": function(expr, args) {
 			if (expr[0] === "name" && expr[1] === "define") {
-				if (args[0][0] !== "string" && args[0][0] !== "array") {
+				if (args[0][0] !== "string") {
 					nameIndex = w.parent()[0].start.pos + (src.substring(w.parent()[0].start.pos).indexOf('(')+1);
 				}
 			}
