@@ -1,11 +1,11 @@
 {
-	"bootstrapModules" : ["requirejs/amdloader.js"],
-	"debugBootstrapModules" : ["requirejs/amdloader.js"],
+	"bootstrapModules" : ["loader/amd/amdloader.js"],
+	"debugBootstrapModules" : ["loader/amd/amdloader.js"],
 	"implicitDependencies" : [{
-		"uri": "requirejs/text.js",
+		"uri": "loader/amd/text.js",
 		"id": "text"
 	}, {
-		"uri": "requirejs/i18n.js", 
+		"uri": "loader/amd/i18n.js", 
 		"id": "i18n"
 	}],
 	"aliases" : {
