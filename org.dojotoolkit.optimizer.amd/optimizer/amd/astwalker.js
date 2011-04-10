@@ -43,7 +43,7 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 	if (moduleMap.get(uri) === undefined) {
 		var src = resourceloader.readText('/'+uri+'.js');
 		if (src === null) {
-			throw new Error("Unable to load src for ["+uri+"]");
+			throw new Error("Unable to load src for ["+uri+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
 		}
 		var ast = jsp.parse(src, false, true);
 		var w = uglify.ast_walker();
