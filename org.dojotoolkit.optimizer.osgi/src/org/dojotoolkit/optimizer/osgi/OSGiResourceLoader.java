@@ -42,6 +42,7 @@ public class OSGiResourceLoader extends JSCompressorResourceLoader {
 		URL url = bundleContext.getBundle().getResource(path);
 		if (url != null) {
 			logger.logp(Level.FINER, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+			trackURL(path, url);
 			return url;
 		}
 		for (Bundle bundle : bundles) {

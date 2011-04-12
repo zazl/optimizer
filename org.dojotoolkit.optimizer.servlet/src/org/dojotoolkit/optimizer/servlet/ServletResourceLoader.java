@@ -5,7 +5,6 @@
 */
 package org.dojotoolkit.optimizer.servlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -32,11 +31,13 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		URL url = servletContext.getResource(path);
 		if (url != null) {
 			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+			trackURL(path, url);
 			return url;
 		}
 		url = getClass().getClassLoader().getResource(path);	
 		if (url != null) {
 			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+			trackURL(path, url);
 			return url;
 		}
 		url = getClass().getClassLoader().getResource(path.substring(1));	
