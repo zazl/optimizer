@@ -51,6 +51,10 @@ public class SyncLoaderJSHandler extends JSHandler {
 		}
 		
 		if (analysisData != null) {	
+			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
+			if (writeBootstrap) {
+				writer.write(resourceLoader.readResource("/optimizer/syncloader/localization.js"));
+			}
 			List<Localization> localizations = analysisData.getLocalizations();
 			if (localizations.size() > 0) {
 				Util.writeLocalizations(resourceLoader, writer, localizations, request.getLocale());

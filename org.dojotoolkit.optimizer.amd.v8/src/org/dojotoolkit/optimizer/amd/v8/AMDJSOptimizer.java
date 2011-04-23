@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import org.dojotoolkit.json.JSONSerializer;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.ChecksumCreator;
+import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.rt.v8.V8JavaBridge;
@@ -50,9 +51,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return config;
 	}
 	
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException {
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException {
 		AMDOptimizerScriptRunner amdOptimizerScriptRunner = new AMDOptimizerScriptRunner(useCache, resourceLoader);
-		return amdOptimizerScriptRunner._getAnalysisData(modules);
+		return amdOptimizerScriptRunner._getAnalysisData(modules, exclude);
 	}
 	
 	public class AMDOptimizerScriptRunner extends V8JavaBridge {
@@ -77,7 +78,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		}
 		
 		@SuppressWarnings("unchecked")
-		public JSAnalysisDataImpl _getAnalysisData(String[] modules) throws IOException {
+		public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
 			JSAnalysisDataImpl jsAnalysisData = null;
 			
 			StringBuffer moduleList = new StringBuffer();
@@ -97,7 +98,26 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	        	}
 	        }
 	        sb.append("];\n");
-			sb.append("var analysisData = analyzer.getAnalysisData(modules);\n");
+	        List<String> excludeList = new ArrayList<String>();
+	        for (JSAnalysisData analysisData : exclude) {
+		        for (String excludeModule : analysisData.getDependencies()) {
+		        	if (!excludeList.contains(excludeModule)) {
+		        		excludeList.add(excludeModule.substring(0, excludeModule.indexOf(".js")));
+		        	}
+		        }
+	        }
+	        count = 0;
+	        sb.append("var exclude = [");
+	        for (String excludeModule : excludeList) {
+	        	sb.append('\'');
+	        	sb.append(excludeModule);
+	        	sb.append('\'');
+	        	if (++count < excludeList.size()) {
+	            	sb.append(',');
+	        	}
+	        }
+	        sb.append("];\n");
+			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude);\n");
 			sb.append("JSON.stringify(analysisData);\n");
 			try {
 				long start = System.currentTimeMillis();
@@ -118,7 +138,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				List<String> textList = (List<String>)analysisData.get("textList");
 				List<Map<String, Object>> missingNamesList = (List<Map<String, Object>>)analysisData.get("missingNamesList");
 				missingNamesList.addAll(modulesMissingNames);
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, localizationList, textList, missingNamesList, resourceLoader);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, localizationList, textList, missingNamesList, resourceLoader, exclude);
 				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {

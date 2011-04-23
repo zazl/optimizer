@@ -26,8 +26,7 @@ public class ChecksumCreator {
 				content.append(contentElement);
 			}
 		}
-		try
-        {
+		try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(content.toString().getBytes());
             BigInteger number = new BigInteger(1,messageDigest);

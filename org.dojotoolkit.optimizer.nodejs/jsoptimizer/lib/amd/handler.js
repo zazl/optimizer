@@ -72,7 +72,7 @@ Handler.prototype = {
 	},
 	
 	getAnalysisData: function(modules) {
-		analysisData = analyzer.createAnalyzer(this.config.aliases).getAnalysisData(modules);
+		analysisData = analyzer.createAnalyzer(this.config.aliases).getAnalysisData(modules, []);
 		var js = "";
 		
 		for (i = 0; i < analysisData.dependencyList.length; i++) {

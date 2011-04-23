@@ -38,7 +38,7 @@ function expand(uri, pathStack) {
 	return uri;
 }
 
-function walker(uri, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack) {
+function walker(uri, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack) {
 	uri = expand(uri, pathStack);
 	if (moduleMap.get(uri) === undefined) {
 		var src = resourceloader.readText('/'+uri+'.js');
@@ -109,14 +109,20 @@ function walker(uri, moduleMap, localizationList, textList, missingNamesList, al
 									textList.push(textDependency);
 								}
 							}
-							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
-								if (aliases[dependency] !== undefined) {
-									dependency = aliases[dependency];
+							if (aliases[dependency] !== undefined) {
+								dependency = aliases[dependency];
+							}
+							for (var k = 0; k < exclude.length; k++) {
+								if (dependency === exclude[k]) {
+									keepWalking = false;
+									break;
 								}
+							}
+							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack);
 								module.addDependency(dependency);
-								walker(dependency, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack);
+								walker(dependency, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack);
 								pathStack.pop();
 							}
 						}

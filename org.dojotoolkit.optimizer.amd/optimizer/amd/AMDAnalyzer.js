@@ -34,21 +34,19 @@ AMDAnalyzer.prototype = {
 		}
 	},
 		
-	_analyze: function(modules) {
+	_analyze: function(modules, exclude) {
 		this.dependencyStack = [];
 		this.localizationList = [];
 		this.textList = [];
 		this.missingNamesList = [];
 		this.moduleMap = map.createMap();
 		for (var i = 0; i < modules.length; i++) {
-			astwalker.walker(modules[i], this.moduleMap, this.localizationList, this.textList, this.missingNamesList, this.aliases, []);
+			astwalker.walker(modules[i], exclude, this.moduleMap, this.localizationList, this.textList, this.missingNamesList, this.aliases, []);
 		}
 	},
 	
-	getDependencyList: function(modules, bypassAnalysis) {
-		if (bypassAnalysis === undefined || bypassAnalysis === false) {
-			this._analyze(modules);
-		}
+	getDependencyList: function(modules, exclude) {
+		this._analyze(modules, exclude);
 		var dependencyList = [];
 		for (i = 0; i < modules.length; i++) {
 			var module = this.moduleMap.get(modules[i]);
@@ -57,8 +55,8 @@ AMDAnalyzer.prototype = {
 		return dependencyList;
 	},
 	
-	getAnalysisData: function(modules) {
-		var dependencyList = this.getDependencyList(modules);
+	getAnalysisData: function(modules, exclude) {
+		var dependencyList = this.getDependencyList(modules, exclude);
 		return ({dependencyList: dependencyList, localizations: this.localizationList, textList: this.textList, missingNamesList: this.missingNamesList});
 	}
 };

@@ -37,4 +37,12 @@ public interface JSAnalysisData {
 	 * @return Map array of object detailing modules missing names 
 	 */
 	List<Map<String, Object>> getModulesMissingNames();
+	/**
+	 * @return String Key value that can be used to identify what this analyisData is for 
+	 */
+	String getKey();
+	/**
+	 * @return String array of the excluded modules
+	 */
+	String[] getExcludes();
 }

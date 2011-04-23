@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public abstract class CachingJSOptimizer implements JSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	protected Map<String, JSAnalysisDataImpl> cache = null;
 	protected Map<String, Object> lockMap = null;
+	private static final JSAnalysisData[] EMPTY_ARRAY = new JSAnalysisData[] {};
 	
 	public CachingJSOptimizer() {
 		cache = Collections.synchronizedMap(new HashMap<String, JSAnalysisDataImpl>());
@@ -24,7 +24,11 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 	}
 	
 	public JSAnalysisData getAnalysisData(String[] modules) throws IOException {
-		String key = getKey(modules);
+		return getAnalysisData(modules, EMPTY_ARRAY);
+	}
+	
+	public JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+		String key = JSAnalysisDataImpl.getKey(modules, exclude);
 		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
 		Object lock = null;
 		synchronized (lockMap) {
@@ -40,7 +44,7 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 			jsAnalysisData = cache.get(key);
 			if (jsAnalysisData == null || jsAnalysisData.isStale()) {
 				boolean useCache = jsAnalysisData == null ? true : !jsAnalysisData.isStale();
-				jsAnalysisData = _getAnalysisData(modules, useCache);
+				jsAnalysisData = _getAnalysisData(modules, exclude, useCache);
 				cache.put(key, jsAnalysisData);
 			}
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
@@ -50,13 +54,26 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 		return jsAnalysisData;
 	}
 	
-	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException;
-	
-	private static String getKey(String[] keyValues) {
-		StringBuffer key = new StringBuffer();
-		for (String keyValue : keyValues) {
-			key.append(keyValue);
+	public JSAnalysisData getAnalysisData(String key) throws UnsupportedOperationException {
+		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
+		Object lock = null;
+		synchronized (lockMap) {
+			lock = lockMap.get(key);
+			if (lock == null) {
+				lock = new Object();
+				lockMap.put(key, lock);
+			}
 		}
-		return key.toString();
+		JSAnalysisDataImpl jsAnalysisData = null;
+		synchronized (lock) {
+			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in lock");
+			jsAnalysisData = cache.get(key);
+			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
+		}
+		
+		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out");
+		return jsAnalysisData;
 	}
+	
+	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException;
 }

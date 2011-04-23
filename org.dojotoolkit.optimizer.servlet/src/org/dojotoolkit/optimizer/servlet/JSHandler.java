@@ -41,7 +41,8 @@ public abstract class JSHandler {
 	
 	public static final String AMD_HANDLER_TYPE = "amd";
 	public static final String SYNCLOADER_HANDLER_TYPE = "syncloader";
-	
+	private static final JSAnalysisData[] EMPTY_ARRAY = new JSAnalysisData[] {};
+
 	protected JSOptimizer jsOptimizer = null;
 	protected ResourceLoader resourceLoader = null;
 	protected Map<String, Object> config = null;
@@ -93,7 +94,6 @@ public abstract class JSHandler {
 		if (debug) {
 			bootstrapModulePaths = debugBootstrapModules;
 		}
-		
 		boolean gzip = false;
 		
 		String encoding = request.getHeader("Accept-Encoding");
@@ -105,9 +105,19 @@ public abstract class JSHandler {
 		
 		JSAnalysisData analysisData = null;
 		if (modulesParam != null) {
-			modules = getModuleList(modulesParam);
+			modules = getAsList(modulesParam);
 			try {
-				analysisData = jsOptimizer.getAnalysisData(modules);
+				JSAnalysisData[] exclude = EMPTY_ARRAY;
+				String excludeParam = request.getParameter("exclude");
+				if (excludeParam != null) {
+					String[] keys = getAsList(excludeParam);
+					exclude = new JSAnalysisData[keys.length];
+					int count = 0;
+					for (String key : keys) {
+						exclude[count++] = jsOptimizer.getAnalysisData(key);
+					}
+				}
+				analysisData = jsOptimizer.getAnalysisData(modules, exclude);
 				if (logger.getLevel() == Level.FINE) {
 					logger.logp(Level.FINE, getClass().getName(), "handle", "checksum for ["+modulesParam+"] = "+analysisData.getChecksum());
 					for (String dependency : analysisData.getDependencies()) {
@@ -132,7 +142,7 @@ public abstract class JSHandler {
 			    }
 			    
 				if (modules == null) {
-					modules = getModuleList(modulesParam);
+					modules = getAsList(modulesParam);
 				}
 	 			response.setHeader("ETag", checksum);
 	 			
@@ -154,8 +164,11 @@ public abstract class JSHandler {
  			} else {
 	 			osw = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
  			}
- 			for (String bootstrapModulePath: bootstrapModulePaths) {
-	 			osw.write(resourceLoader.readResource(bootstrapModulePath, !debug));
+ 			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
+ 			if (writeBootstrap) {
+	 			for (String bootstrapModulePath: bootstrapModulePaths) {
+		 			osw.write(resourceLoader.readResource(bootstrapModulePath, !debug));
+	 			}
  			}
  			customHandle(request, osw, analysisData);
 		} catch (IOException e) {
@@ -176,18 +189,17 @@ public abstract class JSHandler {
 	
 	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException;
 	
-	private String[] getModuleList(String modulesParam) {
-		String[] modules = null;
+	private String[] getAsList(String param) {
+		String[] list = null;
 		List<String> moduleList = new ArrayList<String>();
-		StringTokenizer st = new StringTokenizer(modulesParam, ",");
+		StringTokenizer st = new StringTokenizer(param, ",");
 		while (st.hasMoreTokens()) {
 			moduleList.add(st.nextToken());
 		}
-		modules = new String[moduleList.size()];
-		modules = moduleList.toArray(modules);
-		return modules;
+		list = new String[moduleList.size()];
+		list = moduleList.toArray(list);
+		return list;
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> loadHandlerConfig(String handlerConfigFileName) throws IOException {

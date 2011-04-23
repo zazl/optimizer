@@ -51,6 +51,8 @@ public class Activator implements BundleActivator {
 			if (System.getProperty("jsHandlerType") != null && System.getProperty("jsHandlerType").equals("syncloader")) {
 				suite.addTest(new RhinoSyncLoaderOptimizerTest(context, dojoIds));
 				suite.addTest(new V8SyncLoaderOptimizerTest(context, dojoIds));
+				suite.addTest(new RhinoSyncLoaderExcludeTest(context, dojoIds));
+				suite.addTest(new V8SyncLoaderExcludeTest(context, dojoIds));
 			} else if (System.getProperty("jsHandlerType") != null && System.getProperty("jsHandlerType").equals("amd")) {
 				suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds));
 				suite.addTest(new V8AMDOptimizerTest(context, dojoIds));
@@ -60,6 +62,8 @@ public class Activator implements BundleActivator {
 				suite.addTest(new V8AMDRelativeTest(context, ids));
 				suite.addTest(new RhinoAMDErrorTest(context, ids));
 				suite.addTest(new V8AMDErrorTest(context, ids));
+				suite.addTest(new RhinoAMDExcludeTest(context, dojoIds));
+				suite.addTest(new V8AMDExcludeTest(context, dojoIds));
 			}
 			TestRunner.run(suite);
 		}

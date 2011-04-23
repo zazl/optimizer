@@ -27,8 +27,9 @@ public class AMDJSHandler extends JSHandler {
 	@SuppressWarnings("unchecked")
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
 		boolean debug = (request.getParameter("debug") == null) ? false : Boolean.valueOf(request.getParameter("debug"));
+		boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
 		List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
-		if (implicitDependencies != null) {
+		if (writeBootstrap && implicitDependencies != null) {
 			for (Map<String, Object> implicitDependency : implicitDependencies) {
 				String uri = (String)implicitDependency.get("uri");
 				String id = (String)implicitDependency.get("id");

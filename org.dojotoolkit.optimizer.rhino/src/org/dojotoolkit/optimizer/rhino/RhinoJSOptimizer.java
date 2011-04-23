@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.dojotoolkit.json.JSONParser;
+import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.ChecksumCreator;
@@ -44,7 +45,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, boolean useCache) throws IOException {
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException {
 		JSAnalysisDataImpl jsAnalysisData = null;
 		
 		StringBuffer moduleList = new StringBuffer();
@@ -64,12 +65,32 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
         	}
         }
         sb.append("];\n");
+        List<String> excludeList = new ArrayList<String>();
+        for (JSAnalysisData analysisData : exclude) {
+	        for (String excludeModule : analysisData.getDependencies()) {
+	        	String s = excludeModule.substring(1, excludeModule.indexOf(".js")).replace('/', '.');
+	        	if (!excludeList.contains(s)) {
+	        		excludeList.add(s);
+	        	}
+	        }
+        }
+        count = 0;
+        sb.append("var exclude = [");
+        for (String excludeModule : excludeList) {
+        	sb.append('\'');
+        	sb.append(excludeModule);
+        	sb.append('\'');
+        	if (++count < excludeList.size()) {
+            	sb.append(',');
+        	}
+        }
+        sb.append("];\n");
         sb.append("var analyzer = new dojo.optimizer.Analyzer();\n"); 
         
 		if (javaChecksum) {
-			sb.append("var analysisData = analyzer.getAnalysisData(modules, true);\n");
+			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude, true);\n");
 		} else {
-			sb.append("var analysisData = analyzer.getAnalysisData(modules);\n");
+			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude);\n");
 		}
 		sb.append("JSON.stringify(analysisData);\n");
 		Context ctx = null; 
@@ -90,7 +111,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 				Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 				localizationList.add(localization);
 			}
-			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, resourceLoader);
+			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, resourceLoader, exclude);
 		}
 		catch(Throwable t) {
 			logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", t);

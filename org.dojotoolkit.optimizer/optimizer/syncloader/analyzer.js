@@ -58,10 +58,19 @@ dojo.optimizer.Analyzer.prototype = {
 		this.dependencyStack.pop();
 	},
 	
-	_buildDependencyList: function(module, dependencyList, seen) {
+	_buildDependencyList: function(module, dependencyList, exclude, seen) {
 		for (var i = 0; i < module.dependencies.length; i++) {
+			var excludeModule = false;
 			var moduleDependency = this.moduleMap.get(module.dependencies[i]);
-			this._buildDependencyList(moduleDependency, dependencyList, seen);
+			for (var j = 0; j < exclude.length; j++) {
+				if (moduleDependency.id === exclude[j]) {
+					excludeModule = true;
+					break;
+				}
+			}
+			if (!excludeModule) {
+				this._buildDependencyList(moduleDependency, dependencyList, exclude, seen);
+			}
 		}
 		if (seen[module.id] === undefined) {
 			dependencyList.push(dojo.baseUrl+module.uri);
@@ -112,7 +121,6 @@ dojo.optimizer.Analyzer.prototype = {
 	 		else {
 				throw new Exception("Failed to locate provide statement for module ["+module+"]");
 			}
-			
 			var dependencies = scope._getDependencies(moduleContents);
 			scope._moduleStarted(id);
 			eval(dependencies.join(";"));
@@ -128,7 +136,7 @@ dojo.optimizer.Analyzer.prototype = {
 		loadJS = oldLoadJS;
 	},
 	
-	getDependencyList: function(modules, bypassAnalysis) {
+	getDependencyList: function(modules, exclude, bypassAnalysis) {
 		if (bypassAnalysis === undefined || bypassAnalysis === false) {
 			this._analyze(modules);
 		}
@@ -136,13 +144,13 @@ dojo.optimizer.Analyzer.prototype = {
 		var dependencyList = [];
 		for (var i = 0; i < modules.length; i++) {
 			var module = this.moduleMap.get(modules[i]);
-			this._buildDependencyList(module, dependencyList, seen);
+			this._buildDependencyList(module, dependencyList, exclude, seen);
 		}
 		return dependencyList;
 	},
 	
-	calculateChecksum: function(modules, bypassAnalysis) {
-		var dependencyList = this.getDependencyList(modules, bypassAnalysis);
+	calculateChecksum: function(modules, exclude, bypassAnalysis) {
+		var dependencyList = this.getDependencyList(modules, exclude, bypassAnalysis);
 		dojo.require("dojox.encoding.digests.MD5");
 		
 		var js = "";
@@ -162,11 +170,11 @@ dojo.optimizer.Analyzer.prototype = {
 		return this.localizationList;
 	},
 	
-	getAnalysisData: function(modules, skipCheckSum) {
-		var dependencyList = this.getDependencyList(modules);
+	getAnalysisData: function(modules, exclude, skipCheckSum) {
+		var dependencyList = this.getDependencyList(modules, exclude);
 		var checksum = null;
 		if (skipCheckSum === undefined || skipCheckSum === false) {
-			checksum = this.calculateChecksum(modules, true);
+			checksum = this.calculateChecksum(modules, exclude, true);
 		}
 		var localizations = this.getLocalizations(modules, true);
 		return ({dependencyList: dependencyList, checksum: checksum, localizations: localizations});

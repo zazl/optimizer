@@ -4,4 +4,4 @@
     see: http://dojotoolkit.org/license for details
 */
 analyzer = new dojo.optimizer.Analyzer();
-analysisData = analyzer.getAnalysisData(modules, false);
+analysisData = analyzer.getAnalysisData(modules, [], false);

@@ -17,7 +17,6 @@ public class Util {
 	private static String lineSeparator = System.getProperty("line.separator");
 
 	public static void writeLocalizations(ResourceLoader resourceLoader,  Writer w, List<Localization> localizations, Locale locale) throws IOException {
-		w.write(resourceLoader.readResource("/optimizer/syncloader/localization.js"));
 		String localeString = locale.toString();
 		String intermediateLocaleString = null;
 		localeString = localeString.toLowerCase();

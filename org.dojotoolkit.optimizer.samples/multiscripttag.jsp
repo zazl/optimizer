@@ -3,7 +3,7 @@
 <%@ page import="org.dojotoolkit.optimizer.JSAnalysisData" %>
 <html>
     <head>
-        <title>Person Grid</title>
+        <title>Person Grid + Calendar using multiple script tags</title>
         <style type="text/css">
             @import "<%=request.getContextPath()%>/dojo/resources/dojo.css";
             
@@ -32,13 +32,22 @@
 		    if (jsOptimizer == null) {
 		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		    }
-			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"test.PersonGrid"});
-
+		    JSAnalysisData calendarAnalysisData = jsOptimizer.getAnalysisData(new String[] {"dijit.Calendar"});
+			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"test.PersonGrid"}, new JSAnalysisData[]{calendarAnalysisData});
+			
 		    if (debug) {
-				String[] dependencies = analysisData.getDependencies();
+				String[] calendarDependencies = calendarAnalysisData.getDependencies();
 		%>
 				<script type="text/javascript" src="<%=request.getContextPath() +"/_javascript?debug=true"%>"/></script>
 		<%
+
+				for (String dependency : calendarDependencies) {
+					String url = request.getContextPath() + dependency;
+		%>
+					<script type="text/javascript" src="<%=url%>"/></script>
+		<%
+		    	}
+				String[] dependencies = analysisData.getDependencies();
 
 				for (String dependency : dependencies) {
 					String url = request.getContextPath() + dependency;
@@ -47,14 +56,18 @@
 		<%
 		    	}
 		    } else {
-				String checksum = analysisData.getChecksum();
-				String url = request.getContextPath() +"/_javascript?modules=test.PersonGrid&version="+checksum+"&locale="+request.getLocale();
+				String calendarUrl = request.getContextPath() +"/_javascript?modules=dijit.Calendar&version="+calendarAnalysisData.getChecksum()+"&locale="+request.getLocale();
+		%>
+				<script type="text/javascript" src="<%=calendarUrl%>"/></script>
+		<%
+				String url = request.getContextPath() +"/_javascript?modules=test.PersonGrid&version="+analysisData.getChecksum()+"&locale="+request.getLocale()+"&writeBootstrap=false&exclude="+calendarAnalysisData.getKey();
 		%>
 				<script type="text/javascript" src="<%=url%>"/></script>
 		<%
 		    }
 		%>
 		<script type="text/javascript">
+  			dojo.require("dijit.Calendar");
   			dojo.require("test.PersonGrid");
 		</script>        
 		<script type="text/javascript">
@@ -94,6 +107,7 @@
 		</script>        
     </head>
     <body class="tundra">
+    	<div dojoType="dijit.Calendar"></div>
     	<table id="persongrid" dojoType="dojox.grid.DataGrid" store="personStore">
 			<thead>
 				<tr>

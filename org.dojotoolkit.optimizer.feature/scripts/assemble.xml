@@ -13,12 +13,20 @@
 		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
 	
 	<property
+		name="dojo16.dir"
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.6.0"/>
+	
+	<property
 		name="json.dir"
 		value="${workspace.dir}/../targetplatform/json/plugins/org.json_1.0.0"/>
 	
 	<property
 		name="uglifyjs.dir"
 		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.0"/>
+	
+	<property
+		name="requirejs.dir"
+		value="${workspace.dir}/../targetplatform/requirejs/plugins/org.requirejs_0.24.0"/>
 	
 	<property
 		name="equinox.dir"
@@ -33,6 +41,9 @@
 		</jar>
 		<jar destfile="${target.dir}/package/warlib/uglifyjs.jar">
 			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
+		</jar>
+		<jar destfile="${target.dir}/package/warlib/requirejs.jar">
+			<zipfileset dir="${requirejs.dir}/requirejs" prefix="requirejs"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
 	        <fileset dir="${equinox.dir}">
@@ -64,13 +75,49 @@
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
-				<exclude name="org.dojotoolkit.optimizer.v8*.jar"/> 
+				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
 			</zipfileset>	
 			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/test" prefix="test"/>
 			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples">
 				<include name="persongrid.jsp"/>
+				<include name="multiscripttag.jsp"/>
+				<include name="multiscripttag2.jsp"/>
+			</fileset>
+		</war>
+		<propertyfile file="${target.dir}/package/org_dojotoolkit_optimizer.properties">
+		  <entry  key="jsOptimizerClassName" value="org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizer"/>
+		</propertyfile>		
+		<war destfile="${target.dir}/package/amdoptimizerjsp.war" webxml="${workspace.dir}/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
+			<zipfileset dir="${dojo16.dir}/dojo" prefix="dojo"/>
+			<zipfileset dir="${dojo16.dir}/dijit" prefix="dijit"/>
+			<zipfileset dir="${dojo16.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_compressor.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_optimizer.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
+				<include name="org.dojotoolkit.json*.jar"/> 
+				<include name="org.dojotoolkit.optimizer*.jar"/> 
+				<include name="org.dojotoolkit.compressor*.jar"/> 
+				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
+				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="org.dojotoolkit.server.util*.jar"/> 
+				<include name="json*.jar"/> 
+				<include name="uglifyjs*.jar"/> 
+				<include name="requirejs*.jar"/> 
+				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
+				<exclude name="*v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
+			</zipfileset>	
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
+			<fileset dir="${workspace.dir}/org.dojotoolkit.optimizer.samples">
+				<include name="amdcalendar.jsp"/>
+				<include name="amddeclarative.jsp"/>
 			</fileset>
 		</war>
 	</target>

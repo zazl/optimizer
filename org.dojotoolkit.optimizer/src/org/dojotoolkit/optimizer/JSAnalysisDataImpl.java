@@ -5,6 +5,10 @@
 */
 package org.dojotoolkit.optimizer;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +24,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private List<Map<String, Object>> modulesMissingNames = null;
 	private ResourceLoader resourceLoader = null;
 	private Map<String, Long> timestampLookup = null;
+	private String[] excludes = null;
+	private String key = null;
 	
 	public JSAnalysisDataImpl(String[] modules, 
 			                  List<String> dependencies, 
@@ -27,7 +33,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  List<Localization> localizations, 
 			                  List<String> textDependencies, 
 			                  List<Map<String, Object>> modulesMissingNames,
-			                  ResourceLoader resourceLoader) {
+			                  ResourceLoader resourceLoader,
+			                  JSAnalysisData[] exclude) {
 		timestampLookup = new HashMap<String, Long>();
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
@@ -42,6 +49,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.textDependencies = textDependencies;
 		this.modulesMissingNames = modulesMissingNames;
 		this.resourceLoader = resourceLoader;
+        key = getKey(this.modules, exclude);
 	}
 	
 	public String[] getModules() {
@@ -72,6 +80,14 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		return modulesMissingNames;
 	}
 	
+	public String[] getExcludes() {
+		return excludes;
+	}
+	
+	public String getKey() {
+		return key;
+	}
+	
 	public boolean isStale() {
 		for (String dependency : dependencies) {
 			Long timestamp = timestampLookup.get(dependency);
@@ -83,4 +99,30 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		}
 		return false;
 	}
+	
+	public static String getKey(String[] keyValues, JSAnalysisData[] exclude) {
+		StringBuffer key = new StringBuffer();
+		key.append("keyValues:");
+		for (String keyValue : keyValues) {
+			key.append(keyValue);
+		}
+		key.append("excludeValue:");
+        List<String> excludeList = new ArrayList<String>();
+        for (JSAnalysisData analysisData : exclude) {
+	        for (String excludeModule : analysisData.getDependencies()) {
+	        	if (!excludeList.contains(excludeModule)) {
+	    			key.append(excludeModule);
+	        	}
+	        }
+        }
+		try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(key.toString().getBytes());
+            BigInteger number = new BigInteger(1,messageDigest);
+            return number.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+	}
+
 }
