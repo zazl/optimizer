@@ -34,16 +34,21 @@
 			locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
 		};
 	</script>
-		<%
+	<%
+		boolean debug = (request.getParameter("debug") == null) ? false : Boolean.valueOf(request.getParameter("debug"));
+		String url = null;
+		if (debug) {
+			url = request.getContextPath() +"/_javascript?debug=true";
+		} else {
 		    JSOptimizer jsOptimizer = (JSOptimizer)pageContext.getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
 		    if (jsOptimizer == null) {
 		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		    }
 			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"amdtest/Calendar"});
-			
-			String url = request.getContextPath() +"/_javascript?modules=amdtest/Calendar&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
-		%>
-			<script type="text/javascript" src="<%=url%>"></script>
+			url = request.getContextPath() +"/_javascript?modules=amdtest/Calendar&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
+		}
+	%>
+	<script type="text/javascript" src="<%=url%>"></script>
 
 </head>
 <body class="claro">

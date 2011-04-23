@@ -7,6 +7,10 @@
 		@import "dojo/resources/dojo.css";
 		@import "dijit/themes/claro/claro.css";
 	</style>
+	<style type="text/css">
+    	html, body { width: 100%; height: 100%; margin: 0; overflow:hidden; }
+    	#borderContainerTwo { width: 100%; height: 100%; }
+	</style>
 	<script type="text/javascript">
 		require = {
             packages: [
@@ -33,24 +37,28 @@
 		};
 	</script>
 	<%
-	    JSOptimizer jsOptimizer = (JSOptimizer)pageContext.getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
-	    if (jsOptimizer == null) {
-	    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
-	    }
-		JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"amdtest/Declarative"});
-		
-		//String url = request.getContextPath() +"/_javascript?modules=amdtest/Declarative&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
-		String url = request.getContextPath() +"/_javascript?debug=true";
+		boolean debug = (request.getParameter("debug") == null) ? false : Boolean.valueOf(request.getParameter("debug"));
+		String url = null;
+		if (debug) {
+			url = request.getContextPath() +"/_javascript?debug=true";
+		} else {
+		    JSOptimizer jsOptimizer = (JSOptimizer)pageContext.getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
+		    if (jsOptimizer == null) {
+		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
+		    }
+			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"amdtest/Declarative"});
+			url = request.getContextPath() +"/_javascript?modules=amdtest/Declarative&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
+		}
 	%>
 	<script type="text/javascript" src="<%=url%>"></script>
 
 </head>
 <body class="claro">
-<div dojoType="dijit.layout.BorderContainer" gutters="true" liveSplitters="false">
+<div dojoType="dijit.layout.BorderContainer" gutters="true" id="borderContainerTwo" liveSplitters="false">
     <div dojoType="dijit.layout.ContentPane" region="top" splitter="false">
     	<div id="title"></div>
     </div>
-    <div dojoType="dijit.layout.AccordionContainer" minSize="20" style="width: 300px;" region="leading" splitter="true">
+    <div dojoType="dijit.layout.AccordionContainer" minSize="20" style="width: 300px;" id="leftAccordion" region="leading" splitter="true">
         <div dojoType="dijit.layout.AccordionPane" title="One">
         </div>
         <div dojoType="dijit.layout.AccordionPane" title="Two">
