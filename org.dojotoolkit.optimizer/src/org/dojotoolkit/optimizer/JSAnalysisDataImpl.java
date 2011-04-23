@@ -49,7 +49,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.textDependencies = textDependencies;
 		this.modulesMissingNames = modulesMissingNames;
 		this.resourceLoader = resourceLoader;
-        key = getKey(this.modules, exclude);
+        excludes = _getExludes(exclude);
+        key = _getKey(this.modules, excludes);
 	}
 	
 	public String[] getModules() {
@@ -101,20 +102,19 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	}
 	
 	public static String getKey(String[] keyValues, JSAnalysisData[] exclude) {
+		return _getKey(keyValues, _getExludes(exclude));
+	}
+	
+	private static String _getKey(String[] keyValues, String[] excludes) {
 		StringBuffer key = new StringBuffer();
 		key.append("keyValues:");
 		for (String keyValue : keyValues) {
 			key.append(keyValue);
 		}
 		key.append("excludeValue:");
-        List<String> excludeList = new ArrayList<String>();
-        for (JSAnalysisData analysisData : exclude) {
-	        for (String excludeModule : analysisData.getDependencies()) {
-	        	if (!excludeList.contains(excludeModule)) {
-	    			key.append(excludeModule);
-	        	}
-	        }
-        }
+        for (String excludeModule : excludes) {
+    		key.append(excludeModule);
+    	}
 		try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(key.toString().getBytes());
@@ -125,4 +125,17 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
         }
 	}
 
+	private static String[] _getExludes(JSAnalysisData[] exclude) {
+        List<String> excludeList = new ArrayList<String>();
+        for (JSAnalysisData analysisData : exclude) {
+	        for (String excludeModule : analysisData.getDependencies()) {
+	        	if (!excludeList.contains(excludeModule)) {
+	        		excludeList.add(excludeModule);
+	        	}
+	        }
+        }
+		String[] excludes = new String[excludeList.size()];
+		excludes = excludeList.toArray(excludes);
+		return excludes;
+	}
 }
