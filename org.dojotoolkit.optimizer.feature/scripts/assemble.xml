@@ -22,7 +22,7 @@
 	
 	<property
 		name="uglifyjs.dir"
-		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.0"/>
+		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.1"/>
 	
 	<property
 		name="requirejs.dir"

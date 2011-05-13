@@ -15,7 +15,7 @@ escapeString = function (str) {
 exports.compress = function(src, escape) {
 	var ast = jsp.parse(src);
 	ast = pro.ast_mangle(ast);
-	ast = pro.ast_squeeze(ast, {make_seqs: false});
+	ast = pro.ast_squeeze(ast);
 	var compressedSrc;
 	if (escape) {
 		compressedSrc = escapeString(pro.gen_code(ast)); 

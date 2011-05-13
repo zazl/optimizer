@@ -54,10 +54,10 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 		    "call": function(expr, args) {
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
-					if (args[0][0] === "string" && args[1][0] === "array") {
+					if (args[0][0].name === "string" && args[1][0].name === "array") {
 						id = args[0][1];
 						dependencyArg = args[1][1];
-					} else if (args[0][0] === "array") {
+					} else if (args[0][0].name === "array") {
                         if (expr[1] === "define") {
     	                    var start = w.parent()[0].start;
     						var nameIndex = start.pos + (src.substring(start.pos).indexOf('(')+1);
@@ -144,7 +144,7 @@ function getMissingNameIndex(src) {
 	w.with_walkers({
 	    "call": function(expr, args) {
 			if (expr[0] === "name" && expr[1] === "define") {
-				if (args[0][0] !== "string") {
+				if (args[0][0].name !== "string") {
 					nameIndex = w.parent()[0].start.pos + (src.substring(w.parent()[0].start.pos).indexOf('(')+1);
 				}
 			}
