@@ -27,19 +27,22 @@ function normalize(path) {
 	return segments.join('/');
 };
 
-function expand(uri, pathStack) {
-	var isRelative = uri.search(/^\.\/|^\.\.\//) === -1 ? false : true;
+function expand(uri, pathStack, aliases) {
+	var isRelative = uri.search(/^\./) === -1 ? false : true;
 	if (isRelative) {
 		var parentPath = pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
 		parentPath = parentPath.substring(0, parentPath.lastIndexOf('/')+1);
 		uri = parentPath + uri;
 		uri = normalize(uri);
+		if (aliases[uri] !== undefined) {
+			uri = aliases[uri];
+		}
 	}
 	return uri;
 }
 
 function walker(uri, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack) {
-	uri = expand(uri, pathStack);
+	uri = expand(uri, pathStack, aliases);
 	if (moduleMap.get(uri) === undefined) {
 		var src = resourceloader.readText('/'+uri+'.js');
 		if (src === null) {
@@ -69,7 +72,9 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 						for (var i = 0; i < dependencyArg.length; i++) {
 							var dependency = dependencyArg[i][1];
 							var keepWalking = true;
-							if (dependency.match("^order!")) {
+							if (dependencyArg[i][0].name !== "string") {
+								keepWalking = false;
+							} else if (dependency.match("^order!")) {
 								dependency = dependency.substring(6);
 							} else if (dependency.match("^i18n!")) {
 								keepWalking = false;
@@ -92,7 +97,7 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 							} else if (dependency.match(".js$")) {
 								keepWalking = false;
 								pathStack.push(uri);
-								dependency = expand(dependency, pathStack);
+								dependency = expand(dependency, pathStack, aliases);
 								module.addDependency(dependency);
 								pathStack.pop();
 							} else if (dependency.match("^text!")) {
@@ -120,7 +125,7 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 							}
 							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
 								pathStack.push(uri);
-								dependency = expand(dependency, pathStack);
+								dependency = expand(dependency, pathStack, aliases);
 								module.addDependency(dependency);
 								walker(dependency, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack);
 								pathStack.pop();
