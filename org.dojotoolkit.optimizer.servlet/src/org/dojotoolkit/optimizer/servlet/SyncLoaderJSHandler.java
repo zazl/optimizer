@@ -10,6 +10,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,14 +21,25 @@ import javax.servlet.http.HttpServletRequest;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.Util;
+import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class SyncLoaderJSHandler extends JSHandler {
+	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
+	
 	private static final String NAMESPACE_PREFIX = "dojo.registerModulePath('";
 	private static final String NAMESPACE_MIDDLE = "', '";
 	private static final String NAMESPACE_SUFFIX = "');\n";
-
+	private static Pattern templatePattern = Pattern.compile("(((templatePath)\\s*(=|:)\\s*)dojo\\.(module)?Url\\(|dojo\\.cache\\s*\\(\\s*)\\s*?[\\\"\\']([\\w\\.\\/]+)[\\\"\\'](([\\,\\s]*)[\\\"\\']([\\w\\.\\/]*)[\\\"\\'])?(\\s*,\\s*)?([^\\)]*)?\\s*\\)");
+	
+	private boolean inlineTemplateHTML = true;
+	
 	public SyncLoaderJSHandler() {
 		super("syncloader.json");
+	}
+	
+	public SyncLoaderJSHandler(boolean inlineTemplateHTML) {
+		super("syncloader.json");
+		this.inlineTemplateHTML = inlineTemplateHTML;
 	}
 	
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
@@ -69,10 +84,90 @@ public class SyncLoaderJSHandler extends JSHandler {
 			for (String dependency : dependencies) {
 				String contentElement = resourceLoader.readResource(Util.normalizePath(dependency));
 				if (contentElement != null) {
-					writer.write(contentElement);
+					if (inlineTemplateHTML) {
+						writer.write(inlineTemplateHTML(dependency, contentElement, resourceLoader));
+					} else {
+						writer.write(contentElement);
+					}
 				}
 			}
 		}
+	}
+	
+	private static String inlineTemplateHTML(String dependency, String input, ResourceLoader resourceLoader) {
+		StringBuffer inlinedWithHTML = new StringBuffer();
+		Matcher m = templatePattern.matcher(input);
+		while (m.find()) {
+			if (m.groupCount() == 11 && m.group(11).equals("")) {
+				String namespace = m.group(6);
+				String templateURLStr = m.group(9);
+				String url = namespace.replace('.', '/') + '/' + templateURLStr;
+				try {
+					String templateHTML = resourceLoader.readResource(url);
+					if (templateHTML != null) {
+						if (m.group(1).startsWith("dojo.cache")) {
+							logger.logp(Level.FINE, SyncLoaderJSHandler.class.getName(), "inlineTemplateHTML", "Inlining Template HTML(dojo.cache) for ["+dependency+"] ["+url+"]");
+							m.appendReplacement(inlinedWithHTML, quoteReplacement(" dojo.cache(\""+namespace+"\", \""+templateURLStr+"\", \"" + escape(templateHTML) + "\")"));
+						} else if (m.group(1).startsWith("templatePath")) {
+							logger.logp(Level.FINE, SyncLoaderJSHandler.class.getName(), "inlineTemplateHTML", "Inlining Template HTML(dojo.moduleUrl) for ["+dependency+"] ["+url+"]");
+							m.appendReplacement(inlinedWithHTML, quoteReplacement("templateString "+m.group(4)+" \"" + escape(templateHTML) + "\""));
+						}
+					} else {
+						logger.logp(Level.INFO, SyncLoaderJSHandler.class.getName(), "inlineTemplateHTML", "Unable to inline Template HTML for ["+dependency+"] ["+url+"]");
+					}
+				} catch (IOException e) {
+					logger.logp(Level.SEVERE, SyncLoaderJSHandler.class.getName(), "inlineTemplateHTML", "Exception on inlining Template HTML for ["+dependency+"] ["+url+"]", e);
+				}
+			}
+		}
+		if (inlinedWithHTML.length() > 0) {
+			m.appendTail(inlinedWithHTML);
+			return inlinedWithHTML.toString();
+		} 
+		else {
+			return input;
+		}
+	}
+	
+	private static String escape(String s) {
+		StringBuffer escaped = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch (c) {
+				case '\"': {
+					escaped.append("\\\""); //$NON-NLS-1$
+					break;
+				}
+				case '\n': {
+					escaped.append(" "); //$NON-NLS-1$
+					break;
+				}
+				default: {
+					escaped.append(c);
+					break;
+				}
+			}
+		}
+		return escaped.toString();
+	}
+	
+	private static String quoteReplacement(String s) {
+		if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1))
+			return s;
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if (c == '\\') {
+				sb.append('\\');
+				sb.append('\\');
+			} else if (c == '$') {
+				sb.append('\\');
+				sb.append('$');
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 	
 	public class JSNamespace {

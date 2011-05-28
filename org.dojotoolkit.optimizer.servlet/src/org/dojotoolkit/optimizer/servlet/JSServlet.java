@@ -96,7 +96,11 @@ public class JSServlet extends HttpServlet {
 			}
 		}
 		if (jsHandlerType.equals(JSHandler.SYNCLOADER_HANDLER_TYPE)) {
-			jsHandler = new SyncLoaderJSHandler();
+			boolean inlineTemplateHTML = true;
+			if (getServletContext().getInitParameter("inlineTemplateHTML") != null) {
+				inlineTemplateHTML = Boolean.valueOf(getServletContext().getInitParameter("inlineTemplateHTML"));
+			}
+			jsHandler = new SyncLoaderJSHandler(inlineTemplateHTML);
 		} else if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
 			jsHandler = new AMDJSHandler("requirejs.json");
 		}
