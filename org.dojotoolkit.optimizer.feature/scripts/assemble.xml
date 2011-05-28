@@ -84,6 +84,7 @@
 				<include name="persongrid.jsp"/>
 				<include name="multiscripttag.jsp"/>
 				<include name="multiscripttag2.jsp"/>
+				<include name="circular.jsp"/>
 			</fileset>
 		</war>
 		<propertyfile file="${target.dir}/package/org_dojotoolkit_optimizer.properties">

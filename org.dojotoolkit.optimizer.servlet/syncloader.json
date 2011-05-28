@@ -1,5 +1,6 @@
 {
 	"bootstrapModules" : ["dojo/dojo.js", "dojo/i18n.js"],
 	"debugBootstrapModules" : ["dojo/dojo.js.uncompressed.js", "dojo/i18n.js"],
+	"suffixCode" : "(function(){\ndojo.require = function(moduleName) {\nreturn dojo._loadedModules[moduleName];\n}\n})();\n",
 	"type" : "syncloader"
 }
