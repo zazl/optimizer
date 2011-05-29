@@ -66,12 +66,12 @@ public class SyncLoaderJSHandler extends JSHandler {
 		}
 		
 		if (analysisData != null) {	
-			String suffixCode = (String)config.get("suffixCode");
-			if (suffixCode != null) {
-				writer.write(suffixCode);
-			}
 			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
 			if (writeBootstrap) {
+				String suffixCode = (String)config.get("suffixCode");
+				if (suffixCode != null) {
+					writer.write(suffixCode);
+				}
 				writer.write(resourceLoader.readResource("/optimizer/syncloader/localization.js"));
 			}
 			List<Localization> localizations = analysisData.getLocalizations();
