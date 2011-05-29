@@ -121,6 +121,21 @@
 				<include name="amddeclarative.jsp"/>
 			</fileset>
 		</war>
+		<zip destfile="${target.dir}/package/optimizer.zip">
+			<fileset dir="${target.dir}/package/warlib">
+				<include name="org.dojotoolkit.json*.jar"/> 
+				<include name="org.dojotoolkit.optimizer*.jar"/> 
+				<include name="org.dojotoolkit.compressor*.jar"/> 
+				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
+				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="org.dojotoolkit.server.util*.jar"/> 
+				<include name="json*.jar"/> 
+				<include name="uglifyjs*.jar"/> 
+				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
+				<exclude name="*v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
+			</fileset>	
+		</zip>
 	</target>
 
 	<!-- Clean up the target directory -->
