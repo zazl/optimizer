@@ -110,7 +110,7 @@ dojo.optimizer.Analyzer.prototype = {
 		
 		loadJS = function(module) {
 			var provideRegex = /dojo\.provide\((("|')([\w\W]*?)("|'))\)/;
-			var moduleContents = readText(module);
+			var moduleContents = readText(module).replace( /(\/\*([\s\S]*?)\*\/|\/\/(.*)$)/mg , "");
 			var id = null;
 			
 	 		var provide = provideRegex.exec(moduleContents);
