@@ -122,7 +122,7 @@
 			</fileset>
 		</war>
 		<zip destfile="${target.dir}/package/optimizer.zip">
-			<fileset dir="${target.dir}/package/warlib">
+			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
@@ -134,7 +134,13 @@
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
-			</fileset>	
+			</zipfileset>	
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
+				<include name="*.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
+				<include name="*.properties"/> 
+			</zipfileset>
 		</zip>
 	</target>
 

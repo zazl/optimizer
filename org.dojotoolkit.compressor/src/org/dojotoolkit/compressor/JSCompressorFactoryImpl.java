@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,8 +20,23 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class JSCompressorFactoryImpl implements JSCompressorFactory {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.compressor");
-	private static final String DEFAULT_JS_COMPRESSOR_CLASS = "org.dojotoolkit.compressor.shrinksafe.ShrinksafeJSCompressor"; 
+	private static final String DEFAULT_JS_COMPRESSOR_CLASS = "org.dojotoolkit.compressor.shrinksafe.ShrinksafeJSCompressor";
+	
+	public static String[] defaultIgnoreList = new String[] {
+		"/dojo/dojo.js", 
+		"^/optimizer/", 
+		"^/uglifyjs/", 
+		"^/uglify-js", 
+		"^/jsutil/", 
+		"^/jssrc/", 
+		"/dtlapp.js", 
+		"/dtlenv.js", 
+		"/env.js", 
+		".*/nls/.*"
+	};
+	
 	private Constructor<JSCompressor> jsCompressorConstructor = null;
+	private String[] ignoreList = defaultIgnoreList;
 	
 	public JSCompressorFactoryImpl() {
 		try {
@@ -35,6 +53,18 @@ public class JSCompressorFactoryImpl implements JSCompressorFactory {
 					if (jsCompressorClassName != null) {
 						logger.logp(Level.FINE, getClass().getName(), "JSCompressorFactoryImpl", "jsCompressorClassName is to ["+jsCompressorClassName+"]");
 						jsCompressorClass = (Class<JSCompressor>) getClass().getClassLoader().loadClass(jsCompressorClassName);
+					}
+					String ignoreListValues = props.getProperty("ignoreList");
+					if (ignoreListValues != null) {
+						StringTokenizer st = new StringTokenizer(ignoreListValues, ",");
+						List<String> ignoreListList = new ArrayList<String>();
+						while (st.hasMoreTokens()) {
+							String ignoreListValue = st.nextToken();
+							logger.logp(Level.FINE, getClass().getName(), "JSCompressorFactoryImpl", "Adding ignore list value["+ignoreListValue+"]");
+							ignoreListList.add(ignoreListValue);
+						}
+						ignoreList = new String[ignoreListList.size()];
+						ignoreList = ignoreListList.toArray(ignoreList);
 					}
 				} catch (IOException e) {
 					logger.logp(Level.SEVERE, getClass().getName(), "JSOptimizerFactoryImpl", "Implementation of JSCompressor defined in org_dojotoolkit_compressor.properties is unavailable", e);
@@ -73,5 +103,8 @@ public class JSCompressorFactoryImpl implements JSCompressorFactory {
 		 
 		return jsCompressor; 
 	}
-
+	
+	public String[] getIgnoreList() {
+		return ignoreList;
+	}
 }

@@ -15,18 +15,6 @@ import org.dojotoolkit.server.util.resource.CachingResourceLoader;
 
 public abstract class JSCompressorResourceLoader extends CachingResourceLoader {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.compressor");
-	private static String[] ignoreList = new String[] {
-		"/dojo/dojo.js", 
-		"^/optimizer/", 
-		"^/uglifyjs/", 
-		"^/uglify-js", 
-		"^/jsutil/", 
-		"^/jssrc/", 
-		"/dtlapp.js", 
-		"/dtlenv.js", 
-		"/env.js", 
-		".*/nls/.*"
-	};
 	
 	private JSCompressor jsCompressor = null;
 	private Pattern[] ignorePatterns = null;
@@ -35,6 +23,7 @@ public abstract class JSCompressorResourceLoader extends CachingResourceLoader {
 		if (jsCompressorFactory != null) {
 			jsCompressor = jsCompressorFactory.createJSCompressor(this);
 		}
+		String[] ignoreList = jsCompressorFactory.getIgnoreList();
 		ignorePatterns = new Pattern[ignoreList.length];
 		int i = 0;
 		for (String ignorePath : ignoreList) {

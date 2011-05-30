@@ -9,4 +9,5 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public interface JSCompressorFactory {
 	public JSCompressor createJSCompressor(ResourceLoader resourceLoader);
+	public String[] getIgnoreList();
 }
