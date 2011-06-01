@@ -34,7 +34,7 @@ var config;
 					if (moduleRegistry[prefix] === undefined) {
 						moduleRegistry[prefix] = {};
 						moduleRegistry[prefix].dependencies = [];
-						plugin = _loadModule(prefix);
+						plugin = _loadModule(prefix, []);
 					} else {
 						plugin = moduleRegistry[prefix].module;
 					}
@@ -76,9 +76,9 @@ var config;
 	require = function (dependencies, callback) {
 		var args = [];
 		if (isString(dependencies)) {
-			return _loadModule(dependencies);
+			return _loadModule(dependencies, []);
 		} else if (isArray(dependencies)) {
-			args = _loadModules(dependencies);
+			args = _loadModules(dependencies, []);
 			if (callback !== undefined) {
 				callback.apply(null, args);
 			}
@@ -101,18 +101,21 @@ var config;
 	moduleRegistry["require"] = {};
 	moduleRegistry["require"].module = require;
 
-	_loadModules = function (ids) {
+	_loadModules = function (ids, pathStack) {
 		var args = [];
 		for (var i = 0; i < ids.length; i++) {
-			args.push(_loadModule(ids[i]));
+			args.push(_loadModule(ids[i], pathStack));
 		}
 		return args;
 	};
 	
-	_loadModule = function(id) {
+	_loadModule = function(id, pathStack) {
+		id = _expand(id, pathStack);
 		if (moduleRegistry[id] !== undefined) {
 			if (moduleRegistry[id].module === undefined) {
+				pathStack.push(id);
 				var dependencyArgs = _loadModules(moduleRegistry[id].dependencies);
+				pathStack.pop();
 				moduleRegistry[id].module = moduleRegistry[id].factory.apply(null, dependencyArgs);
 			}
 			return moduleRegistry[id].module;
@@ -120,6 +123,36 @@ var config;
 			throw new Error("Unable to locate dependency ["+id+"]");
 		}
 	};
+	
+	_normalize = function(path) {
+		var segments = path.split('/');
+		var skip = 0;
+
+		for (var i = segments.length; i >= 0; i--) {
+			var segment = segments[i];
+			if (segment === '.') {
+				segments.splice(i, 1);
+			} else if (segment === '..') {
+				segments.splice(i, 1);
+				skip++;
+			} else if (skip) {
+				segments.splice(i, 1);
+				skip--;
+			}
+		}
+		return segments.join('/');
+	};
+
+	_expand = function(uri, pathStack) {
+		var isRelative = uri.search(/^\./) === -1 ? false : true;
+		if (isRelative) {
+			var parentPath = pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
+			parentPath = parentPath.substring(0, parentPath.lastIndexOf('/')+1);
+			uri = parentPath + uri;
+			uri = _normalize(uri);
+		}
+		return uri;
+	}
 	
 	document.addEventListener("DOMContentLoaded", function() {
 		pageLoaded = true;

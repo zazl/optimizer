@@ -138,6 +138,7 @@ public class SyncLoaderJSHandler extends JSHandler {
 					escaped.append("\\\""); //$NON-NLS-1$
 					break;
 				}
+				case '\r': 
 				case '\n': {
 					escaped.append(" "); //$NON-NLS-1$
 					break;
