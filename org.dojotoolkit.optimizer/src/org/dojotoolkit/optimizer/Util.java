@@ -39,21 +39,21 @@ public class Util {
 			if (root == null) {
 				root = "null";
 			} else {
-				root = root.replace(lineSeparator, " ");
+				root = root.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
 				root = "'"+root+"'";
 			}
 			String lang = (intermediateModule == null) ? null : resourceLoader.readResource(intermediateModule);
 			if (lang == null) {
 				lang = "null";
 			} else {
-				lang = lang.replace(lineSeparator, " ");
+				lang = lang.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
 				lang = "'"+lang+"'";
 			}
 			String langCountry = resourceLoader.readResource(fullModule);
 			if (langCountry == null) {
 				langCountry = "null";
 			} else {
-				langCountry = langCountry.replace(lineSeparator, " ");
+				langCountry = langCountry.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
 				langCountry = "'"+langCountry+"'";
 			}
 			sb.append("dojo.optimizer.localization.load('"+localization.bundlePackage+"', "+langId+", '"+localeString+"', "+root+", "+lang+", "+langCountry+");\n");
