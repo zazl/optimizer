@@ -55,7 +55,10 @@ dojo.optimizer.Analyzer.prototype = {
 	},
 	
 	_moduleEnded: function(id) {
-		this.dependencyStack.pop();
+		var module = this.moduleMap.get(id);
+		if (module !== undefined) {
+			this.dependencyStack.pop();
+		}
 	},
 	
 	_buildDependencyList: function(module, dependencyList, exclude, seen) {
