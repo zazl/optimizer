@@ -119,7 +119,7 @@ dojo.optimizer.Analyzer.prototype = {
 	 			id = provide[3];
 	 		}
 	 		else {
-				throw new Exception("Failed to locate provide statement for module ["+module+"]");
+				throw new Error("Failed to locate provide statement for module ["+module+"]");
 			}
 			var dependencies = scope._getDependencies(moduleContents);
 			scope._moduleStarted(id);
