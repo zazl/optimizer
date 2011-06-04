@@ -10,7 +10,7 @@ dojo.optimizer.Analyzer = function() {}
 
 dojo.optimizer.Analyzer.prototype = {
 	_getDependencies: function(moduleContents) {
-		var dependencyRegex = /dojo\.(require|provide)\([\w\W]*?\)/mg;
+		var dependencyRegex = /dojo\.(require|provide)\s*\([\w\W]*?\)/mg;
 		var result;
 		var dependencies = [];
 		
@@ -109,7 +109,7 @@ dojo.optimizer.Analyzer.prototype = {
 		var oldLoadJS = loadJS;
 		
 		loadJS = function(module) {
-			var provideRegex = /dojo\.provide\((("|')([\w\W]*?)("|'))\)/;
+			var provideRegex = /dojo\.provide\s*\(\s*(("|')([\w\W]*?)("|'))\s*\)/;
 			var moduleContents = readText(module).replace( /(\/\*([\s\S]*?)\*\/|\/\/(.*)$)/mg , "");
 			var id = null;
 			
