@@ -10,11 +10,14 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class Util {
 	private static String lineSeparator = System.getProperty("line.separator");
+	private static Pattern commentsRegex = Pattern.compile("(\\/\\*([\\s\\S]*?)\\*\\/|\\/\\/(.*)$)", Pattern.MULTILINE);
 
 	public static void writeLocalizations(ResourceLoader resourceLoader,  Writer w, List<Localization> localizations, Locale locale) throws IOException {
 		String localeString = locale.toString();
@@ -39,22 +42,19 @@ public class Util {
 			if (root == null) {
 				root = "null";
 			} else {
-				root = root.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
-				root = "'"+root+"'";
+				root = convert(root);
 			}
 			String lang = (intermediateModule == null) ? null : resourceLoader.readResource(intermediateModule);
 			if (lang == null) {
 				lang = "null";
 			} else {
-				lang = lang.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
-				lang = "'"+lang+"'";
+				lang = convert(lang);
 			}
 			String langCountry = resourceLoader.readResource(fullModule);
 			if (langCountry == null) {
 				langCountry = "null";
 			} else {
-				langCountry = langCountry.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
-				langCountry = "'"+langCountry+"'";
+				langCountry = convert(langCountry);
 			}
 			sb.append("dojo.optimizer.localization.load('"+localization.bundlePackage+"', "+langId+", '"+localeString+"', "+root+", "+lang+", "+langCountry+");\n");
 		}
@@ -111,5 +111,17 @@ public class Util {
 		w.write("',");
 		w.write(content.substring(content.indexOf('(')+1));
 		w.write("\n");
+	}
+	
+	private static String convert(String messages) {
+		Matcher m = commentsRegex.matcher(messages);
+		messages = m.replaceAll("");
+		messages = messages.replace(lineSeparator, " ").replace("\\\"", "\\\\\"").replace("'", "\\\'");
+		if (messages.indexOf('(') == -1) {
+			messages = "'("+messages+")'";
+		} else {
+			messages = "'"+messages+"'";
+		}
+		return messages;
 	}
 }
