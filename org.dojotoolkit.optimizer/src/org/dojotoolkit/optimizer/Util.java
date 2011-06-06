@@ -18,6 +18,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 public class Util {
 	private static String lineSeparator = System.getProperty("line.separator");
 	private static Pattern commentsRegex = Pattern.compile("(\\/\\*([\\s\\S]*?)\\*\\/|\\/\\/(.*)$)", Pattern.MULTILINE);
+	private static Pattern apostropheRegex = Pattern.compile("(?<!\\\\)\'", Pattern.MULTILINE);
 
 	public static void writeLocalizations(ResourceLoader resourceLoader,  Writer w, List<Localization> localizations, Locale locale) throws IOException {
 		String localeString = locale.toString();
@@ -116,7 +117,15 @@ public class Util {
 	private static String convert(String messages) {
 		Matcher m = commentsRegex.matcher(messages);
 		messages = m.replaceAll("");
-		messages = messages.replace(lineSeparator, " ").replace("\\\"", "\\\\\"").replace("'", "\\\'");
+		m = apostropheRegex.matcher(messages);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			m.appendReplacement(sb, "\\\\\'");
+		}
+		m.appendTail(sb);
+		messages = sb.toString();
+		messages = messages.replace(lineSeparator, " ").replace("\\\"", "\\\\\"");
+		
 		if (messages.indexOf('(') == -1) {
 			messages = "'("+messages+")'";
 		} else {
