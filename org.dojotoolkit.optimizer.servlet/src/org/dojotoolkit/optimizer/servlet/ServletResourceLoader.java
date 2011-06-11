@@ -31,20 +31,15 @@ public class ServletResourceLoader extends JSCompressorResourceLoader {
 		URL url = servletContext.getResource(path);
 		if (url != null) {
 			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
-			trackURL(path, url);
 			return url;
 		}
 		url = getClass().getClassLoader().getResource(path);	
 		if (url != null) {
 			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
-			trackURL(path, url);
 			return url;
 		}
 		url = getClass().getClassLoader().getResource(path.substring(1));	
 		logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path.substring(1)+"] ["+url+"]");
-		if (url != null) {
-			trackURL(path, url);
-		}
 		return url;
 	}
 }

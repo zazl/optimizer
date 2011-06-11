@@ -77,6 +77,18 @@ public class Activator implements BundleActivator {
 	private void registerServlet() {
 		if (!servletRegistered && httpService != null && httpContextExtensionService != null && jsCompressorFactory != null && jsOptimizerFactory != null) {
 			HttpContext httpContext = httpContextExtensionService.getHttpContext(httpServiceReference, "org.dojotoolkit.optimizer.samples.httpcontext");
+			if (httpContext == null) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				httpContext = httpContextExtensionService.getHttpContext(httpServiceReference, "org.dojotoolkit.optimizer.samples.httpcontext");
+				if (httpContext == null) {
+					System.out.println("Unable to obtain HttpContext for org.dojotoolkit.optimizer.samples.httpcontext");
+					return;
+				}
+			}
 			boolean javaChecksum = Boolean.valueOf(System.getProperty("javaChecksum", "false"));
 			List<String> bundleIdList = new ArrayList<String>();
 			String bundleIdsString = System.getProperty("searchBundleIds");

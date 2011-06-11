@@ -36,7 +36,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		this.resourceLoader = resourceLoader;
 		this.config = config;
-		AMDOptimizerScriptRunner scriptRunner = new AMDOptimizerScriptRunner(true, resourceLoader);
+		AMDOptimizerScriptRunner scriptRunner = new AMDOptimizerScriptRunner(resourceLoader);
 		scriptRunner.loadtModulesMissingNames(config); 
 		StringWriter sw = new StringWriter();
 		try {
@@ -51,27 +51,26 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return config;
 	}
 	
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException {
-		AMDOptimizerScriptRunner amdOptimizerScriptRunner = new AMDOptimizerScriptRunner(useCache, resourceLoader);
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+		AMDOptimizerScriptRunner amdOptimizerScriptRunner = new AMDOptimizerScriptRunner(resourceLoader);
 		return amdOptimizerScriptRunner._getAnalysisData(modules, exclude);
 	}
 	
 	public class AMDOptimizerScriptRunner extends V8JavaBridge {
 		private ResourceLoader resourceLoader = null;
 
-		public AMDOptimizerScriptRunner(boolean useCache, ResourceLoader resourceLoader) {
-			super(useCache);
+		public AMDOptimizerScriptRunner(ResourceLoader resourceLoader) {
 			this.resourceLoader = resourceLoader;
 		}
 		
-		public String readResource(String path, boolean useCache) throws IOException {
+		public String readResource(String path) throws IOException {
 			try {
 				URI uri = new URI(path);
 				path = uri.normalize().getPath();
 				if (path.charAt(0) != '/') {
 					path = '/'+path;
 				}
-				return resourceLoader.readResource(path, useCache);
+				return resourceLoader.readResource(path);
 			} catch (URISyntaxException e) {
 				throw new IOException(e.getMessage());
 			}

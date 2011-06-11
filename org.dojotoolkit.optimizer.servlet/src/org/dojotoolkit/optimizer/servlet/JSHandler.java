@@ -167,7 +167,7 @@ public abstract class JSHandler {
  			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
  			if (writeBootstrap) {
 	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-		 			osw.write(resourceLoader.readResource(bootstrapModulePath, !debug));
+		 			osw.write(resourceLoader.readResource(bootstrapModulePath));
 	 			}
  			}
  			customHandle(request, osw, analysisData);

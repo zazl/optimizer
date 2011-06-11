@@ -55,7 +55,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return config;
 	}
 	
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException {
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
 		JSAnalysisDataImpl jsAnalysisData = null;
 		
 		StringBuffer moduleList = new StringBuffer();
@@ -101,7 +101,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		try {
 			ctx = Context.enter();
 			ScriptableObject scope = ctx.initStandardObjects();
-			RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, useCache, false);
+			RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false);
 			long start = System.currentTimeMillis();
 			Object o = ctx.evaluateString(scope, sb.toString(), "AMDJSOptimizer", 1, null);//$NON-NLS-1$
 			long end = System.currentTimeMillis();
@@ -157,7 +157,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				
 				ctx = Context.enter();
 				ScriptableObject scope = ctx.initStandardObjects();
-				RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, true, false);
+				RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false);
 				long start = System.currentTimeMillis();
 				Object o = ctx.evaluateString(scope, sb.toString(), "AMDJSOptimizer", 1, null);
 				long end = System.currentTimeMillis();

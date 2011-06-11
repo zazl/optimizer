@@ -47,7 +47,7 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 		try {
 			ctx = Context.enter();
 			ScriptableObject scope = ctx.initStandardObjects();
-			initScope(scope, resourceLoader, true, src);
+			initScope(scope, resourceLoader, src);
 			long start = System.currentTimeMillis();
 			compressedSrc = Context.toString(ctx.evaluateString(scope, sb.toString(), "RhinoJSCompressor", 1, null));//$NON-NLS-1$
 			long end = System.currentTimeMillis();
@@ -66,8 +66,8 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 		return compressedSrc;
 	}
 
-	private void initScope(ScriptableObject scope, ResourceLoader resourceLoader, boolean useCache, String src) {
-		RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, useCache, false);
+	private void initScope(ScriptableObject scope, ResourceLoader resourceLoader, String src) {
+		RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false);
     	Method[] methods = getClass().getMethods();
     	for (int i = 0; i < methods.length; i++) {
     		if (methods[i].getName().equals(READ_SRC)) {

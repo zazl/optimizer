@@ -23,7 +23,6 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 	private String src = null;
 	
 	public V8UglifyJSCompressor(ResourceLoader resourceLoader) {
-		super(true);
 		this.resourceLoader = resourceLoader;
 	}
 	
@@ -57,8 +56,8 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 		return compressedSrc;
 	}
 
-	public String readResource(String path, boolean useCache) throws IOException {
-		return resourceLoader.readResource(path, useCache);
+	public String readResource(String path) throws IOException {
+		return resourceLoader.readResource(path);
 	}
 	
 	public String readSrc(String json) {

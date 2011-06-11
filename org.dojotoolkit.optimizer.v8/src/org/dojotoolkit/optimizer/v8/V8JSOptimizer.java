@@ -37,8 +37,8 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 		this.config = config;
 	}
 
-	public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, boolean useCache) throws IOException {
-		V8OptimizerScriptRunner v8OptimizerScriptRunner = new V8OptimizerScriptRunner(useCache, resourceLoader);
+	public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+		V8OptimizerScriptRunner v8OptimizerScriptRunner = new V8OptimizerScriptRunner(resourceLoader);
 		return v8OptimizerScriptRunner._getAnalysisData(modules, exclude);
 	}
 	
@@ -49,19 +49,18 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 	public class V8OptimizerScriptRunner extends V8JavaBridge {
 		private ResourceLoader resourceLoader = null;
 
-		public V8OptimizerScriptRunner(boolean useCache, ResourceLoader resourceLoader) {
-			super(useCache);
+		public V8OptimizerScriptRunner(ResourceLoader resourceLoader) {
 			this.resourceLoader = resourceLoader;
 		}
 		
-		public String readResource(String path, boolean useCache) throws IOException {
+		public String readResource(String path) throws IOException {
 			try {
 				URI uri = new URI(path);
 				path = uri.normalize().getPath();
 				if (path.charAt(0) != '/') {
 					path = '/'+path;
 				}
-				return resourceLoader.readResource(path, useCache);
+				return resourceLoader.readResource(path);
 			} catch (URISyntaxException e) {
 				throw new IOException(e.getMessage());
 			}
