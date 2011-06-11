@@ -12,7 +12,6 @@ loadJS("/dojo/_base/_loader/bootstrap.js");
 dojo._hasResource = {};
 loadJS("/dojo/_base/_loader/loader.js");
 loadJS("/optimizer/syncloader/hostenv_optimizer.js");
-loadJS("/dojo/_base.js");
 loadJS("/json/json2.js");
 loadJS("/optimizer/syncloader/module.js");
 loadJS("/optimizer/syncloader/map.js");
