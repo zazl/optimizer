@@ -36,6 +36,7 @@ public class JSServlet extends HttpServlet {
 	protected boolean javaChecksum = false; 
 	protected String jsHandlerType = null;
 	protected List<List<String>> warmupValues = null;
+	protected JSCompressorFactory jsCompressorFactory = null;
 	
 	public JSServlet() {}
 	
@@ -44,7 +45,8 @@ public class JSServlet extends HttpServlet {
 			         RhinoClassLoader rhinoClassLoader, 
 			         boolean javaChecksum, 
 			         String jsHandlerType,
-			         List<List<String>> warmupValues) {
+			         List<List<String>> warmupValues,
+			         JSCompressorFactory jsCompressorFactory) {
 		this();
 		this.jsOptimizerFactory = jsOptimizerFactory;
 		this.resourceLoader = resourceLoader;
@@ -52,6 +54,7 @@ public class JSServlet extends HttpServlet {
 		this.javaChecksum = javaChecksum;
 		this.jsHandlerType = jsHandlerType;
 		this.warmupValues = warmupValues;
+		this.jsCompressorFactory = jsCompressorFactory;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -61,12 +64,7 @@ public class JSServlet extends HttpServlet {
 		if (resourceLoader == null) {
 			resourceLoader = (ResourceLoader)getServletContext().getAttribute("org.dojotoolkit.ResourceLoader");
 			if (resourceLoader == null) {
-				JSCompressorFactory jsCompressorFactory = null;
-				String compressJS = getServletContext().getInitParameter("compressJS");
-				if (compressJS != null && compressJS.equalsIgnoreCase("true")) {
-					jsCompressorFactory = new JSCompressorFactoryImpl();
-				}
-				resourceLoader = new ServletResourceLoader(getServletContext(), jsCompressorFactory);
+				resourceLoader = new ServletResourceLoader(getServletContext());
 				getServletContext().setAttribute("org.dojotoolkit.ResourceLoader", resourceLoader);
 			}
 		}
@@ -112,7 +110,13 @@ public class JSServlet extends HttpServlet {
 				logger.logp(Level.SEVERE, getClass().getName(), "init", "IOException while parsing warmup values", e);
 			}
 		}
-		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, warmupValues);
+		if (jsCompressorFactory == null) {
+			String compressJS = getServletContext().getInitParameter("compressJS");
+			if (compressJS != null && compressJS.equalsIgnoreCase("true")) {
+				jsCompressorFactory = new JSCompressorFactoryImpl();
+			}
+		}
+		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, warmupValues, jsCompressorFactory);
 		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizer", jsHandler.getJSOptimizer());
 	}
 	

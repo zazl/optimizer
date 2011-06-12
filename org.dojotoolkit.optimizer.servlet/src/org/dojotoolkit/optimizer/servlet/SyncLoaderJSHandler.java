@@ -82,12 +82,13 @@ public class SyncLoaderJSHandler extends JSHandler {
 			String[] dependencies = analysisData.getDependencies();
 			
 			for (String dependency : dependencies) {
-				String contentElement = resourceLoader.readResource(Util.normalizePath(dependency));
+				String path = Util.normalizePath(dependency);
+				String contentElement = resourceLoader.readResource(path);
 				if (contentElement != null) {
 					if (inlineTemplateHTML) {
-						writer.write(inlineTemplateHTML(dependency, contentElement, resourceLoader));
+						writer.write(compressorContentFilter.filter(inlineTemplateHTML(dependency, contentElement, resourceLoader), path));
 					} else {
-						writer.write(contentElement);
+						writer.write(compressorContentFilter.filter(contentElement, path));
 					}
 				}
 			}

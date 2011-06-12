@@ -100,11 +100,11 @@ public class Activator implements BundleActivator {
 			}
 			String[] bundleIds = new String[bundleIdList.size()];
 			bundleIds = bundleIdList.toArray(bundleIds);
-			ResourceLoader resourceLoader = new OSGiResourceLoader(context, bundleIds, jsCompressorFactory);
+			ResourceLoader resourceLoader = new OSGiResourceLoader(context, bundleIds);
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 			String jsHandlerType = System.getProperty("jsHandlerType");
 			
-			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null);
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null, jsCompressorFactory);
 			try {
 				httpService.registerServlet("/_javascript", jsServlet, null, httpContext);
 				httpService.registerServlet("/", new ResourceServlet(resourceLoader), null, httpContext);

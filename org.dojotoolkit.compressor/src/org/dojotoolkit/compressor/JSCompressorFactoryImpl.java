@@ -24,14 +24,6 @@ public class JSCompressorFactoryImpl implements JSCompressorFactory {
 	
 	public static String[] defaultIgnoreList = new String[] {
 		"/dojo/dojo.js", 
-		"^/optimizer/", 
-		"^/uglifyjs/", 
-		"^/uglify-js", 
-		"^/jsutil/", 
-		"^/jssrc/", 
-		"/dtlapp.js", 
-		"/dtlenv.js", 
-		"/env.js", 
 		".*/nls/.*"
 	};
 	

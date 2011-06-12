@@ -27,6 +27,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dojotoolkit.compressor.JSCompressorContentFilter;
+import org.dojotoolkit.compressor.JSCompressorFactory;
 import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.JSAnalysisData;
@@ -48,6 +50,7 @@ public abstract class JSHandler {
 	protected Map<String, Object> config = null;
 	protected String[] bootstrapModules = null;
 	protected String[] debugBootstrapModules = null;
+	protected JSCompressorContentFilter compressorContentFilter = null;
 	
 	public JSHandler(String configFileName) {
 		try {
@@ -57,8 +60,8 @@ public abstract class JSHandler {
 		}
 	}
 
-	public void initialize(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, JSOptimizerFactory jsOptimizerFactory) {
-		this.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, null);
+	public void initialize(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, JSOptimizerFactory jsOptimizerFactory, JSCompressorFactory jsCompressorFactory) {
+		this.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, null, jsCompressorFactory);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -66,7 +69,8 @@ public abstract class JSHandler {
 			               RhinoClassLoader rhinoClassLoader, 
 			               boolean javaChecksum, 
 			               JSOptimizerFactory jsOptimizerFactory, 
-			               List<List<String>> warmupValues) {
+			               List<List<String>> warmupValues, 
+			               JSCompressorFactory jsCompressorFactory) {
 		this.resourceLoader = resourceLoader;
 		jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
 		List<String> bootstrapModuleList = (List<String>)config.get("bootstrapModules");
@@ -80,6 +84,7 @@ public abstract class JSHandler {
 				new Thread(new OptimizerRunnable(jsOptimizer, modules)).start();
 			}
 		}
+		compressorContentFilter = new JSCompressorContentFilter(jsCompressorFactory, resourceLoader);
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -167,7 +172,7 @@ public abstract class JSHandler {
  			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
  			if (writeBootstrap) {
 	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-		 			osw.write(resourceLoader.readResource(bootstrapModulePath));
+		 			osw.write(compressorContentFilter.filter(resourceLoader.readResource(bootstrapModulePath), bootstrapModulePath));
 	 			}
  			}
  			customHandle(request, osw, analysisData);

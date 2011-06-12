@@ -33,7 +33,8 @@ public class AMDJSHandler extends JSHandler {
 			for (Map<String, Object> implicitDependency : implicitDependencies) {
 				String uri = (String)implicitDependency.get("uri");
 				String id = (String)implicitDependency.get("id");
-				String implicitDependencyContent = resourceLoader.readResource(Util.normalizePath(uri));
+				String path = Util.normalizePath(uri);
+				String implicitDependencyContent = resourceLoader.readResource(path);
 				if (implicitDependencyContent == null) {
 					throw new IOException("Unable to load implicit dependency ["+implicitDependency+"]");
 				}
@@ -50,7 +51,7 @@ public class AMDJSHandler extends JSHandler {
 					modifiedSrc.append(implicitDependencyContent.substring(missingNameIndex));
 					implicitDependencyContent = modifiedSrc.toString();
 				}
-				writer.write(implicitDependencyContent);
+				writer.write(compressorContentFilter.filter(implicitDependencyContent, path));
 			}
 		}
 		if (analysisData != null) {	
@@ -75,7 +76,8 @@ public class AMDJSHandler extends JSHandler {
 			}
 			Map<String, Object> aliases = (Map<String, Object>)config.get("aliases");
 			for (String dependency : analysisData.getDependencies()) {
-				String content = resourceLoader.readResource(Util.normalizePath(dependency));
+				String path = Util.normalizePath(dependency);
+				String content = resourceLoader.readResource(path);
 				if (content != null) {
 					String id = dependency.substring(0, dependency.indexOf(".js"));
 					int missingNameIndex = lookForMissingName(id, analysisData.getModulesMissingNames());
@@ -94,7 +96,7 @@ public class AMDJSHandler extends JSHandler {
 						content = modifiedSrc.toString();
 					}
 					
-					writer.write(content);
+					writer.write(compressorContentFilter.filter(content,path));
 				}
 			}
 		}

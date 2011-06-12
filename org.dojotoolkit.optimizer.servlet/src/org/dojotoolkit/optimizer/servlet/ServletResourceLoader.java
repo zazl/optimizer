@@ -12,15 +12,13 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 
-import org.dojotoolkit.compressor.JSCompressorFactory;
-import org.dojotoolkit.compressor.JSCompressorResourceLoader;
+import org.dojotoolkit.server.util.resource.CachingResourceLoader;
 
-public class ServletResourceLoader extends JSCompressorResourceLoader {
+public class ServletResourceLoader extends CachingResourceLoader {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	private ServletContext servletContext = null;
 
-	public ServletResourceLoader(ServletContext servletContext, JSCompressorFactory jsCompressorFactory) {
-		super(jsCompressorFactory);
+	public ServletResourceLoader(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 	

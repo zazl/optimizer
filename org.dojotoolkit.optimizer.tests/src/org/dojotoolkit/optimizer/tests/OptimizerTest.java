@@ -19,6 +19,6 @@ public abstract class OptimizerTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		resourceLoader = new OSGiResourceLoader(bundleContext, ids, null);
+		resourceLoader = new OSGiResourceLoader(bundleContext, ids);
 	}
 }

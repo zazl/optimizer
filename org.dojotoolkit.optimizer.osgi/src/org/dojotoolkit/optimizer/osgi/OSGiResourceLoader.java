@@ -9,20 +9,18 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.dojotoolkit.compressor.JSCompressorFactory;
-import org.dojotoolkit.compressor.JSCompressorResourceLoader;
+import org.dojotoolkit.server.util.resource.CachingResourceLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-public class OSGiResourceLoader extends JSCompressorResourceLoader {
+public class OSGiResourceLoader extends CachingResourceLoader {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	
 	private BundleContext bundleContext = null;
 	private Bundle[] bundles = null;
 	private String[] bundleIds = null;
 
-	public OSGiResourceLoader(BundleContext bundleContext, String[] bundleIds, JSCompressorFactory jsCompressorFactory) {
-		super(jsCompressorFactory);
+	public OSGiResourceLoader(BundleContext bundleContext, String[] bundleIds) {
 		this.bundleContext = bundleContext;
 		this.bundleIds = bundleIds;
 	}
