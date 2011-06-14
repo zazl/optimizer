@@ -37,6 +37,8 @@ dojo.optimizer.Analyzer.prototype = {
 		var module = this.moduleMap.get(id);
 		if (module !== undefined) {
 			this.dependencyStack.push(id);
+		} else {
+			print("Unable to locate dependant for ["+id+"");
 		}
 	},
 	
@@ -58,6 +60,8 @@ dojo.optimizer.Analyzer.prototype = {
 		var module = this.moduleMap.get(id);
 		if (module !== undefined) {
 			this.dependencyStack.pop();
+		} else {
+			print("Unable to locate dependant for ["+id+"");
 		}
 	},
 	
