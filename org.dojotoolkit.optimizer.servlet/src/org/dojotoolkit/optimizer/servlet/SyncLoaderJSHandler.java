@@ -30,16 +30,18 @@ public class SyncLoaderJSHandler extends JSHandler {
 	private static final String NAMESPACE_MIDDLE = "', '";
 	private static final String NAMESPACE_SUFFIX = "');\n";
 	private static Pattern templatePattern = Pattern.compile("(((templatePath)\\s*(=|:)\\s*)dojo\\.(module)?Url\\(|dojo\\.cache\\s*\\(\\s*)\\s*?[\\\"\\']([\\w\\.\\/]+)[\\\"\\'](([\\,\\s]*)[\\\"\\']([\\w\\.\\/]*)[\\\"\\'])?(\\s*,\\s*)?([^\\)]*)?\\s*\\)");
-	
+	private static Pattern dojoRequirePattern = Pattern.compile("^\\s*dojo\\.require\\s*\\([\\w\\W]*?\\);", Pattern.MULTILINE);
 	private boolean inlineTemplateHTML = true;
+	private boolean removeDojoRequires = false;
 	
 	public SyncLoaderJSHandler() {
 		super("syncloader.json");
 	}
 	
-	public SyncLoaderJSHandler(boolean inlineTemplateHTML) {
+	public SyncLoaderJSHandler(boolean inlineTemplateHTML, boolean removeDojoRequires) {
 		super("syncloader.json");
 		this.inlineTemplateHTML = inlineTemplateHTML;
+		this.removeDojoRequires = removeDojoRequires;
 	}
 	
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
@@ -85,11 +87,13 @@ public class SyncLoaderJSHandler extends JSHandler {
 				String path = Util.normalizePath(dependency);
 				String contentElement = resourceLoader.readResource(path);
 				if (contentElement != null) {
-					if (inlineTemplateHTML) {
-						writer.write(compressorContentFilter.filter(inlineTemplateHTML(dependency, contentElement, resourceLoader), path));
-					} else {
-						writer.write(compressorContentFilter.filter(contentElement, path));
+					if (removeDojoRequires) {
+						contentElement = removeDojoRequireCalls(dependency, contentElement);
 					}
+					if (inlineTemplateHTML) {
+						contentElement = inlineTemplateHTML(dependency, contentElement, resourceLoader);
+					}
+					writer.write(compressorContentFilter.filter(contentElement, path));
 				}
 			}
 		}
@@ -124,6 +128,22 @@ public class SyncLoaderJSHandler extends JSHandler {
 		if (inlinedWithHTML.length() > 0) {
 			m.appendTail(inlinedWithHTML);
 			return inlinedWithHTML.toString();
+		} 
+		else {
+			return input;
+		}
+	}
+	
+	private static String removeDojoRequireCalls(String dependency, String input) {
+		StringBuffer removedDojoProvides = new StringBuffer();
+		Matcher m = dojoRequirePattern.matcher(input);
+		while (m.find()) {
+			logger.logp(Level.FINE, SyncLoaderJSHandler.class.getName(), "removeDojoRequireCalls", "Removing ["+m.group(0)+"] from ["+dependency+"]");
+			m.appendReplacement(removedDojoProvides, "");
+		}
+		if (removedDojoProvides.length() > 0) {
+			m.appendTail(removedDojoProvides);
+			return removedDojoProvides.toString();
 		} 
 		else {
 			return input;
