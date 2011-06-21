@@ -25,7 +25,7 @@
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.zazl.jetty/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=false -DjavaChecksum=true -DcompressorType=shrinksafe -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.json,org.uglifyjs,org.dojotoolkit.server.util.js,org.requirejs,org.dojotoolkit.optimizer.amd,org.dojotoolkit.optimizer.samples -DjsHandlerType=amd"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.zazl.jetty/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=false -DjavaChecksum=true -DcompressorType=shrinksafe -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.json,org.uglifyjs,org.dojotoolkit.server.util.js,org.requirejs,org.dojotoolkit.optimizer.amd,org.dojotoolkit.optimizer.samples -DjsHandlerType=requirejs"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
 <setEntry value="org.dojotoolkit.compressor.feature:default"/>

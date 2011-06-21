@@ -34,14 +34,44 @@ AMDAnalyzer.prototype = {
 		}
 	},
 		
+	_scanForCircularDependencies: function(module, check) {
+        check.push(module.id);
+		for (var i = 0; i < module.dependencies.length; i++) {
+			var moduleDependency = this.moduleMap.get(module.dependencies[i]);
+            if (moduleDependency.scanned !== undefined) {
+                continue;
+            }
+            var found = false;
+            var dup;
+            for (var j = 0; j < check.length; j++) {
+                if (check[j] === moduleDependency.id) {
+                    found = true;
+                    dup = moduleDependency.id;
+                    break;
+                }
+            }
+            if (found) {
+                var msg = "Circular dependency found : ";
+                for (j = 0; j < check.length; j++) {
+                    msg += check[j];
+                    msg += "->";
+                }
+                print(msg+dup);
+            } else {
+                this._scanForCircularDependencies(moduleDependency, check);
+            }
+		}
+        module.scanned = true;
+        check.pop();
+	},
+	
 	_analyze: function(modules, exclude) {
 		this.dependencyStack = [];
-		this.localizationList = [];
-		this.textList = [];
+		this.pluginRefList = {};
 		this.missingNamesList = [];
 		this.moduleMap = map.createMap();
 		for (var i = 0; i < modules.length; i++) {
-			astwalker.walker(modules[i], exclude, this.moduleMap, this.localizationList, this.textList, this.missingNamesList, this.aliases, []);
+			astwalker.walker(modules[i], exclude, this.moduleMap, this.pluginRefList, this.missingNamesList, this.aliases, []);
 		}
 	},
 	
@@ -51,13 +81,14 @@ AMDAnalyzer.prototype = {
 		for (i = 0; i < modules.length; i++) {
 			var module = this.moduleMap.get(modules[i]);
 			this._buildDependencyList(module, dependencyList, {});
+			this._scanForCircularDependencies(module, []);
 		}
 		return dependencyList;
 	},
 	
 	getAnalysisData: function(modules, exclude) {
 		var dependencyList = this.getDependencyList(modules, exclude);
-		return ({dependencyList: dependencyList, localizations: this.localizationList, textList: this.textList, missingNamesList: this.missingNamesList});
+		return ({dependencyList: dependencyList, pluginRefs: this.pluginRefList, missingNamesList: this.missingNamesList});
 	}
 };
 

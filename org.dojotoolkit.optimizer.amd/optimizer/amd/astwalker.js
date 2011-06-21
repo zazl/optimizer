@@ -41,7 +41,7 @@ function expand(uri, pathStack, aliases) {
 	return uri;
 }
 
-function walker(uri, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack) {
+function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, aliases, pathStack) {
 	uri = expand(uri, pathStack, aliases);
 	if (moduleMap.get(uri) === undefined) {
 		var src = resourceloader.readText('/'+uri+'.js');
@@ -74,45 +74,25 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 							var keepWalking = true;
 							if (dependencyArg[i][0].name !== "string") {
 								keepWalking = false;
-							} else if (dependency.match("^order!")) {
-								dependency = dependency.substring(6);
-							} else if (dependency.match("^i18n!")) {
+							} else if (dependency.match(".+!.+")) {
 								keepWalking = false;
-								var i18nDependency = dependency.substring(5);
-								var localization = {
-									bundlepackage : i18nDependency,
-									modpath : i18nDependency.substring(0, i18nDependency.lastIndexOf('/')),
-									bundlename : i18nDependency.substring(i18nDependency.lastIndexOf('/')+1)
-								};
-								var add = true;
-								for (var j = 0; j < localizationList.length; j++) {
-									if (localizationList[j].bundlepackage === localization.bundlepackage) {
-										add = false;
-										break;
-									}
+								pathStack.push(uri);
+								var pluginName = dependency.substring(0, dependency.indexOf('!'));
+								var parentPath = pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
+								pluginName = expand(pluginName, pathStack, aliases);
+								var pluginValue = dependency.substring(dependency.indexOf('!')+1);
+								pluginValue = expand(pluginValue, pathStack, aliases);
+								if (pluginRefList[pluginName] === undefined) {
+									pluginRefList[pluginName] = [];
 								}
-								if (add === true) {
-									localizationList.push(localization);
-								}
+								pluginRefList[pluginName].push(pluginValue);
+								pathStack.pop();
 							} else if (dependency.match(".js$")) {
 								keepWalking = false;
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack, aliases);
 								module.addDependency(dependency);
 								pathStack.pop();
-							} else if (dependency.match("^text!")) {
-								keepWalking = false;
-								var textDependency = dependency.substring(5);
-								var add = true;
-								for (var k = 0; k < textList.length; k++) {
-									if (textList[k] === textDependency) {
-										add = false;
-										break;
-									}
-								}
-								if (add) {
-									textList.push(textDependency);
-								}
 							}
 							if (aliases[dependency] !== undefined) {
 								dependency = aliases[dependency];
@@ -127,7 +107,7 @@ function walker(uri, exclude, moduleMap, localizationList, textList, missingName
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack, aliases);
 								module.addDependency(dependency);
-								walker(dependency, exclude, moduleMap, localizationList, textList, missingNamesList, aliases, pathStack);
+								walker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, aliases, pathStack);
 								pathStack.pop();
 							}
 						}

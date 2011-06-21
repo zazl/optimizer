@@ -195,17 +195,17 @@ public class Activator implements BundleActivator {
 		
 		public Object addingService(ServiceReference reference) {
 			String dojoServiceId = null;
-			if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
-				if (useV8) {
-					dojoServiceId = "AMDV8JSOptimizer";
-				} else {
-					dojoServiceId = "AMDRhinoJSOptimizer";
-				}
-			} else {
+			if (jsHandlerType.equals(JSHandler.SYNCLOADER_HANDLER_TYPE)) {
 				if (useV8) {
 					dojoServiceId = "V8JSOptimizer";
 				} else {
 					dojoServiceId = "RhinoJSOptimizer";
+				}
+			} else {
+				if (useV8) {
+					dojoServiceId = "AMDV8JSOptimizer";
+				} else {
+					dojoServiceId = "AMDRhinoJSOptimizer";
 				}
 			}
 			if (dojoServiceId != null && reference.getProperty("dojoServiceId").equals(dojoServiceId)) {

@@ -5,8 +5,8 @@ import org.osgi.framework.BundleContext;
 
 
 public class RhinoAMDOptimizerTest extends AMDOptimizerTest {
-	public RhinoAMDOptimizerTest(BundleContext bundleContext, String[] ids) {
-		super(bundleContext, ids);
+	public RhinoAMDOptimizerTest(BundleContext bundleContext, String[] ids, String handlerConfig) {
+		super(bundleContext, ids, handlerConfig);
 	}
 	
 	protected void setUp() throws Exception {

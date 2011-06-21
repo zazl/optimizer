@@ -128,8 +128,10 @@ public abstract class JSHandler {
 					for (String dependency : analysisData.getDependencies()) {
 						logger.logp(Level.FINER, getClass().getName(), "handle", "dependency for ["+modulesParam+"] = ["+dependency+"]");
 					}
-					for (Localization localization : analysisData.getLocalizations()) {
-						logger.logp(Level.FINER, getClass().getName(), "handle", "localization for ["+modulesParam+"] = ["+localization.modulePath+"]");
+					if (analysisData.getLocalizations() != null) {
+						for (Localization localization : analysisData.getLocalizations()) {
+							logger.logp(Level.FINER, getClass().getName(), "handle", "localization for ["+modulesParam+"] = ["+localization.modulePath+"]");
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -172,7 +174,8 @@ public abstract class JSHandler {
  			boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
  			if (writeBootstrap) {
 	 			for (String bootstrapModulePath: bootstrapModulePaths) {
-		 			osw.write(compressorContentFilter.filter(resourceLoader.readResource(bootstrapModulePath), bootstrapModulePath));
+		 			//osw.write(compressorContentFilter.filter(resourceLoader.readResource(bootstrapModulePath), bootstrapModulePath));
+		 			osw.write(resourceLoader.readResource(bootstrapModulePath));
 	 			}
  			}
  			customHandle(request, osw, analysisData);

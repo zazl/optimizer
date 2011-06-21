@@ -111,7 +111,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 				Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 				localizationList.add(localization);
 			}
-			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, resourceLoader, exclude);
+			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, null, resourceLoader, exclude);
 		}
 		catch(Throwable t) {
 			logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", t);

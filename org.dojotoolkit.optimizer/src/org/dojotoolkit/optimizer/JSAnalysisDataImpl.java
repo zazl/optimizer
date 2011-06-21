@@ -22,6 +22,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private List<Localization> localizations = null;
 	private List<String> textDependencies = null;
 	private List<Map<String, Object>> modulesMissingNames = null;
+	private Map<String, List<String>> pluginRefs = null;
 	private ResourceLoader resourceLoader = null;
 	private Map<String, Long> timestampLookup = null;
 	private String[] excludes = null;
@@ -33,6 +34,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  List<Localization> localizations, 
 			                  List<String> textDependencies, 
 			                  List<Map<String, Object>> modulesMissingNames,
+			                  Map<String, List<String>> pluginRefs,
 			                  ResourceLoader resourceLoader,
 			                  JSAnalysisData[] exclude) {
 		timestampLookup = new HashMap<String, Long>();
@@ -48,6 +50,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.localizations = localizations;
 		this.textDependencies = textDependencies;
 		this.modulesMissingNames = modulesMissingNames;
+		this.pluginRefs = pluginRefs;
 		this.resourceLoader = resourceLoader;
         excludes = _getExludes(exclude);
         key = _getKey(this.modules, excludes);
@@ -81,6 +84,10 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		return modulesMissingNames;
 	}
 	
+	public Map<String, List<String>> getPluginRefs() {
+		return pluginRefs;
+	}
+
 	public String[] getExcludes() {
 		return excludes;
 	}

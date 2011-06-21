@@ -103,8 +103,8 @@ public class JSServlet extends HttpServlet {
 				removeDojoRequires = Boolean.valueOf(getServletContext().getInitParameter("removeDojoRequires"));
 			}
 			jsHandler = new SyncLoaderJSHandler(inlineTemplateHTML, removeDojoRequires);
-		} else if (jsHandlerType.equals(JSHandler.AMD_HANDLER_TYPE)) {
-			jsHandler = new AMDJSHandler("requirejs.json");
+		} else {
+			jsHandler = new AMDJSHandler(jsHandlerType+".json");
 		}
 		String stringWarmupValues = getServletContext().getInitParameter("optimizerWarmup");
 		if (warmupValues == null && stringWarmupValues != null) {

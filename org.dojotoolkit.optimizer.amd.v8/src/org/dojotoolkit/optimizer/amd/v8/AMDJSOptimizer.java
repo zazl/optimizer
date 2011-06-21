@@ -21,7 +21,6 @@ import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
-import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.rt.v8.V8JavaBridge;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
@@ -124,20 +123,16 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				long end = System.currentTimeMillis();
 				logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "time : "+(end-start)+" ms for ["+moduleList+"]");
 				List<String> dependencies = (List<String>)analysisData.get("dependencyList");
-				List<Localization> localizationList = new ArrayList<Localization>();
-				List<Map<String, Object>> localizations = (List<Map<String, Object>>)analysisData.get("localizations");
-				for (Map<String, Object> localizationMap : localizations) {
-					Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
-					localizationList.add(localization);
-				}
 				for (ListIterator<String> itr = dependencies.listIterator(); itr.hasNext();) {
 					String dependency = itr.next();
 					itr.set(dependency+=".js");
 				}
-				List<String> textList = (List<String>)analysisData.get("textList");
 				List<Map<String, Object>> missingNamesList = (List<Map<String, Object>>)analysisData.get("missingNamesList");
-				missingNamesList.addAll(modulesMissingNames);
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, localizationList, textList, missingNamesList, resourceLoader, exclude);
+				if (modulesMissingNames != null) {
+					missingNamesList.addAll(modulesMissingNames);
+				}
+				Map<String, List<String>> pluginRefs = (Map<String, List<String>>)analysisData.get("pluginRefs");
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude);
 				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {

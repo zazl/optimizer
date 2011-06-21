@@ -51,7 +51,8 @@ public class AMDJSHandler extends JSHandler {
 					modifiedSrc.append(implicitDependencyContent.substring(missingNameIndex));
 					implicitDependencyContent = modifiedSrc.toString();
 				}
-				writer.write(compressorContentFilter.filter(implicitDependencyContent, path));
+				//writer.write(compressorContentFilter.filter(implicitDependencyContent, path));
+				writer.write(implicitDependencyContent);
 			}
 		}
 		if (analysisData != null) {	
@@ -59,24 +60,32 @@ public class AMDJSHandler extends JSHandler {
 			if (suffixCode != null) {
 				writer.write(suffixCode);
 			}
-			
-			List<Localization> localizations = analysisData.getLocalizations();
-			if (localizations.size() > 0) {
-				Util.writeAMDLocalizations(resourceLoader, writer, localizations, request.getLocale());
-			}
-			
-			for (String textDependency : analysisData.getTextDependencies()) {
-				String textContent = resourceLoader.readResource(Util.normalizePath(textDependency));
-				writer.write("define('text!");
-				writer.write(textDependency);
-				writer.write("', function () { return ");
-				writer.write(escapeString(textContent));
-				writer.write(";});");
-				writer.write("\n");
+			String[] dependencies = analysisData.getDependencies();
+			Map<String, List<String>> pluginRefs = analysisData.getPluginRefs();
+			for (String pluginId : pluginRefs.keySet()) {
+				boolean writePlugin = true;
+				for (String dependency : dependencies) {
+					if (dependency.equals(pluginId+".js")) {
+						writePlugin = false;
+						break;
+					}
+				}
+				if (writePlugin) {
+					String pluginContent = resourceLoader.readResource(pluginId+".js");
+					if (pluginContent != null) {
+						System.out.println("writing plugin : "+pluginId);
+						writer.write(pluginContent);
+					}
+				}
+				List<String> resources = pluginRefs.get(pluginId);
+				for (String resource : resources) {
+					System.out.println(pluginId+":"+resource);
+				}
 			}
 			Map<String, Object> aliases = (Map<String, Object>)config.get("aliases");
-			for (String dependency : analysisData.getDependencies()) {
+			for (String dependency : dependencies) {
 				String path = Util.normalizePath(dependency);
+				System.out.println("path:"+path);
 				String content = resourceLoader.readResource(path);
 				if (content != null) {
 					String id = dependency.substring(0, dependency.indexOf(".js"));
@@ -96,7 +105,8 @@ public class AMDJSHandler extends JSHandler {
 						content = modifiedSrc.toString();
 					}
 					
-					writer.write(compressorContentFilter.filter(content,path));
+					writer.write(content);
+					//writer.write(compressorContentFilter.filter(content,path));
 				}
 			}
 		}

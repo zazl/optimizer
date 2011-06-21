@@ -48,22 +48,27 @@ public class Activator implements BundleActivator {
 	public class TestsRunner implements Runnable {
 		public void run() {
 			TestSuite suite = new TestSuite();
-			if (System.getProperty("jsHandlerType") != null && System.getProperty("jsHandlerType").equals("syncloader")) {
-				suite.addTest(new RhinoSyncLoaderOptimizerTest(context, dojoIds));
-				suite.addTest(new V8SyncLoaderOptimizerTest(context, dojoIds));
-				suite.addTest(new RhinoSyncLoaderExcludeTest(context, dojoIds));
-				suite.addTest(new V8SyncLoaderExcludeTest(context, dojoIds));
-			} else if (System.getProperty("jsHandlerType") != null && System.getProperty("jsHandlerType").equals("amd")) {
-				suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds));
-				suite.addTest(new V8AMDOptimizerTest(context, dojoIds));
-				suite.addTest(new RhinoAMDCircularDependencyTest(context, ids));
-				suite.addTest(new V8AMDCircularDependencyTest(context, ids));
-				suite.addTest(new RhinoAMDRelativeTest(context, ids));
-				suite.addTest(new V8AMDRelativeTest(context, ids));
-				suite.addTest(new RhinoAMDErrorTest(context, ids));
-				suite.addTest(new V8AMDErrorTest(context, ids));
-				suite.addTest(new RhinoAMDExcludeTest(context, dojoIds));
-				suite.addTest(new V8AMDExcludeTest(context, dojoIds));
+			String jsHandlerType = System.getProperty("jsHandlerType");
+			if (jsHandlerType != null) { 
+				if (jsHandlerType.equals("syncloader")) {
+					suite.addTest(new RhinoSyncLoaderOptimizerTest(context, dojoIds));
+					suite.addTest(new V8SyncLoaderOptimizerTest(context, dojoIds));
+					suite.addTest(new RhinoSyncLoaderExcludeTest(context, dojoIds));
+					suite.addTest(new V8SyncLoaderExcludeTest(context, dojoIds));
+				} else {
+					//suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
+					suite.addTest(new V8AMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
+					/*
+					suite.addTest(new RhinoAMDCircularDependencyTest(context, ids));
+					suite.addTest(new V8AMDCircularDependencyTest(context, ids));
+					suite.addTest(new RhinoAMDRelativeTest(context, ids));
+					suite.addTest(new V8AMDRelativeTest(context, ids));
+					suite.addTest(new RhinoAMDErrorTest(context, ids));
+					suite.addTest(new V8AMDErrorTest(context, ids));
+					suite.addTest(new RhinoAMDExcludeTest(context, dojoIds));
+					suite.addTest(new V8AMDExcludeTest(context, dojoIds));
+					*/
+				}
 			}
 			TestRunner.run(suite);
 		}

@@ -1,0 +1,10 @@
+{
+	"bootstrapModules" : ["dojo/dojo.js"],
+	"debugBootstrapModules" : ["dojo/dojo.js"],
+	"aliases" : {
+		"dojo": "dojo/main", 
+		"dijit" : "dijit/main",
+		"dojox" : "dojox/main"
+	},
+	"type" : "amd"
+}
