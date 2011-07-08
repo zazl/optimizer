@@ -43,16 +43,17 @@ dojo.optimizer.Analyzer.prototype = {
 	},
 	
 	_moduleLoading: function(id) {
-		if (this.moduleMap.get(id) === undefined) {
+		var module = this.moduleMap.get(id);
+		if (module === undefined) {
 			var uri = dojo._getModuleSymbols(id).join("/") + '.js';
 			var module = new dojo.optimizer.Module(id, uri);
 			this.moduleMap.add(id, module);
-			if (this.dependencyStack.length > 0) {
-				var parentId = this.dependencyStack[this.dependencyStack.length - 1];
-				var parent = this.moduleMap.get(parentId);
-				parent.addDependency(id);
-				module.addDependent(parent.id);
-			}
+		}
+		if (this.dependencyStack.length > 0) {
+			var parentId = this.dependencyStack[this.dependencyStack.length - 1];
+			var parent = this.moduleMap.get(parentId);
+			parent.addDependency(id);
+			module.addDependent(parent.id);
 		}
 	},
 	
@@ -66,6 +67,11 @@ dojo.optimizer.Analyzer.prototype = {
 	},
 	
 	_buildDependencyList: function(module, dependencyList, exclude, seen) {
+		var addToList = false;
+		if (seen[module.id] === undefined) {
+			seen[module.id] = module.id;
+			addToList = true;
+		}
 		for (var i = 0; i < module.dependencies.length; i++) {
 			var excludeModule = false;
 			var moduleDependency = this.moduleMap.get(module.dependencies[i]);
@@ -75,13 +81,12 @@ dojo.optimizer.Analyzer.prototype = {
 					break;
 				}
 			}
-			if (!excludeModule) {
+			if (!excludeModule && seen[moduleDependency.id] === undefined) {
 				this._buildDependencyList(moduleDependency, dependencyList, exclude, seen);
 			}
 		}
-		if (seen[module.id] === undefined) {
+		if (addToList) {
 			dependencyList.push(dojo.baseUrl+module.uri);
-			seen[module.id] = module.id;
 		}
 	},
 	
@@ -143,6 +148,37 @@ dojo.optimizer.Analyzer.prototype = {
 		loadJS = oldLoadJS;
 	},
 	
+	_scanForCircularDependencies: function(module, check) {
+        check.push(module.id);
+		for (var i = 0; i < module.dependencies.length; i++) {
+			var moduleDependency = this.moduleMap.get(module.dependencies[i]);
+            if (moduleDependency.scanned !== undefined) {
+                continue;
+            }
+            var found = false;
+            var dup;
+            for (var j = 0; j < check.length; j++) {
+                if (check[j] === moduleDependency.id) {
+                    found = true;
+                    dup = moduleDependency.id;
+                    break;
+                }
+            }
+            if (found) {
+                var msg = "Circular dependency found : ";
+                for (j = 0; j < check.length; j++) {
+                    msg += check[j];
+                    msg += "->";
+                }
+                print(msg+dup);
+            } else {
+                this._scanForCircularDependencies(moduleDependency, check);
+            }
+		}
+        module.scanned = true;
+        check.pop();
+	},
+	
 	getDependencyList: function(modules, exclude, bypassAnalysis) {
 		if (bypassAnalysis === undefined || bypassAnalysis === false) {
 			this._analyze(modules);
@@ -152,6 +188,7 @@ dojo.optimizer.Analyzer.prototype = {
 		for (var i = 0; i < modules.length; i++) {
 			var module = this.moduleMap.get(modules[i]);
 			this._buildDependencyList(module, dependencyList, exclude, seen);
+			this._scanForCircularDependencies(module, []);
 		}
 		return dependencyList;
 	},

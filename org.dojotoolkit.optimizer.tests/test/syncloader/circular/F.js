@@ -1,1 +1,1 @@
-dojo.provide("test.syncloader.F");
+dojo.provide("test.syncloader.circular.F");

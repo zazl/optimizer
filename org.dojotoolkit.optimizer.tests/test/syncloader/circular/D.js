@@ -1,2 +1,2 @@
-dojo.provide("test.syncloader.D");
-dojo.require("test.syncloader.E");
+dojo.provide("test.syncloader.circular.D");
+dojo.require("test.syncloader.circular.E");

@@ -1,3 +1,8 @@
+/*
+    Copyright (c) 2004-2011, The Dojo Foundation All Rights Reserved.
+    Available via Academic Free License >= 2.1 OR the modified BSD license.
+    see: http://dojotoolkit.org/license for details
+*/
 package org.dojotoolkit.optimizer.tests;
 
 import junit.framework.TestSuite;
@@ -8,6 +13,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 	private static final String[] dojoIds = {
+		"org.dojotoolkit.optimizer.tests",
 		"org.dojotoolkit.dojo",
 		"org.dojotoolkit.compressor.uglifyjs",
 		"org.json",
@@ -55,6 +61,8 @@ public class Activator implements BundleActivator {
 					suite.addTest(new V8SyncLoaderOptimizerTest(context, dojoIds));
 					suite.addTest(new RhinoSyncLoaderExcludeTest(context, dojoIds));
 					suite.addTest(new V8SyncLoaderExcludeTest(context, dojoIds));
+					suite.addTest(new RhinoSyncLoaderCircularDepTest(context, dojoIds));
+					suite.addTest(new V8SyncLoaderCircularDepTest(context, dojoIds));
 				} else {
 					suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
 					suite.addTest(new V8AMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
