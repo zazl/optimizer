@@ -152,7 +152,7 @@ var config;
 			uri = _normalize(uri);
 		}
 		return uri;
-	}
+	};
 	
 	document.addEventListener("DOMContentLoaded", function() {
 		pageLoaded = true;

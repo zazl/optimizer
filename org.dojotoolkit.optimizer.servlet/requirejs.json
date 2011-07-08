@@ -1,20 +1,11 @@
 {
 	"bootstrapModules" : ["requirejs/require.js"],
 	"debugBootstrapModules" : ["requirejs/require.js"],
-	"implicitDependencies" : [{
-		"uri": "requirejs/text.js",
-		"id": "text"
-	}, {
-		"uri": "requirejs/i18n.js", 
-		"id": "i18n"
-	}, { 
-		"uri": "requirejs/order.js",
-		"id": "order"
-	}],
-	"suffixCode" : "define('requirejs/require', function(){});\n",
 	"aliases" : {
 		"dojo": "dojo/lib/main-browser", 
-		"dijit" : "dijit/lib/main"
+		"dijit" : "dijit/lib/main",
+		"text" : "optimizer/amd/text"
 	},
-	"type" : "amd"
+	"type" : "amd",
+	"i18nPluginId" : "i18n"
 }

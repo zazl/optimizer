@@ -46,7 +46,7 @@ public interface JSAnalysisData {
 	 */
 	String[] getExcludes();
 	/**
-	 * @return String array of the excluded modules
+	 * @return Map of plugin references include any optimized values
 	 */
-	Map<String, List<String>> getPluginRefs();
+	Map<String, List<Map<String, String>>> getPluginRefs();
 }

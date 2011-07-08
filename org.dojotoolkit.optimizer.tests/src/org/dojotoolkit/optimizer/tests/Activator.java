@@ -56,9 +56,8 @@ public class Activator implements BundleActivator {
 					suite.addTest(new RhinoSyncLoaderExcludeTest(context, dojoIds));
 					suite.addTest(new V8SyncLoaderExcludeTest(context, dojoIds));
 				} else {
-					//suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
+					suite.addTest(new RhinoAMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
 					suite.addTest(new V8AMDOptimizerTest(context, dojoIds, jsHandlerType+".json"));
-					/*
 					suite.addTest(new RhinoAMDCircularDependencyTest(context, ids));
 					suite.addTest(new V8AMDCircularDependencyTest(context, ids));
 					suite.addTest(new RhinoAMDRelativeTest(context, ids));
@@ -67,7 +66,6 @@ public class Activator implements BundleActivator {
 					suite.addTest(new V8AMDErrorTest(context, ids));
 					suite.addTest(new RhinoAMDExcludeTest(context, dojoIds));
 					suite.addTest(new V8AMDExcludeTest(context, dojoIds));
-					*/
 				}
 			}
 			TestRunner.run(suite);

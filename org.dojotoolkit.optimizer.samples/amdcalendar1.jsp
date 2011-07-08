@@ -33,10 +33,13 @@
                     lib: '.'
                 }
             ],
-            has: {
-                "config-tlmSiblingOfDojo":0,
-                "dojo-sync-loader":0
-            },
+			trace:{
+				"loader-inject":0,
+				"loader-define":0,
+				"loader-run-factory":0,
+				"loader-exec-module":0,
+				"loader-define-module":0
+			},
 			locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
 		};
 	</script>
@@ -56,7 +59,11 @@
 	%>
 	<script type="text/javascript" src="<%=url%>"></script>
 	<script type="text/javascript">
-		require(["dojo/domReady!", 'amdtest/Calendar']);
+	
+		require(["dojo/domReady!ready", 'amdtest/Calendar'], function(){
+			console.log("loaded");
+		});
+		
 	</script>
 
 </head>

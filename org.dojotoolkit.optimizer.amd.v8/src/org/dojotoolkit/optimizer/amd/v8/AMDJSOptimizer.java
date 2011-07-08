@@ -81,6 +81,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			
 			StringBuffer moduleList = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
+	        sb.append("config = {paths : "+aliases+"};\n");
 	        sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
 	        sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer("+aliases+");\n");
 	        int count = 0;
@@ -131,7 +132,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				if (modulesMissingNames != null) {
 					missingNamesList.addAll(modulesMissingNames);
 				}
-				Map<String, List<String>> pluginRefs = (Map<String, List<String>>)analysisData.get("pluginRefs");
+				Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)analysisData.get("pluginRefs");
 				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude);
 				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 			} catch (Throwable e) {

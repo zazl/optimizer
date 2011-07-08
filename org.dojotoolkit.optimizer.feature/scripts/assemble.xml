@@ -43,7 +43,7 @@
 			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
 		</jar>
 		<jar destfile="${target.dir}/package/warlib/requirejs.jar">
-			<zipfileset dir="${requirejs.dir}/requirejs" prefix="requirejs"/>
+			<fileset dir="${requirejs.dir}"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
 	        <fileset dir="${equinox.dir}">

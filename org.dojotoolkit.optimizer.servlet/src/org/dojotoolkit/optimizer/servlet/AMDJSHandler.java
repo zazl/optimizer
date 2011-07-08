@@ -7,6 +7,7 @@ package org.dojotoolkit.optimizer.servlet;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,42 +27,16 @@ public class AMDJSHandler extends JSHandler {
 	
 	@SuppressWarnings("unchecked")
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
-		boolean debug = (request.getParameter("debug") == null) ? false : Boolean.valueOf(request.getParameter("debug"));
-		boolean writeBootstrap = (request.getParameter("writeBootstrap") == null) ? true : Boolean.valueOf(request.getParameter("writeBootstrap"));
-		List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
-		if (writeBootstrap && implicitDependencies != null) {
-			for (Map<String, Object> implicitDependency : implicitDependencies) {
-				String uri = (String)implicitDependency.get("uri");
-				String id = (String)implicitDependency.get("id");
-				String path = Util.normalizePath(uri);
-				String implicitDependencyContent = resourceLoader.readResource(path);
-				if (implicitDependencyContent == null) {
-					throw new IOException("Unable to load implicit dependency ["+implicitDependency+"]");
-				}
-				List<Map<String, Object>> modulesMissingNames = null;
-				if (debug) {
-					modulesMissingNames = (List<Map<String, Object>>)config.get("modulesMissingNames");
-				} else {
-					modulesMissingNames = analysisData.getModulesMissingNames();
-				}
-				int missingNameIndex = lookForMissingName(uri, modulesMissingNames);
-				if (missingNameIndex != -1) {
-					StringBuffer modifiedSrc = new StringBuffer(implicitDependencyContent.substring(0, missingNameIndex));
-					modifiedSrc.append("'"+id+"', ");
-					modifiedSrc.append(implicitDependencyContent.substring(missingNameIndex));
-					implicitDependencyContent = modifiedSrc.toString();
-				}
-				//writer.write(compressorContentFilter.filter(implicitDependencyContent, path));
-				writer.write(implicitDependencyContent);
-			}
-		}
 		if (analysisData != null) {	
 			String suffixCode = (String)config.get("suffixCode");
 			if (suffixCode != null) {
 				writer.write(suffixCode);
 			}
 			String[] dependencies = analysisData.getDependencies();
-			Map<String, List<String>> pluginRefs = analysisData.getPluginRefs();
+			Map<String, List<Map<String, String>>> pluginRefs = analysisData.getPluginRefs();
+			List<Map<String, Object>> modulesMissingNames = analysisData.getModulesMissingNames();
+			List<Localization> localizations = new ArrayList<Localization>();
+			String i18nPluginId = (String)config.get("i18nPluginId");
 			for (String pluginId : pluginRefs.keySet()) {
 				boolean writePlugin = true;
 				for (String dependency : dependencies) {
@@ -73,19 +48,40 @@ public class AMDJSHandler extends JSHandler {
 				if (writePlugin) {
 					String pluginContent = resourceLoader.readResource(pluginId+".js");
 					if (pluginContent != null) {
-						System.out.println("writing plugin : "+pluginId);
-						writer.write(pluginContent);
+						int missingNameIndex = lookForMissingName(pluginId, modulesMissingNames);
+						if (missingNameIndex != -1) {
+							StringBuffer modifiedSrc = new StringBuffer(pluginContent.substring(0, missingNameIndex));
+							modifiedSrc.append("'"+pluginId+"', ");
+							modifiedSrc.append(pluginContent.substring(missingNameIndex));
+							pluginContent = modifiedSrc.toString();
+						}
+						
+						writer.write(compressorContentFilter.filter(pluginContent, pluginId+".js"));
 					}
 				}
-				List<String> resources = pluginRefs.get(pluginId);
-				for (String resource : resources) {
-					System.out.println(pluginId+":"+resource);
+				List<Map<String, String>> pluginRefInstances = pluginRefs.get(pluginId);
+				for (Map<String, String> pluginRefInstance : pluginRefInstances) {
+					String value = pluginRefInstance.get("value");
+					if (value != null) {
+						writer.write(value);
+					}
 				}
+				if (i18nPluginId != null && i18nPluginId.equals(pluginId)) {
+					for (Map<String, String> pluginRefInstance : pluginRefInstances) {
+						String bundlePackage = pluginRefInstance.get("normalizedName");
+						String modulePath = bundlePackage.substring(0, bundlePackage.lastIndexOf('/'));
+						String bundleName = bundlePackage.substring(bundlePackage.lastIndexOf('/')+1);	
+						Localization localization = new Localization(bundlePackage, modulePath, bundleName);
+						localizations.add(localization);
+					}
+				}
+			}
+			if (localizations.size() > 0) {
+				Util.writeAMDLocalizations(resourceLoader, writer, localizations, request.getLocale());
 			}
 			Map<String, Object> aliases = (Map<String, Object>)config.get("aliases");
 			for (String dependency : dependencies) {
 				String path = Util.normalizePath(dependency);
-				System.out.println("path:"+path);
 				String content = resourceLoader.readResource(path);
 				if (content != null) {
 					String id = dependency.substring(0, dependency.indexOf(".js"));
@@ -105,8 +101,7 @@ public class AMDJSHandler extends JSHandler {
 						content = modifiedSrc.toString();
 					}
 					
-					writer.write(content);
-					//writer.write(compressorContentFilter.filter(content,path));
+					writer.write(compressorContentFilter.filter(content,path));
 				}
 			}
 		}
@@ -122,8 +117,4 @@ public class AMDJSHandler extends JSHandler {
 		}
 		return index;
 	}
-	
-	private String escapeString(String str) {
-		return "\"" + str.replace("\"", "\\\"").replaceAll("[\f]", "\\f").replaceAll("[\b]", "\\b").replaceAll("[\n]", "\\n").replaceAll("[\t]", "\\t").replaceAll("[\r]", "\\r")+"\"";
-	}	
 }

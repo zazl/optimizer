@@ -81,11 +81,10 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, aliase
 								var parentPath = pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
 								pluginName = expand(pluginName, pathStack, aliases);
 								var pluginValue = dependency.substring(dependency.indexOf('!')+1);
-								pluginValue = expand(pluginValue, pathStack, aliases);
 								if (pluginRefList[pluginName] === undefined) {
 									pluginRefList[pluginName] = [];
 								}
-								pluginRefList[pluginName].push(pluginValue);
+								pluginRefList[pluginName].push({name:pluginValue, normalizedName: expand(pluginValue, pathStack, aliases)});
 								pathStack.pop();
 							} else if (dependency.match(".js$")) {
 								keepWalking = false;

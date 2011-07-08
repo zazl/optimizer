@@ -6,6 +6,7 @@
 
 var map = require("./map");
 var astwalker = require('./astwalker');
+var resourceloader = require('zazlutil').resourceloader;
 
 AMDAnalyzer = function(aliases) {
 	if (aliases === undefined) {
@@ -75,6 +76,55 @@ AMDAnalyzer.prototype = {
 		}
 	},
 	
+	_processPluginRefs: function(dependencyList) {
+		for (pluginId in this.pluginRefList) {
+			var addMissingNameIndex = true;
+			for (var i = 0; i < this.missingNamesList.length; i++) {
+				if (this.missingNamesList[i].uri === pluginId) {
+					addMissingNameIndex = false;
+					break;
+				}
+			}
+			if (addMissingNameIndex) {
+				for (var i = 0; i < dependencyList.length; i++) {
+					if (dependencyList[i] === pluginId) {
+						addMissingNameIndex = false;
+						break;
+					}
+				}
+			}
+			if (addMissingNameIndex) {
+				var pluginContent = resourceloader.readText('/'+pluginId+'.js');
+				if (pluginContent === null) {
+					throw new Error("Unable to load src for plugin ["+pluginId+"]");
+				}
+				var nameIndex = astwalker.getMissingNameIndex(pluginContent);
+				this.missingNamesList.push({uri: pluginId, nameIndex: nameIndex})
+				//print("adding missing name index for plugin ["+pluginId+"]["+nameIndex+"]");
+			}
+			
+			try {
+				var refs = this.pluginRefList[pluginId];
+				if (this.aliases[pluginId]) {
+					pluginId = this.aliases[pluginId];
+				}
+				var plugin = require(pluginId);
+				
+				if (plugin.write) {
+					for (var i = 0; i < refs.length; i++) {
+						var moduleName = refs[i].name;
+						require(pluginId+"!"+moduleName);
+						plugin.write(pluginId, moduleName, function(writeOutput){
+							refs[i].value = writeOutput;
+						});
+					}
+				}
+			} catch (exc) {
+				print("Unable to process plugin ["+pluginId+"]:"+exc);
+			}
+		}
+	},
+	
 	getDependencyList: function(modules, exclude) {
 		this._analyze(modules, exclude);
 		var dependencyList = [];
@@ -88,6 +138,7 @@ AMDAnalyzer.prototype = {
 	
 	getAnalysisData: function(modules, exclude) {
 		var dependencyList = this.getDependencyList(modules, exclude);
+		this._processPluginRefs(dependencyList);
 		return ({dependencyList: dependencyList, pluginRefs: this.pluginRefList, missingNamesList: this.missingNamesList});
 	}
 };
