@@ -6,7 +6,7 @@
 package org.dojotoolkit.optimizer.tests;
 
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
-import org.dojotoolkit.optimizer.osgi.OSGiResourceLoader;
+import org.dojotoolkit.server.util.osgi.OSGiResourceLoader;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.osgi.framework.BundleContext;
 

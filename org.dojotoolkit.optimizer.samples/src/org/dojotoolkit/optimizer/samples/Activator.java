@@ -21,9 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.compressor.JSCompressorFactory;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
-import org.dojotoolkit.optimizer.osgi.OSGiResourceLoader;
 import org.dojotoolkit.optimizer.servlet.JSHandler;
 import org.dojotoolkit.optimizer.servlet.JSServlet;
+import org.dojotoolkit.server.util.osgi.OSGiResourceLoader;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 import org.eclipse.equinox.http.registry.HttpContextExtensionService;
