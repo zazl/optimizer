@@ -1,6 +1,6 @@
 {
-	"bootstrapModules" : ["requirejs/require.js"],
-	"debugBootstrapModules" : ["requirejs/require.js"],
+	"bootstrapModules" : ["require.js"],
+	"debugBootstrapModules" : ["require.js"],
 	"aliases" : {
 		"dojo": "dojo/lib/main-browser", 
 		"dijit" : "dijit/lib/main",
