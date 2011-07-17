@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ page import="org.dojotoolkit.optimizer.JSOptimizer" %>
-<%@ page import="org.dojotoolkit.optimizer.JSAnalysisData" %>
+<%@ page import="org.dojotoolkit.optimizer.servlet.JSURLGenerator" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,8 +53,8 @@
 		    if (jsOptimizer == null) {
 		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		    }
-			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"amdtest/Calendar"});
-			url = request.getContextPath() +"/_javascript?modules=amdtest/Calendar&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
+		   	JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
+		   	url = urlGenerator.generateURL("amdtest/Calendar");
 		}
 	%>
 	<script type="text/javascript" src="<%=url%>"></script>

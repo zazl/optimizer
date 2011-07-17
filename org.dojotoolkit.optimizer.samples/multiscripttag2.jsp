@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ page import="org.dojotoolkit.optimizer.JSOptimizer" %>
-<%@ page import="org.dojotoolkit.optimizer.JSAnalysisData" %>
+<%@ page import="org.dojotoolkit.optimizer.servlet.JSURLGenerator" %>
 <html>
     <head>
         <title>Person Grid + Calendar using multiple script tags</title>
@@ -31,21 +31,11 @@
 		    if (jsOptimizer == null) {
 		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		    }
-		    JSAnalysisData widgetAnalysisData = jsOptimizer.getAnalysisData(new String[] {"dijit._Widget"});
-		    JSAnalysisData calendarAnalysisData = jsOptimizer.getAnalysisData(new String[] {"dijit.Calendar"}, new JSAnalysisData[]{widgetAnalysisData});
-			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"test.PersonGrid"}, new JSAnalysisData[]{calendarAnalysisData, widgetAnalysisData});
-			
-			String widgetUrl = request.getContextPath() +"/_javascript?modules=dijit._Widget&version="+widgetAnalysisData.getChecksum()+"&locale="+request.getLocale();
+		    JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
 		%>
-			<script type="text/javascript" src="<%=widgetUrl%>"/></script>
-		<%
-			String calendarUrl = request.getContextPath() +"/_javascript?modules=dijit.Calendar&version="+calendarAnalysisData.getChecksum()+"&locale="+request.getLocale()+"&writeBootstrap=false&exclude="+widgetAnalysisData.getKey();
-		%>
-			<script type="text/javascript" src="<%=calendarUrl%>"/></script>
-		<%
-			String url = request.getContextPath() +"/_javascript?modules=test.PersonGrid&version="+analysisData.getChecksum()+"&locale="+request.getLocale()+"&writeBootstrap=false&exclude="+calendarAnalysisData.getKey()+","+widgetAnalysisData.getKey();
-		%>
-			<script type="text/javascript" src="<%=url%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit._Widget")%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit.Calendar")%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid")%>"/></script>
 		<script type="text/javascript">
   			dojo.require("dijit.Calendar");
   			dojo.require("test.PersonGrid");
