@@ -1,7 +1,7 @@
 Dojo Zazl Javascript Optimizer
 ------------------------------
 
-The Zazl Javascript Optimizer enable developers to produce optimized javascript environments for their Dojo syncloader and AMD based applications 
+The Zazl Javascript Optimizer enables developers to produce optimized javascript environments for their Dojo syncloader and AMD based applications 
 without having to depend on static build/optimizer tools.
 
 Setting up a Development Environment
