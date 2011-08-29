@@ -56,8 +56,10 @@ public class Activator implements BundleActivator {
 		httpContextExtensionServiceTracker.open();
 		boolean useV8 = Boolean.valueOf(System.getProperty("V8", "false"));
 		String compressorType = System.getProperty("compressorType");
-		jsCompressorFactoryTracker = new JSCompressorFactoryServiceTracker(context, useV8, compressorType);
-		jsCompressorFactoryTracker.open();
+		if (compressorType != null && !compressorType.equals("none")) {
+			jsCompressorFactoryTracker = new JSCompressorFactoryServiceTracker(context, useV8, compressorType);
+			jsCompressorFactoryTracker.open();
+		}
 		jsOptimizerFactoryServiceTracker = new JSOptimizerFactoryServiceTracker(context, useV8, System.getProperty("jsHandlerType"));
 		jsOptimizerFactoryServiceTracker.open();
 	}
@@ -67,15 +69,18 @@ public class Activator implements BundleActivator {
 		httpContextExtensionServiceTracker = null;
 		httpServiceTracker.close();
 		httpServiceTracker = null;
-		jsCompressorFactoryTracker.close();
-		jsCompressorFactoryTracker = null;
+		if (jsCompressorFactoryTracker != null) {
+			jsCompressorFactoryTracker.close();
+			jsCompressorFactoryTracker = null;
+		}
 		jsOptimizerFactoryServiceTracker.close();
 		jsOptimizerFactoryServiceTracker = null;
 		this.context = null;
 	}
 	
 	private void registerServlet() {
-		if (!servletRegistered && httpService != null && httpContextExtensionService != null && jsCompressorFactory != null && jsOptimizerFactory != null) {
+		boolean compressorReady = (jsCompressorFactoryTracker == null) ? true : jsCompressorFactory != null;
+		if (!servletRegistered && httpService != null && httpContextExtensionService != null && compressorReady && jsOptimizerFactory != null) {
 			HttpContext httpContext = httpContextExtensionService.getHttpContext(httpServiceReference, "org.dojotoolkit.optimizer.samples.httpcontext");
 			if (httpContext == null) {
 				try {
