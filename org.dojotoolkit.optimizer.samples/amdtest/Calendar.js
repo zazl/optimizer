@@ -1,6 +1,7 @@
 define([
 	'dojo',
-	'dijit/Calendar'
+	'dijit/Calendar',
+	'dojo/domReady!'
 ], function (dojo, Calendar) {
     var calendar = new Calendar({}, dojo.byId("calendarNode"));
     return calendar;
