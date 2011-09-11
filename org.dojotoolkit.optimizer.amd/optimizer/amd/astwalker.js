@@ -57,7 +57,9 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, aliase
 		    "call": function(expr, args) {
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
-					if (args[0][0].name === "string" && args[1][0].name === "array") {
+					if (expr[1] === "require" && args[0][0].name === "string") {
+						dependencyArg = [args[0][1]];
+					} else if (args[0][0].name === "string" && args[1][0].name === "array") {
 						id = args[0][1];
 						dependencyArg = args[1][1];
 					} else if (args[0][0].name === "array") {
