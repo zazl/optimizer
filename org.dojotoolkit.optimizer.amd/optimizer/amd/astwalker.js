@@ -80,7 +80,7 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, aliase
 							var keepWalking = true;
 							if (dependencyArg[i][0].name !== "string") {
 								keepWalking = false;
-							} else if (dependency.match(".+!.+")) {
+							} else if (dependency.match(".+!")) {
 								keepWalking = false;
 								pathStack.push(uri);
 								var pluginName = dependency.substring(0, dependency.indexOf('!'));
