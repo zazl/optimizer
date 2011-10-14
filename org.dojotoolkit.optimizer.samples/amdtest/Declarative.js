@@ -1,7 +1,7 @@
 define([
     'dojo',    
 	'dojo/parser',
-	'i18n!amdtest/nls/messages',
+	'dojo/i18n!amdtest/nls/messages',
 	'dijit/Calendar',
 	'dijit/layout/BorderContainer',
 	'dijit/layout/ContentPane',
@@ -15,7 +15,8 @@ define([
 	'dijit/form/DateTextBox',
 	'dijit/form/ValidationTextBox',
 	'dijit/layout/StackController',
-	'dijit/layout/StackContainer'
+	'dijit/layout/StackContainer',
+	'dojo/domReady!'
 ], function (dojo, parser, messages) {
 	parser.parse();
 	dojo.byId("title").innerHTML = messages.title;

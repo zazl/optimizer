@@ -29,7 +29,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer.amd.v8");
 	private ResourceLoader resourceLoader = null;
 	private Map<String, Object> config = null;
-	private String aliases = "{}";
+	private String amdconfig = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
 
 	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
@@ -39,8 +39,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		scriptRunner.loadtModulesMissingNames(config); 
 		StringWriter sw = new StringWriter();
 		try {
-			JSONSerializer.serialize(sw, config.get("aliases"));
-			aliases = sw.toString();
+			JSONSerializer.serialize(sw, config.get("amdconfig"));
+			amdconfig = sw.toString();
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing aliases from config", e);
 		}
@@ -81,9 +81,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			
 			StringBuffer moduleList = new StringBuffer();
 			StringBuffer sb = new StringBuffer();
-	        sb.append("config = {paths : "+aliases+"};\n");
+	        sb.append("config = "+amdconfig+";\n");
 	        sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
-	        sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer("+aliases+");\n");
+	        sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer("+amdconfig+");\n");
 	        int count = 0;
 	        sb.append("var modules = [");
 	        for (String module : modules) {

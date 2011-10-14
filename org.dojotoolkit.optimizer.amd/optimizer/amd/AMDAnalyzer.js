@@ -8,11 +8,27 @@ var map = require("./map");
 var astwalker = require('./astwalker');
 var resourceloader = require('zazlutil').resourceloader;
 
-AMDAnalyzer = function(aliases) {
-	if (aliases === undefined) {
-		this.aliases = {};
-	} else {
-		this.aliases = aliases;
+AMDAnalyzer = function(cfg) {
+	this.config = {paths: {}, pkgs: {}, plugins: {}};
+	if (cfg) {
+		if (cfg.paths) {
+			for (var p in cfg.paths) {
+				var path = cfg.paths[p];
+				this.config.paths[p] = path;
+			}
+		}
+		if (cfg.packages) {
+			for (i = 0; i < cfg.packages.length; i++) {
+				var pkg = cfg.packages[i];
+				this.config.pkgs[pkg.name] = pkg;
+			}
+		}
+		if (cfg.plugins) {
+			for (var p in cfg.plugins) {
+				var plugin = cfg.plugins[p];
+				this.config.plugins[p] = plugin;
+			}
+		}
 	}
 };
 
@@ -72,56 +88,7 @@ AMDAnalyzer.prototype = {
 		this.missingNamesList = [];
 		this.moduleMap = map.createMap();
 		for (var i = 0; i < modules.length; i++) {
-			astwalker.walker(modules[i], exclude, this.moduleMap, this.pluginRefList, this.missingNamesList, this.aliases, []);
-		}
-	},
-	
-	_processPluginRefs: function(dependencyList) {
-		for (pluginId in this.pluginRefList) {
-			var addMissingNameIndex = true;
-			for (var i = 0; i < this.missingNamesList.length; i++) {
-				if (this.missingNamesList[i].uri === pluginId) {
-					addMissingNameIndex = false;
-					break;
-				}
-			}
-			if (addMissingNameIndex) {
-				for (var i = 0; i < dependencyList.length; i++) {
-					if (dependencyList[i] === pluginId) {
-						addMissingNameIndex = false;
-						break;
-					}
-				}
-			}
-			if (addMissingNameIndex) {
-				var pluginContent = resourceloader.readText('/'+pluginId+'.js');
-				if (pluginContent === null) {
-					throw new Error("Unable to load src for plugin ["+pluginId+"]");
-				}
-				var nameIndex = astwalker.getMissingNameIndex(pluginContent);
-				this.missingNamesList.push({uri: pluginId, nameIndex: nameIndex})
-				//print("adding missing name index for plugin ["+pluginId+"]["+nameIndex+"]");
-			}
-			
-			try {
-				var refs = this.pluginRefList[pluginId];
-				if (this.aliases[pluginId]) {
-					pluginId = this.aliases[pluginId];
-				}
-				var plugin = require(pluginId);
-				
-				if (plugin.write) {
-					for (var i = 0; i < refs.length; i++) {
-						var moduleName = refs[i].name;
-						require(pluginId+"!"+moduleName);
-						plugin.write(pluginId, moduleName, function(writeOutput){
-							refs[i].value = writeOutput;
-						});
-					}
-				}
-			} catch (exc) {
-				print("Unable to process plugin ["+pluginId+"]:"+exc);
-			}
+			astwalker.walker(modules[i], exclude, this.moduleMap, this.pluginRefList, this.missingNamesList, this.config, []);
 		}
 	},
 	
@@ -138,13 +105,12 @@ AMDAnalyzer.prototype = {
 	
 	getAnalysisData: function(modules, exclude) {
 		var dependencyList = this.getDependencyList(modules, exclude);
-		this._processPluginRefs(dependencyList);
 		return ({dependencyList: dependencyList, pluginRefs: this.pluginRefList, missingNamesList: this.missingNamesList});
 	}
 };
 
-exports.createAnalyzer = function(aliases) {
-	return new AMDAnalyzer(aliases);
+exports.createAnalyzer = function(config) {
+	return new AMDAnalyzer(config);
 };
 
 exports.getMissingNameIndex = astwalker.getMissingNameIndex;

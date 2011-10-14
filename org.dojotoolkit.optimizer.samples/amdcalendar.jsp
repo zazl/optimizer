@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ page import="org.dojotoolkit.optimizer.JSOptimizer" %>
-<%@ page import="org.dojotoolkit.optimizer.servlet.JSURLGenerator" %>
+<%@ page import="org.dojotoolkit.optimizer.JSAnalysisData" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,28 +10,11 @@
 		@import "dijit/themes/claro/claro.css";
 	</style>
 	<script type="text/javascript">
-		require = {
-            packages: [
-                {
-                    name: 'dojo',
-                    location: 'dojo',
-                    main:'lib/main-browser',
-                    lib: '.'
-                },
-                {
-                    name: 'dijit',
-                    location: 'dijit',
-                    main:'lib/main',
-                    lib: '.'
-                }
-            ],
-            paths: {
-                require: 'requirejs/require'
-            },
-			ready: function () {
-                require(['amdtest/Calendar']);
-			},
-			locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
+        var dojoConfig = {
+            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>",
+            has:{
+                "dojo-1x-base":1
+            }
 		};
 	</script>
 	<%
@@ -44,12 +27,36 @@
 		    if (jsOptimizer == null) {
 		    	throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		    }
-		   	JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath());
-		   	url = urlGenerator.generateURL("amdtest/Calendar");
+			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {"amdtest/Calendar"});
+			url = request.getContextPath() +"/_javascript?modules=amdtest/Calendar&version="+analysisData.getChecksum()+"&locale="+request.getLocale();
 		}
 	%>
 	<script type="text/javascript" src="<%=url%>"></script>
-
+	<script type="text/javascript">
+        amdlite({
+            packages: [
+                {
+                    name: 'dojo',
+                    location: 'dojo',
+                    main:'main'
+                },
+                {
+                    name: 'dijit',
+                    location: 'dijit',
+                    main:'main'
+                },
+                {
+                    name: 'dojox',
+                    location: 'dojox',
+                    main:'main'
+                }
+            ]
+        }, 
+        ["amdtest/Calendar"], 
+        function(calendar) {
+            console.log("done");
+        });
+	</script>
 </head>
 <body class="claro">
 <div id="calendarNode"></div>

@@ -12,28 +12,11 @@
     	#borderContainerTwo { width: 100%; height: 100%; }
 	</style>
 	<script type="text/javascript">
-		require = {
-            packages: [
-                {
-                    name: 'dojo',
-                    location: 'dojo',
-                    main:'lib/main-browser',
-                    lib: '.'
-                },
-                {
-                    name: 'dijit',
-                    location: 'dijit',
-                    main:'lib/main',
-                    lib: '.'
-                }
-            ],
-            paths: {
-                require: 'requirejs/require'
-            },
-			ready: function () {
-                require(['amdtest/Declarative']);
-			},
-			locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
+        var dojoConfig = {
+            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>",
+            has:{
+                "dojo-1x-base":1
+            }
 		};
 	</script>
 	<%
@@ -51,6 +34,31 @@
 		}
 	%>
 	<script type="text/javascript" src="<%=url%>"></script>
+	<script type="text/javascript">
+        amdlite({
+            packages: [
+                {
+                    name: 'dojo',
+                    location: 'dojo',
+                    main:'main'
+                },
+                {
+                    name: 'dijit',
+                    location: 'dijit',
+                    main:'main'
+                },
+                {
+                    name: 'dojox',
+                    location: 'dojox',
+                    main:'main'
+                }
+            ]
+        }, 
+        ["amdtest/Declarative"], 
+        function(declarative) {
+            console.log("done");
+        });
+	</script>
 
 </head>
 <body class="claro">
@@ -59,13 +67,13 @@
     	<div id="title"></div>
     </div>
     <div dojoType="dijit.layout.AccordionContainer" minSize="20" style="width: 300px;" id="leftAccordion" region="leading" splitter="true">
-        <div dojoType="dijit.layout.AccordionPane" title="One">
+        <div dojoType="dijit.layout.ContentPane" title="One">
         </div>
-        <div dojoType="dijit.layout.AccordionPane" title="Two">
+        <div dojoType="dijit.layout.ContentPane" title="Two">
         </div>
-        <div dojoType="dijit.layout.AccordionPane" title="Three" selected="true">
+        <div dojoType="dijit.layout.ContentPane" title="Three" selected="true">
         </div>
-        <div dojoType="dijit.layout.AccordionPane" title="Four">
+        <div dojoType="dijit.layout.ContentPane" title="Four">
         </div>
     </div>
     <!-- end AccordionContainer -->
