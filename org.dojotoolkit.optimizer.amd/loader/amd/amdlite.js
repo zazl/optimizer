@@ -374,6 +374,8 @@ var define;
 		}
 	};
 	
+	amdlite.cache = cache;
+	
 	var pageLoaded = false;
 	var readyCallbacks = [];
     
