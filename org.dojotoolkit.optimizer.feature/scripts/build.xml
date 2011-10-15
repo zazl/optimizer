@@ -9,7 +9,8 @@
 		       org.dojotoolkit.rt.v8.feature,
 		       org.dojotoolkit.server.util.feature,
 		       org.dojotoolkit.prereqs.feature,
-               org.dojotoolkit.prereq.dojo15"/>
+               org.dojotoolkit.prereq.dojo15
+               org.dojotoolkit.prereq.dojo17"/>
 
 	<property
 		name="target.dir"

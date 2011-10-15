@@ -13,8 +13,8 @@
 		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
 	
 	<property
-		name="dojo16.dir"
-		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.6.0"/>
+		name="dojo17.dir"
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.7.0"/>
 	
 	<property
 		name="json.dir"
@@ -91,9 +91,9 @@
 		  <entry  key="jsOptimizerClassName" value="org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizer"/>
 		</propertyfile>		
 		<war destfile="${target.dir}/package/amdoptimizerjsp.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
-			<zipfileset dir="${dojo16.dir}/dojo" prefix="dojo"/>
-			<zipfileset dir="${dojo16.dir}/dijit" prefix="dijit"/>
-			<zipfileset dir="${dojo16.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
+			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
+			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>

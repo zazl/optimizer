@@ -10,7 +10,7 @@
 	</context-param>
 	<context-param>
 	    <param-name>jsHandlerType</param-name>
-	    <param-value>requirejs</param-value>
+	    <param-value>amdlite</param-value>
 	</context-param>
     <servlet>
         <description/>
