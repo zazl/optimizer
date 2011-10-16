@@ -34,8 +34,8 @@ AMDAnalyzer = function(cfg) {
 
 AMDAnalyzer.prototype = {
 	_buildDependencyList: function(module, dependencyList, seen) {
-		if (seen[module.id] === undefined) {
-			seen[module.id] = module.id;
+		if (seen[module.uri] === undefined) {
+			seen[module.uri] = module.uri;
 			for (var i = 0; i < module.dependencies.length; i++) {
 				var moduleDependency = this.moduleMap.get(module.dependencies[i]);
 				if (moduleDependency !== undefined) {

@@ -10,6 +10,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.Util;
 
 public class AMDJSHandler extends JSHandler {
+	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	
 	public AMDJSHandler(String configFileName) {
 		super(configFileName);
@@ -38,7 +41,9 @@ public class AMDJSHandler extends JSHandler {
 				List<Map<String, String>> pluginRefInstances = pluginRefs.get(pluginId);
 				for (Map<String, String> pluginRefInstance : pluginRefInstances) {
 					String value = pluginRefInstance.get("value");
+					logger.logp(Level.FINE, getClass().getName(), "customHandle", "plugin ref ["+pluginId+"]["+pluginRefInstance.get("normalizedName")+"]");
 					if (value != null) {
+						logger.logp(Level.FINE, getClass().getName(), "customHandle", "plugin ref ["+pluginId+"]["+pluginRefInstance.get("normalizedName")+"] has write value["+value+"]");
 						writer.write(value);
 					}
 				}
@@ -50,6 +55,7 @@ public class AMDJSHandler extends JSHandler {
 							seen.add(bundlePackage);
 							String modulePath = bundlePackage.substring(0, bundlePackage.lastIndexOf('/'));
 							String bundleName = bundlePackage.substring(bundlePackage.lastIndexOf('/')+1);	
+							logger.logp(Level.FINE, getClass().getName(), "customHandle", "i18n plugin ref ["+bundlePackage+"]["+modulePath+"]["+bundleName+"]");
 							Localization localization = new Localization(bundlePackage, modulePath, bundleName);
 							localizations.add(localization);
 						}
@@ -63,6 +69,7 @@ public class AMDJSHandler extends JSHandler {
 				String path = Util.normalizePath(dependency);
 				String content = resourceLoader.readResource(path);
 				if (content != null) {
+					logger.logp(Level.FINE, getClass().getName(), "customHandle", "dependency ["+path+"]");
 					String uri = dependency.substring(0, dependency.indexOf(".js"));
 					int missingNameIndex = lookForMissingName(uri, analysisData.getModulesMissingNames());
 					if (missingNameIndex != -1) {

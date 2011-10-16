@@ -127,13 +127,15 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 					} else if (args[0][0].name === "string" && args[1][0].name === "array") {
 						id = args[0][1];
 						dependencyArg = args[1][1];
-					} else if (args[0][0].name === "array") {
+					} else if (args[0][0].name === "array" || args[0][0].name === "function") {
                         if (expr[1] === "define") {
     	                    var start = w.parent()[0].start;
     						var nameIndex = start.pos + (src.substring(start.pos).indexOf('(')+1);
                         	missingNamesList.push({uri: url, id: id, nameIndex: nameIndex});
                         }
-						dependencyArg = args[0][1];
+                        if (args[0][0].name === "array") {
+                        	dependencyArg = args[0][1];
+                        }
 					}
 					if (dependencyArg !== undefined) {
 						for (var i = 0; i < dependencyArg.length; i++) {
