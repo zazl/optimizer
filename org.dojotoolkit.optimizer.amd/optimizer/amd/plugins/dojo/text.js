@@ -12,9 +12,10 @@ function jsEscape(content) {
         .replace(/[\t]/g, "\\t")
         .replace(/[\r]/g, "\\r");
 };
+
 exports.write = function(pluginName, moduleName, write) {
 	var textContent = require('zazlutil').resourceloader.readText(moduleName);
 	if (textContent) {
-		write("amdlite.cache['/"+moduleName+"'] = '"+jsEscape(textContent)+"';\n");
+		write("amdlite.addToCache('"+moduleName+"', '"+jsEscape(textContent)+"');\n");
 	}
 };

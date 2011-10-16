@@ -334,7 +334,7 @@ var define;
 	
 	modules["require"] = {};
 	modules["require"].exports = _require;
-	var cfg = {baseUrl: "./"};
+	var cfg = {baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./")};
 
 	amdlite = function(config, dependencies, callback) {
 		if (!isArray(config) && typeof config == "object") {
@@ -374,7 +374,9 @@ var define;
 		}
 	};
 	
-	amdlite.cache = cache;
+	amdlite.addToCache = function(id, value) {
+		cache[_idToUrl(id)] = value;
+	};
 	
 	var pageLoaded = false;
 	var readyCallbacks = [];
