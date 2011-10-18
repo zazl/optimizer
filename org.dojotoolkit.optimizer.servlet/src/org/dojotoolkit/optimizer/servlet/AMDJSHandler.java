@@ -29,6 +29,7 @@ public class AMDJSHandler extends JSHandler {
 	
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
 		if (analysisData != null) {	
+			writer.write("amdlite.addAnalysisKey('"+analysisData.getKey()+"');\n");
 			String suffixCode = (String)config.get("suffixCode");
 			if (suffixCode != null) {
 				writer.write(suffixCode);
@@ -51,12 +52,14 @@ public class AMDJSHandler extends JSHandler {
 					List<String> seen = new ArrayList<String>();
 					for (Map<String, String> pluginRefInstance : pluginRefInstances) {
 						String bundlePackage = pluginRefInstance.get("normalizedName");
+						String moduleUrl = pluginRefInstance.get("moduleUrl");
 						if (!seen.contains(bundlePackage)) {
 							seen.add(bundlePackage);
 							String modulePath = bundlePackage.substring(0, bundlePackage.lastIndexOf('/'));
+							moduleUrl = moduleUrl.substring(0, moduleUrl.lastIndexOf('/'));
 							String bundleName = bundlePackage.substring(bundlePackage.lastIndexOf('/')+1);	
 							logger.logp(Level.FINE, getClass().getName(), "customHandle", "i18n plugin ref ["+bundlePackage+"]["+modulePath+"]["+bundleName+"]");
-							Localization localization = new Localization(bundlePackage, modulePath, bundleName);
+							Localization localization = new Localization(bundlePackage, modulePath, bundleName, moduleUrl);
 							localizations.add(localization);
 						}
 					}

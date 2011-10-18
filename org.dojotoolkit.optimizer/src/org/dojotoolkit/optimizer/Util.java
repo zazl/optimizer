@@ -73,21 +73,25 @@ public class Util {
 		//System.out.println("["+localeString+"]["+intermediateLocaleString+"]");
 		for (Localization localization : localizations) {
 			//System.out.println("["+localization.bundlePackage+"]["+localization.modulePath+"]["+localization.bundleName+"]");
+			String rootModuleUrl = normalizePath(localization.moduleUrl+'/'+localization.bundleName);
 			String rootModule = normalizePath(localization.modulePath+'/'+localization.bundleName);
+			String intermediateModuleUrl = null;
 			String intermediateModule = null;
+			String fullModuleUrl = normalizePath(localization.moduleUrl+'/'+localeString+'/'+localization.bundleName);
 			String fullModule = normalizePath(localization.modulePath+'/'+localeString+'/'+localization.bundleName);
 			if (intermediateLocaleString != null) {
+				intermediateModuleUrl = normalizePath(localization.moduleUrl+'/'+intermediateLocaleString+'/'+localization.bundleName);
 				intermediateModule = normalizePath(localization.modulePath+'/'+intermediateLocaleString+'/'+localization.bundleName);
 			}
-			String root = resourceLoader.readResource('/'+rootModule+".js");
+			String root = resourceLoader.readResource('/'+rootModuleUrl+".js");
 			if (root != null) {
 				writeLocalization(w, root, rootModule);
 			}
-			String lang = (intermediateModule == null) ? null : resourceLoader.readResource('/'+intermediateModule+".js");
+			String lang = (intermediateModuleUrl == null) ? null : resourceLoader.readResource('/'+intermediateModuleUrl+".js");
 			if (lang != null) {
 				writeLocalization(w, lang, intermediateModule);
 			}
-			String langCountry = resourceLoader.readResource('/'+fullModule+".js");
+			String langCountry = resourceLoader.readResource('/'+fullModuleUrl+".js");
 			if (langCountry != null) {
 				writeLocalization(w, langCountry, fullModule);
 			}

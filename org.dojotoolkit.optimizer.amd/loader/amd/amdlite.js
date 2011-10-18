@@ -32,6 +32,7 @@ var define;
 	var paths = {};
 	var pkgs = {};
 	var cache = {};
+	var analysisKeys = [];
 
 	var opts = Object.prototype.toString;
 	
@@ -105,18 +106,51 @@ var define;
 	
 	function _loadModule(id, cb) {
 		var expandedId = _expand(id);
-		if (modules[expandedId] === undefined) {
-			throw new Error("A module with an id of ["+expandedId+"] has not been provided");
-		}
-		if (modules[expandedId].exports) {
+		if (modules[expandedId] && modules[expandedId].exports) {
 			cb(modules[expandedId].exports);
 			return;
 		}
-		moduleStack.push(modules[expandedId]);
-		_loadModuleDependencies(expandedId, function(exports){
-			moduleStack.pop();
-            cb(exports);
-        });
+    	function _load() {
+    		moduleStack.push(modules[expandedId]);
+    		_loadModuleDependencies(expandedId, function(exports){
+    			moduleStack.pop();
+                cb(exports);
+            });
+    	};
+		
+		if (modules[expandedId] === undefined) {
+			_inject(expandedId, function(){
+				_load();
+			});
+		} else {
+			_load();
+		}
+	};
+	
+	function _inject(moduleId, cb) {
+		var locale = dojoConfig ? dojoConfig.locale : "en-us";
+		var url = cfg.injectUrl+"?modules="+moduleId+"&writeBootstrap=false&locale="+locale+"&exclude=";
+		for (var i = 0; i < analysisKeys.length; i++) {
+			url += analysisKeys[i];
+			url += i < (analysisKeys.length - 1) ? "," : "";
+		}
+		var script = document.createElement('script');
+		script.type = "text/javascript";
+		script.src = url;
+		script.charset = "utf-8";
+		script.onloadDone = false;
+		script.onload = function() {
+			if (!script.onloadDone) {
+				script.onloadDone = true;
+				cb();
+			}
+		};
+		script.onreadystatechange = function(){
+			if (("loaded" === script.readyState || "complete" === script.readyState) && !script.onloadDone) {
+				script.onload();
+			}
+		};
+		document.getElementsByTagName("head")[0].appendChild(script);
 	};
 	
 	function _loadModuleDependencies(id, cb) {
@@ -334,7 +368,10 @@ var define;
 	
 	modules["require"] = {};
 	modules["require"].exports = _require;
-	var cfg = {baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./")};
+	var cfg = {
+		baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./"),
+		injectUrl: "_javascript"
+	};
 
 	amdlite = function(config, dependencies, callback) {
 		if (!isArray(config) && typeof config == "object") {
@@ -353,6 +390,7 @@ var define;
 				}
 			}
 			cfg.baseUrl = cfg.baseUrl || "./";
+			cfg.injectUrl = cfg.injectUrl || "_javascript";
 		} else {	
 			callback = dependencies;
 			dependencies = config;
@@ -376,6 +414,10 @@ var define;
 	
 	amdlite.addToCache = function(id, value) {
 		cache[_idToUrl(id)] = value;
+	};
+	
+	amdlite.addAnalysisKey = function(key) {
+		analysisKeys.push(key);
 	};
 	
 	var pageLoaded = false;

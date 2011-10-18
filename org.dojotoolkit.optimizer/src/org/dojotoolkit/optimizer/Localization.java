@@ -13,10 +13,15 @@ public class Localization {
 	public String bundlePackage = null;
 	public String modulePath = null;
 	public String bundleName = null;
+	public String moduleUrl = null;
 	
 	public Localization(String bundlePackage, String modulePath, String bundleName) {
+		this(bundlePackage, modulePath, bundleName, null);
+	}
+	public Localization(String bundlePackage, String modulePath, String bundleName, String moduleUrl) {
 		this.bundlePackage = bundlePackage;
 		this.modulePath = modulePath;
 		this.bundleName = bundleName;
+		this.moduleUrl = moduleUrl;
 	}
 }

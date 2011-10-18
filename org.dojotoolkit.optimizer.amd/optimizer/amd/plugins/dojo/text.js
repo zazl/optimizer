@@ -13,8 +13,8 @@ function jsEscape(content) {
         .replace(/[\r]/g, "\\r");
 };
 
-exports.write = function(pluginName, moduleName, write) {
-	var textContent = require('zazlutil').resourceloader.readText(moduleName);
+exports.write = function(pluginName, moduleName, write, moduleUrl) {
+	var textContent = require('zazlutil').resourceloader.readText(moduleUrl);
 	if (textContent) {
 		write("amdlite.addToCache('"+moduleName+"', '"+jsEscape(textContent)+"');\n");
 	}

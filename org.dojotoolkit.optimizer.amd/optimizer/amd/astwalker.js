@@ -73,14 +73,16 @@ function processPluginRef(pluginName, resourceName, pathStack, config) {
 	var value;
 	var normalizedName;
 	var dependency;
+	var moduleUrl;
 	if (config.plugins[pluginName]) {
 		try {
 			var plugin = require(config.plugins[pluginName]);
 			if (plugin.write) {
 				normalizedName = expand(resourceName, pathStack, config);
+				moduleUrl = idToUrl(normalizedName, config);
 				plugin.write(pluginName, normalizedName, function(writeOutput){
 					value = writeOutput;
-				});
+				}, moduleUrl);
 			} 
 			if (plugin.normalize) {
 				var cfg = config;
@@ -91,14 +93,16 @@ function processPluginRef(pluginName, resourceName, pathStack, config) {
 				if (normalizedName === undefined) {
 					normalizedName = expand(resourceName, pathStack, config);
 				}
+				moduleUrl = idToUrl(normalizedName, config);
 			}
 		} catch (exc) {
 			print("Unable to process plugin ["+pluginName+"]:"+exc);
 		}
 	} else {
 		normalizedName = expand(resourceName, pathStack, config);
+		moduleUrl = idToUrl(normalizedName, config);
 	}
-	return {name:resourceName, normalizedName: normalizedName, value: value, dependency: dependency};
+	return {name:resourceName, normalizedName: normalizedName, value: value, dependency: dependency, moduleUrl : moduleUrl};
 };
 
 function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
@@ -153,8 +157,18 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 								}
 								var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
 								if (pluginRef.dependency) {
-									module.addDependency(pluginRef.dependency);
-									walker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+									var dependencyUri = idToUrl(pluginRef.dependency, config);
+									var addDependency = true;
+									for (var k = 0; k < exclude.length; k++) {
+										if (dependencyUri === exclude[k]) {
+											addDependency = false;
+											break;
+										}
+									}
+									if (addDependency) {
+										module.addDependency(pluginRef.dependency);
+										walker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+									}
 								}
 								pluginRefList[pluginName].push(pluginRef);
 								pathStack.pop();
@@ -166,17 +180,21 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 								module.addDependency(dependency);
 								pathStack.pop();
 							}
-							for (var k = 0; k < exclude.length; k++) {
-								if (dependency === exclude[k]) {
-									keepWalking = false;
-									break;
-								}
-							}
 							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack, config);
-								module.addDependency(dependency);
-								walker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+								var dependencyUri = idToUrl(dependency, config);
+								var addDependency = true;
+								for (var k = 0; k < exclude.length; k++) {
+									if (dependencyUri === exclude[k]) {
+										addDependency = false;
+										break;
+									}
+								}
+								if (addDependency) {
+									module.addDependency(dependency);
+									walker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+								}
 								pathStack.pop();
 							}
 						}
