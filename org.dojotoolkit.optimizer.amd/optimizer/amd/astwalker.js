@@ -58,13 +58,18 @@ function normalize(path) {
 function expand(path, pathStack, config) {
 	var isRelative = path.search(/^\./) === -1 ? false : true;
 	if (isRelative) {
-        var pkg;
+	    var pkg;
         if ((pkg = config.pkgs[getParentId(pathStack)])) {
             path = pkg.name + "/" + path;
         } else {
             path = getParentId(pathStack) + "/../" + path;
         }
 		path = normalize(path);
+	}
+	for (pkgName in config.pkgs) {
+	    if (path === pkgName) {
+	    	return config.pkgs[pkgName].name + '/' + config.pkgs[pkgName].main;
+	    }
 	}
 	return path;
 };

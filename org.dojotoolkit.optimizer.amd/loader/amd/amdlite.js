@@ -74,6 +74,11 @@ var define;
             }
 			path = _normalize(path);
 		}
+		for (pkgName in pkgs) {
+		    if (path === pkgName) {
+		    	return pkgs[pkgName].name + '/' + pkgs[pkgName].main;
+		    }
+		}
 		return path;
 	};
 	
