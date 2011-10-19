@@ -404,6 +404,13 @@ var define;
 			cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/'+ cfg.baseUrl);
 		}
 
+		for (var id in cache) {
+			var resolvedId = _idToUrl(id);
+			var cacheValue = cache[id];
+			delete cache[id];
+			cache[resolvedId] = cacheValue;
+		}
+		
 		if (!isArray(dependencies)) {
 			callback = dependencies;
 			dependencies = [];
@@ -418,7 +425,7 @@ var define;
 	};
 	
 	amdlite.addToCache = function(id, value) {
-		cache[_idToUrl(id)] = value;
+		cache[id] = value;
 	};
 	
 	amdlite.addAnalysisKey = function(key) {
