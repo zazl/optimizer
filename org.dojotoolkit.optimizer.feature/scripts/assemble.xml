@@ -100,6 +100,9 @@
 			<zipfileset dir="${target.dir}/package" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_optimizer.properties"/> 
 			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
+				<include name="amdlite.json"/> 
+			</zipfileset>
 			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
@@ -143,6 +146,9 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
 				<include name="*.properties"/> 
 				<exclude name="*V8*.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
+				<include name="*.json"/> 
 			</zipfileset>
 		</zip>
 	</target>
