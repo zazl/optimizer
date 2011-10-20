@@ -8,6 +8,7 @@ var w = this;
 var d = {};
 var el = {};
 var cache = {};
+var cacheLoaded = false;
 
 var has = function(name){
 	return cache[name] = typeof cache[name] == "function" ? cache[name](w, d, el) : cache[name];
@@ -17,12 +18,13 @@ has.add = function(name, test, now){
 	cache[name] = now ? test(w, d, el) : test;
 };
 
-has.add("host-browser", 1);
-has.add("dom", 1);
-has.add("dojo-dom-ready-api", 1);
-has.add("dojo-sniff", 1);
-	
-exports.normalize = function(id, expand) {
+exports.normalize = function(id, config, expand) {
+	if (!cacheLoaded) {
+		cacheLoaded = true;
+		for (var hasId in config.has) {
+			has.add(hasId, config.has[hasId]);
+		}
+	}
 	var tokens = id.match(/[\?:]|[^:\?]*/g), i = 0,
 	get = function(skip){
 		var term = tokens[i++];

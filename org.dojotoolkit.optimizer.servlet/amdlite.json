@@ -23,8 +23,14 @@
         	"dojo/has" : "optimizer/amd/plugins/dojo/has",
         	"dojo/text" : "optimizer/amd/plugins/dojo/text",
         	"dojo/selector/_loader" : "optimizer/amd/plugins/dojo/selector/_loader"
-        }
+        },
+		"i18nPluginId" : "dojo/i18n",
+		"has" : {
+			"host-browser" : 1,
+			"dom" : 1,
+			"dojo-dom-ready-api" : 1,
+			"dojo-sniff" : 1 
+		}
     },
-	"i18nPluginId" : "dojo/i18n",
 	"type" : "amd"
 }

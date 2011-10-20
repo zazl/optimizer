@@ -27,6 +27,7 @@ public class AMDJSHandler extends JSHandler {
 		super(configFileName);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
 		if (analysisData != null) {	
 			writer.write("amdlite.addAnalysisKey('"+analysisData.getKey()+"');\n");
@@ -37,7 +38,8 @@ public class AMDJSHandler extends JSHandler {
 			String[] dependencies = analysisData.getDependencies();
 			Map<String, List<Map<String, String>>> pluginRefs = analysisData.getPluginRefs();
 			List<Localization> localizations = new ArrayList<Localization>();
-			String i18nPluginId = (String)config.get("i18nPluginId");
+			Map<String, Object> amdConfig = (Map<String, Object>)config.get("amdconfig");
+			String i18nPluginId = (String)amdConfig.get("i18nPluginId");
 			for (String pluginId : pluginRefs.keySet()) {
 				List<Map<String, String>> pluginRefInstances = pluginRefs.get(pluginId);
 				for (Map<String, String> pluginRefInstance : pluginRefInstances) {

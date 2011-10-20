@@ -92,7 +92,7 @@ function processPluginRef(pluginName, resourceName, pathStack, config) {
 			if (plugin.normalize) {
 				var cfg = config;
 				var stack = pathStack;
-				normalizedName = dependency = plugin.normalize(resourceName, function(id) {
+				normalizedName = dependency = plugin.normalize(resourceName, cfg, function(id) {
 					return expand(id, stack, cfg);
 				});
 				if (normalizedName === undefined) {
