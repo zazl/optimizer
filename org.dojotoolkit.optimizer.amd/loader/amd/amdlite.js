@@ -444,5 +444,9 @@ var define;
 	
 	if (!require) {
 		require = _require;
+		require.toUrl = function(moduleResource) {
+			var url = _idToUrl(_expand(moduleResource)); 
+			return url;
+		};
 	}
 }());
