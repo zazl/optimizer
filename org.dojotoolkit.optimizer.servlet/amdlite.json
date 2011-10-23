@@ -22,7 +22,8 @@
         "plugins" : {
         	"dojo/has" : "optimizer/amd/plugins/dojo/has",
         	"dojo/text" : "optimizer/amd/plugins/dojo/text",
-        	"dojo/selector/_loader" : "optimizer/amd/plugins/dojo/selector/_loader"
+        	"dojo/selector/_loader" : "optimizer/amd/plugins/dojo/selector/_loader",
+        	"dojox/gfx/renderer" : "optimizer/amd/plugins/dojox/gfx/renderer"
         },
 		"i18nPluginId" : "dojo/i18n",
 		"has" : {
