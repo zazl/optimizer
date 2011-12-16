@@ -12,6 +12,8 @@ var define;
     var commentRegExp = /(\/\*([\s\S]*?)\*\/|\/\/(.*)$)/mg;
 	/* Based on the cjs regexs in requirejs, modified slightly */
     var cjsRequireRegExp = /[^\d\w\.]require\(["']([^'"\s]+)["']\)/g;
+	var cjsVarPrefixRegExp = /^~#/;
+	var pluginRegExp = /.+!/;
     
 	Iterator = function(array) {
 		this.array = array;
@@ -165,9 +167,9 @@ var define;
 		var iterate = function(itr) {
 			if (itr.hasMore()) {
 				var dependency = itr.next();
-				if (dependency.match(".+!")) {
+				if (dependency.match(pluginRegExp)) {
 					var add = true;
-					if (dependency.match("^~#")) {
+					if (dependency.match(cjsVarPrefixRegExp)) {
 						dependency = dependency.substring(2);
 						add = false;
 					}
@@ -191,7 +193,7 @@ var define;
 					iterate(itr);
 				} else {
 					var add = true;
-					if (dependency.match("^~#")) {
+					if (dependency.match(cjsVarPrefixRegExp)) {
 						dependency = dependency.substring(2);
 						add = false;
 					}
@@ -329,7 +331,7 @@ var define;
 		if (isString(dependencies)) {
 			var id = dependencies;
 			id = _expand(id);
-			if (id.match(".+!")) {
+			if (id.match(pluginRegExp)) {
 				var pluginName = id.substring(0, id.indexOf('!'));
 				pluginName = _expand(pluginName);
 				var plugin = modules[pluginName].exports;
@@ -349,7 +351,7 @@ var define;
 			var iterate = function(itr) {
 				if (itr.hasMore()) {
 					var dependency = itr.next();
-					if (dependency.match(".+!")) {
+					if (dependency.match(pluginRegExp)) {
 						var pluginName = dependency.substring(0, dependency.indexOf('!'));
 						pluginName = _expand(pluginName);
 						var pluginModuleName = dependency.substring(dependency.indexOf('!')+1);
