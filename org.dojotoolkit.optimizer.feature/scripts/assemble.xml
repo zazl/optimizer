@@ -14,7 +14,7 @@
 	
 	<property
 		name="dojo17.dir"
-		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.7.0"/>
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.7.1"/>
 	
 	<property
 		name="json.dir"
