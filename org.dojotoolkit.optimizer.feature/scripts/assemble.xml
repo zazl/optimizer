@@ -22,11 +22,7 @@
 	
 	<property
 		name="uglifyjs.dir"
-		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.0.6"/>
-	
-	<property
-		name="requirejs.dir"
-		value="${workspace.dir}/../targetplatform/requirejs/plugins/org.requirejs_0.25.0"/>
+		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.2.3"/>
 	
 	<property
 		name="equinox.dir"
@@ -41,9 +37,6 @@
 		</jar>
 		<jar destfile="${target.dir}/package/warlib/uglifyjs.jar">
 			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
-		</jar>
-		<jar destfile="${target.dir}/package/warlib/requirejs.jar">
-			<fileset dir="${requirejs.dir}"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
 	        <fileset dir="${equinox.dir}">
@@ -112,7 +105,6 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
-				<include name="requirejs*.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
@@ -134,7 +126,6 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
-				<include name="requirejs*.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
