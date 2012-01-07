@@ -12,7 +12,6 @@
         <location dir="${targetplatform.dir}/http-client"/>
         <location dir="${targetplatform.dir}/json"/>
         <location dir="${targetplatform.dir}/jsp"/>
-        <location dir="${targetplatform.dir}/requirejs"/>
         <location dir="${targetplatform.dir}/rhino"/>
         <location dir="${targetplatform.dir}/shrinksafe"/>
         <location dir="${targetplatform.dir}/uglifyjs"/>
