@@ -2,3 +2,4 @@ bin/
 .metadata/
 compile*feature.xml
 clientdb.xml
+build/
