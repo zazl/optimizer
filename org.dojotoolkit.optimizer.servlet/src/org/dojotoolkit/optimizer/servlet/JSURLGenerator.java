@@ -28,14 +28,21 @@ public class JSURLGenerator {
 	}
 	
 	public String generateURL(String module) {
+		return generateURL(new String[] {module});
+	}
+	
+	public String generateURL(String[] modules) {
 		StringBuffer url = new StringBuffer();
 		try {
 			JSAnalysisData[] excludes = new JSAnalysisData[excludedList.size()];
 			excludes = excludedList.toArray(excludes);
-			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(new String[] {module}, excludes);
+			JSAnalysisData analysisData = jsOptimizer.getAnalysisData(modules, excludes);
 			url.append(contextRoot);
 			url.append("/_javascript?modules=");
-			url.append(module);
+			for (String module : modules) {
+				url.append(module);
+				url.append(',');
+			}
             url.append("&version=");
             url.append(analysisData.getChecksum());
             url.append("&locale=");

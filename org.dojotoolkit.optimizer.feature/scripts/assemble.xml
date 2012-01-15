@@ -25,8 +25,12 @@
 		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.2.3"/>
 	
 	<property
+		name="nekohtml.dir"
+		value="${workspace.dir}/../targetplatform/nekohtml/plugins/org.cyberneko.html_1.9.15"/>
+	
+	<property
 		name="equinox.dir"
-		value="${workspace.dir}/../targetplatform/equinox-SDK-3.6/plugins"/>
+		value="${workspace.dir}/../targetplatform/equinox-SDK-3.7/plugins"/>
 	
 	<!-- Export the feature -->
 	<target name="assemble">
@@ -47,8 +51,11 @@
 	        <fileset dir="${target.dir}/plugins">
 	            <include name="*.jar"/>
 	        </fileset>
+	        <fileset dir="${nekohtml.dir}">
+	            <include name="*.jar"/>
+	        </fileset>
 		</copy>
-		<war destfile="${target.dir}/package/optimizerjsp.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/optimizerjsp_web.xml">
+		<war destfile="${target.dir}/package/syncsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/optimizerjsp_web.xml">
 			<zipfileset dir="${dojo.dir}/dojo" prefix="dojo"/>
 			<zipfileset dir="${dojo.dir}/dijit" prefix="dijit"/>
 			<zipfileset dir="${dojo.dir}/dojox" prefix="dojox"/>
@@ -83,7 +90,7 @@
 		<propertyfile file="${target.dir}/package/org_dojotoolkit_optimizer.properties">
 		  <entry  key="jsOptimizerClassName" value="org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizer"/>
 		</propertyfile>		
-		<war destfile="${target.dir}/package/amdoptimizerjsp.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
+		<war destfile="${target.dir}/package/amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
 			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
 			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
 			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
@@ -105,6 +112,8 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
+				<include name="nekohtml.jar"/> 
+				<include name="xercesMinimal.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
@@ -112,8 +121,8 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
-				<include name="amdcalendar.jsp"/>
-				<include name="amddeclarative.jsp"/>
+				<include name="amdcalendar*.*"/>
+				<include name="amddeclarative.*"/>
 			</fileset>
 		</war>
 		<zip destfile="${target.dir}/package/optimizer.zip">
@@ -126,6 +135,8 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
+				<include name="nekohtml.jar"/> 
+				<include name="xercesMinimal.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 

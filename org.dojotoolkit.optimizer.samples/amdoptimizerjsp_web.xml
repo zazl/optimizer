@@ -19,8 +19,16 @@
         <servlet-class>org.dojotoolkit.optimizer.servlet.JSServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
+	<filter>
+	   <filter-name>JSFilter</filter-name>
+	   <filter-class>org.dojotoolkit.optimizer.servlet.JSFilter</filter-class>
+	</filter>
     <servlet-mapping>
         <servlet-name>JSServlet</servlet-name>
         <url-pattern>/_javascript/*</url-pattern>
     </servlet-mapping>
+	<filter-mapping>
+	   <filter-name>JSFilter</filter-name>
+	   <url-pattern>*.html</url-pattern>
+	</filter-mapping>
 </web-app>

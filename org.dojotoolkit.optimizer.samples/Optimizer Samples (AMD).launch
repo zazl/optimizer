@@ -4,11 +4,11 @@
 <setEntry value="org.apache.commons.el:1.0.0.v201004212143:default:true"/>
 <setEntry value="org.apache.jasper:5.5.17.v201004212143:default:true"/>
 <setEntry value="org.dojotoolkit.optimizer.samples:1.0.0.qualifier:default:true"/>
-<setEntry value="org.eclipse.equinox.http.jetty:2.0.0.v20100503:default:true"/>
-<setEntry value="org.eclipse.equinox.http.registry:1.1.0.v20100503:default:true"/>
-<setEntry value="org.eclipse.equinox.http.servlet:1.1.0.v20100503:default:true"/>
+<setEntry value="org.eclipse.equinox.http.jetty:2.0.100.v20110502:default:true"/>
+<setEntry value="org.eclipse.equinox.http.registry:1.1.100.v20110502:default:true"/>
+<setEntry value="org.eclipse.equinox.http.servlet:1.1.200.v20110502:default:true"/>
 <setEntry value="org.eclipse.equinox.jsp.jasper.registry:1.0.200.v20100503:default:true"/>
-<setEntry value="org.eclipse.equinox.jsp.jasper:1.0.200.v20100421:default:true"/>
+<setEntry value="org.eclipse.equinox.jsp.jasper:1.0.300.v20110502:default:true"/>
 </setAttribute>
 <booleanAttribute key="append.args" value="true"/>
 <booleanAttribute key="automaticAdd" value="false"/>
@@ -25,7 +25,7 @@
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.zazl.jetty/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=false -DjavaChecksum=true -DcompressorType=shrinksafe -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.json,org.uglifyjs,org.dojotoolkit.server.util.js,org.dojotoolkit.optimizer.amd,org.dojotoolkit.optimizer.samples -DjsHandlerType=amdlite"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/org.dojotoolkit.optimizer.samplesy/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=false -DjavaChecksum=true -DcompressorType=shrinksafe -DsearchBundleIds=org.dojotoolkit.dojo,org.dojotoolkit.compressor.uglifyjs,org.json,org.uglifyjs,org.dojotoolkit.server.util.js,org.dojotoolkit.optimizer.amd,org.dojotoolkit.optimizer.servlet,org.dojotoolkit.optimizer.samples -DjsHandlerType=amdlite"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
 <setEntry value="org.dojotoolkit.compressor.feature:default"/>
