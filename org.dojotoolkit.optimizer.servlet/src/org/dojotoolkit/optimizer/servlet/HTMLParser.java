@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -127,15 +128,18 @@ public class HTMLParser extends DefaultFilter {
         super.endElement(element, augs);
     }
     
-    private static String analyzeScript(String scriptContents, ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, JSURLGenerator urlGenerator) {
+    @SuppressWarnings("unchecked")
+	private static String analyzeScript(String scriptContents, ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, JSURLGenerator urlGenerator) {
     	String url = null;
     	ScriptAnalyzer scriptAnalyzer = new ScriptAnalyzer(resourceLoader, rhinoClassLoader);
     	try {
-    		List<String> depList = scriptAnalyzer.analyze(scriptContents);
+    		Map<String, Object> results = scriptAnalyzer.analyze(scriptContents);
+    		List<String> depList = (List<String>)results.get("dependencies");
+    		Map<String, Object> config = (Map<String, Object>)results.get("config");
     		if (depList.size() > 0) {
     			String[] deps = new String[depList.size()];
     			deps = depList.toArray(deps);
-    			url = urlGenerator.generateURL(deps);
+    			url = urlGenerator.generateURL(deps, config);
     		}
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, "HTMLParser", "analyzeScript", "Exception on script analyze", e);

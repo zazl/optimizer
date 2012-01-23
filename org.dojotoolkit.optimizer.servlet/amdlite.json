@@ -2,23 +2,6 @@
 	"bootstrapModules" : ["loader/amd/amdlite.js"],
 	"debugBootstrapModules" : ["loader/amd/amdlite.js"],
 	"amdconfig" : {
-        "packages": [
-            {
-                "name": "dojo",
-                "location": "dojo",
-                "main": "main"
-            },
-            {
-                "name": "dijit",
-                "location": "dijit",
-                "main": "main"
-            },
-            {
-                "name": "dojox",
-                "location": "dojox",
-                "main": "main"
-            }
-        ],
         "plugins" : {
         	"dojo/has" : "optimizer/amd/plugins/dojo/has",
         	"dojo/text" : "optimizer/amd/plugins/dojo/text",

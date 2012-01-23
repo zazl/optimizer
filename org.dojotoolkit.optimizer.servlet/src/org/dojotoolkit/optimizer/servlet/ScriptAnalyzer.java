@@ -7,7 +7,7 @@ package org.dojotoolkit.optimizer.servlet;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,8 +29,9 @@ public class ScriptAnalyzer {
 		this.rhinoClassLoader = rhinoClassLoader;
 	}
 	
-	public List<String> analyze(String script) throws IOException {
-		List<String> dependencies = null;
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> analyze(String script) throws IOException {
+		Map<String, Object> results = null;
 		StringBuffer sb = new StringBuffer();
         sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
 		sb.append("loadJS('/json/json2.js');\n");
@@ -38,7 +39,7 @@ public class ScriptAnalyzer {
 		sb.append("var results = analyzer.analyze('");
 		sb.append(escape(script));
 		sb.append("');\n");
-		sb.append("JSON.stringify(results);\n");
+		sb.append("JSON.stringify(results, null, '\t');\n");
 
 		Context ctx = null; 
 		try {
@@ -47,7 +48,7 @@ public class ScriptAnalyzer {
 			ScriptableObject scope = ctx.initStandardObjects();
 			RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false);
 			Object o = ctx.evaluateString(scope, sb.toString(), "ScriptAnalyzer", 1, null);
-			dependencies = (List<String>)JSONParser.parse(new StringReader((String)o));
+			results = (Map<String, Object>)JSONParser.parse(new StringReader((String)o));
 			long end = System.currentTimeMillis();
 			logger.logp(Level.FINE, getClass().getName(), "analyze", "time : "+(end-start)+" ms for ["+sb+"]");
 		}
@@ -58,7 +59,7 @@ public class ScriptAnalyzer {
 		finally {
 			Context.exit();
 		}
-		return dependencies;
+		return results;
 	}
 	
 	private static String escape(String s) {

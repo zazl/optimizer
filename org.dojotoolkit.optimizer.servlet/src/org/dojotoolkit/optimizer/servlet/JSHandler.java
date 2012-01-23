@@ -14,11 +14,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -43,7 +41,6 @@ public abstract class JSHandler {
 	
 	public static final String AMD_HANDLER_TYPE = "amd";
 	public static final String SYNCLOADER_HANDLER_TYPE = "syncloader";
-	private static final JSAnalysisData[] EMPTY_ARRAY = new JSAnalysisData[] {};
 
 	protected JSOptimizer jsOptimizer = null;
 	protected ResourceLoader resourceLoader = null;
@@ -88,8 +85,7 @@ public abstract class JSHandler {
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String[] modules = null;
-		String modulesParam = request.getParameter("modules");
+		String key = request.getParameter("key");
 		String url = request.getPathInfo();
 		if (url != null && url.startsWith("/_javascript")) {
 			url = url.substring("/_javascript".length());
@@ -109,35 +105,18 @@ public abstract class JSHandler {
 		response.setContentType("text/javascript; charset=UTF-8");
 		
 		JSAnalysisData analysisData = null;
-		if (modulesParam != null) {
-			modules = getAsList(modulesParam);
-			try {
-				JSAnalysisData[] exclude = EMPTY_ARRAY;
-				String excludeParam = request.getParameter("exclude");
-				if (excludeParam != null) {
-					String[] keys = getAsList(excludeParam);
-					exclude = new JSAnalysisData[keys.length];
-					int count = 0;
-					for (String key : keys) {
-						exclude[count++] = jsOptimizer.getAnalysisData(key);
+		if (key != null) {
+			analysisData = jsOptimizer.getAnalysisData(key);
+			if (logger.getLevel() == Level.FINE) {
+				logger.logp(Level.FINE, getClass().getName(), "handle", "checksum for ["+key+"] = "+analysisData.getChecksum());
+				for (String dependency : analysisData.getDependencies()) {
+					logger.logp(Level.FINER, getClass().getName(), "handle", "dependency for ["+key+"] = ["+dependency+"]");
+				}
+				if (analysisData.getLocalizations() != null) {
+					for (Localization localization : analysisData.getLocalizations()) {
+						logger.logp(Level.FINER, getClass().getName(), "handle", "localization for ["+key+"] = ["+localization.modulePath+"]");
 					}
 				}
-				analysisData = jsOptimizer.getAnalysisData(modules, exclude);
-				if (logger.getLevel() == Level.FINE) {
-					logger.logp(Level.FINE, getClass().getName(), "handle", "checksum for ["+modulesParam+"] = "+analysisData.getChecksum());
-					for (String dependency : analysisData.getDependencies()) {
-						logger.logp(Level.FINER, getClass().getName(), "handle", "dependency for ["+modulesParam+"] = ["+dependency+"]");
-					}
-					if (analysisData.getLocalizations() != null) {
-						for (Localization localization : analysisData.getLocalizations()) {
-							logger.logp(Level.FINER, getClass().getName(), "handle", "localization for ["+modulesParam+"] = ["+localization.modulePath+"]");
-						}
-					}
-				}
-			} catch (IOException e) {
-				logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+modulesParam+"]", e);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-				return true;
 			}
 			if (!debug) {
 				String checksum = analysisData.getChecksum();
@@ -148,9 +127,6 @@ public abstract class JSHandler {
 			        return true;
 			    }
 			    
-				if (modules == null) {
-					modules = getAsList(modulesParam);
-				}
 	 			response.setHeader("ETag", checksum);
 	 			
 				String version = request.getParameter("version");
@@ -180,7 +156,7 @@ public abstract class JSHandler {
  			}
  			customHandle(request, osw, analysisData);
 		} catch (IOException e) {
-			logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+modulesParam+"]", e);
+			logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+key+"]", e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} finally {
 			osw.flush();
@@ -196,18 +172,6 @@ public abstract class JSHandler {
 	}
 	
 	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException;
-	
-	private String[] getAsList(String param) {
-		String[] list = null;
-		List<String> moduleList = new ArrayList<String>();
-		StringTokenizer st = new StringTokenizer(param, ",");
-		while (st.hasMoreTokens()) {
-			moduleList.add(st.nextToken());
-		}
-		list = new String[moduleList.size()];
-		list = moduleList.toArray(list);
-		return list;
-	}
 	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> loadHandlerConfig(String handlerConfigFileName) throws IOException {

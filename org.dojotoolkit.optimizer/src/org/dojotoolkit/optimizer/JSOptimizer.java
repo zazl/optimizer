@@ -21,11 +21,26 @@ public interface JSOptimizer {
 	JSAnalysisData getAnalysisData(String[] modules) throws IOException;
 	/**
 	 * @param modules String array of the modules used to generate the analysis data
+	 * @param pageConfig Map of configuration data for the requesting page
+	 * @return JSAnalysisData object containing the analysis information
+	 * @throws IOException
+	 */
+	JSAnalysisData getAnalysisData(String[] modules, Map<String, Object> pageConfig) throws IOException;
+	/**
+	 * @param modules String array of the modules used to generate the analysis data
 	 * @param exclude JSAnalysisData array of the analysis details that will be used to determine what should be excluded from the dependency results
 	 * @return JSAnalysisData object containing the analysis information
 	 * @throws IOException
 	 */
 	JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException;
+	/**
+	 * @param modules String array of the modules used to generate the analysis data
+	 * @param exclude JSAnalysisData array of the analysis details that will be used to determine what should be excluded from the dependency results
+	 * @param pageConfig Map of configuration data for the requesting page
+	 * @return JSAnalysisData object containing the analysis information
+	 * @throws IOException
+	 */
+	JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException;
 	/**
 	 * @param key String value that can be used to identify what this analyisData is for
 	 * @return JSAnalysisData object containing the analysis information

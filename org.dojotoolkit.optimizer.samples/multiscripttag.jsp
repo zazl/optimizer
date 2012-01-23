@@ -34,7 +34,7 @@
 		    }
 		    JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
 		    if (debug) {
-				String[] urls = urlGenerator.generateDebugURLs("dijit.Calendar");
+				String[] urls = urlGenerator.generateDebugURLs("dijit.Calendar", null);
 		%>
 				<script type="text/javascript" src="<%=request.getContextPath() +"/_javascript?debug=true"%>"/></script>
 		<%
@@ -44,7 +44,7 @@
 					<script type="text/javascript" src="<%=url%>"/></script>
 		<%
 		    	}
-				urls = urlGenerator.generateDebugURLs("test.PersonGrid");
+				urls = urlGenerator.generateDebugURLs("test.PersonGrid", null);
 
 				for (String url : urls) {
 		%>
@@ -53,8 +53,8 @@
 		    	}
 		    } else {
 		%>
-				<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit.Calendar")%>"/></script>
-				<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid")%>"/></script>
+				<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit.Calendar", null)%>"/></script>
+				<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid", null)%>"/></script>
 		<%
 		    }
 		%>

@@ -37,7 +37,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 		this.config = config;
 	}
 
-	public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+	public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		V8OptimizerScriptRunner v8OptimizerScriptRunner = new V8OptimizerScriptRunner(resourceLoader);
 		return v8OptimizerScriptRunner._getAnalysisData(modules, exclude);
 	}

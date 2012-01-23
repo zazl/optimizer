@@ -33,9 +33,9 @@
 		    }
 		    JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
 		%>
-			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit._Widget")%>"/></script>
-			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit.Calendar")%>"/></script>
-			<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid")%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit._Widget", null)%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("dijit.Calendar", null)%>"/></script>
+			<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid", null)%>"/></script>
 		<script type="text/javascript">
   			dojo.require("dijit.Calendar");
   			dojo.require("test.PersonGrid");

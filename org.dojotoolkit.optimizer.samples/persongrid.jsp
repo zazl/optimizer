@@ -34,7 +34,7 @@
 		    }
 		    JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
 		    if (debug) {
-				String[] urls = urlGenerator.generateDebugURLs("test.PersonGrid");
+				String[] urls = urlGenerator.generateDebugURLs("test.PersonGrid", null);
 		%>
 				<script type="text/javascript" src="<%=request.getContextPath() +"/_javascript?debug=true"%>"/></script>
 		<%
@@ -45,7 +45,7 @@
 		    	}
 		    } else {
 		%>
-				<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid")%>"/></script>
+				<script type="text/javascript" src="<%=urlGenerator.generateURL("test.PersonGrid", null)%>"/></script>
 		<%
 		    }
 		%>

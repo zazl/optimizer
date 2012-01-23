@@ -24,10 +24,18 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 	}
 	
 	public JSAnalysisData getAnalysisData(String[] modules) throws IOException {
-		return getAnalysisData(modules, EMPTY_ARRAY);
+		return getAnalysisData(modules, EMPTY_ARRAY, null);
 	}
-	
+
+	public JSAnalysisData getAnalysisData(String[] modules, Map<String, Object> pageConfig) throws IOException {
+		return getAnalysisData(modules, EMPTY_ARRAY, pageConfig);
+	}
+
 	public JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+		return getAnalysisData(modules, exclude, null);
+	}
+
+	public JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		String key = JSAnalysisDataImpl.getKey(modules, exclude);
 		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
 		Object lock = null;
@@ -43,7 +51,7 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in lock");
 			jsAnalysisData = cache.get(key);
 			if (jsAnalysisData == null || jsAnalysisData.isStale()) {
-				jsAnalysisData = _getAnalysisData(modules, exclude);
+				jsAnalysisData = _getAnalysisData(modules, exclude, pageConfig);
 				cache.put(key, jsAnalysisData);
 			}
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
@@ -74,5 +82,5 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 		return jsAnalysisData;
 	}
 	
-	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException;
+	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> config) throws IOException;
 }

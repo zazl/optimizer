@@ -45,7 +45,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		JSAnalysisDataImpl jsAnalysisData = null;
 		
 		StringBuffer moduleList = new StringBuffer();

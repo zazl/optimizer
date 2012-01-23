@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			JSONSerializer.serialize(sw, config.get("amdconfig"));
 			amdconfig = sw.toString();
 		} catch (IOException e) {
-			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing aliases from config", e);
+			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing configuration", e);
 		}
 	}
 	
@@ -54,14 +55,30 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return config;
 	}
 	
-	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+	@SuppressWarnings("unchecked")
+	protected JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		JSAnalysisDataImpl jsAnalysisData = null;
+		
+		String configString = amdconfig;
+		if (pageConfig != null) {
+			Map<String, Object> fullConfig = new HashMap<String, Object>();
+			Map<String, Object> baseConfig = (Map<String, Object>)config.get("amdconfig"); 
+			fullConfig.putAll(baseConfig);
+			fullConfig.putAll(pageConfig);
+			StringWriter sw = new StringWriter();
+			try {
+				JSONSerializer.serialize(sw, fullConfig);
+				configString = sw.toString();
+			} catch (IOException e) {
+				logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing page configuration data", e);
+			}
+		}
 		
 		StringBuffer moduleList = new StringBuffer();
 		StringBuffer sb = new StringBuffer();
-        sb.append("config = "+amdconfig+";\n");
+        sb.append("var config = "+configString+";\n");
         sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
-        sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer("+amdconfig+");\n");
+        sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer(config);\n");
         int count = 0;
         sb.append("var modules = [");
         for (String module : modules) {
@@ -130,6 +147,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return jsAnalysisData;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void loadModulesMissingNames() {
 		List<Map<String, Object>> implicitDependencies = (List<Map<String, Object>>)config.get("implicitDependencies"); 
 		if (implicitDependencies != null) {
