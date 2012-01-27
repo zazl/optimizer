@@ -1,3 +1,3 @@
 exports.normalize = function(id, config, expand) {
-	return "dojox/gfx/svg";
+	return config.plugins["dojox/gfx/renderer"].defval;
 };

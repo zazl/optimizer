@@ -81,7 +81,7 @@ function processPluginRef(pluginName, resourceName, pathStack, config) {
 	var moduleUrl;
 	if (config.plugins[pluginName]) {
 		try {
-			var plugin = require(config.plugins[pluginName]);
+			var plugin = require(config.plugins[pluginName].proxy);
 			if (plugin.write) {
 				normalizedName = expand(resourceName, pathStack, config);
 				moduleUrl = idToUrl(normalizedName, config);

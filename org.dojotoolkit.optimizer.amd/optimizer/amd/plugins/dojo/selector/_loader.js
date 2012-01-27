@@ -1,3 +1,3 @@
 exports.normalize = function(id, config, expand) {
-	return "dojo/selector/lite";
+	return config.plugins["dojo/selector/_loader"].defval;
 };

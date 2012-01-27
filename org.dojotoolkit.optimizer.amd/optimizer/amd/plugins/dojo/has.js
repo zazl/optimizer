@@ -21,8 +21,8 @@ has.add = function(name, test, now){
 exports.normalize = function(id, config, expand) {
 	if (!cacheLoaded) {
 		cacheLoaded = true;
-		for (var hasId in config.has) {
-			has.add(hasId, config.has[hasId]);
+		for (var hasId in config.plugins["dojo/has"].has) {
+			has.add(hasId, config.plugins["dojo/has"].has[hasId]);
 		}
 	}
 	var tokens = id.match(/[\?:]|[^:\?]*/g), i = 0,

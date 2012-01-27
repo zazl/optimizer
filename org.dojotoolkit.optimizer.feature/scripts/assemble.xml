@@ -125,6 +125,7 @@
 				<include name="amddeclarative.*"/>
 			</fileset>
 		</war>
+		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml" tofile="${target.dir}/package/sample_web.xml"/>
 		<zip destfile="${target.dir}/package/optimizer.zip">
 			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
 				<include name="org.dojotoolkit.json*.jar"/> 
@@ -151,6 +152,9 @@
 			</zipfileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
 				<include name="*.json"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package" prefix="WEB-INF">
+				<include name="sample_web.xml"/>
 			</zipfileset>
 		</zip>
 	</target>
