@@ -55,6 +55,9 @@
 	            <include name="*.jar"/>
 	        </fileset>
 		</copy>
+		<propertyfile file="${target.dir}/package/org_dojotoolkit_optimizer.properties">
+		  <entry  key="jsOptimizerClassName" value="org.dojotoolkit.optimizer.rhino.RhinoJSOptimizer"/>
+		</propertyfile>		
 		<war destfile="${target.dir}/package/syncsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/optimizerjsp_web.xml">
 			<zipfileset dir="${dojo.dir}/dojo" prefix="dojo"/>
 			<zipfileset dir="${dojo.dir}/dijit" prefix="dijit"/>
@@ -62,7 +65,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
-			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
+			<zipfileset dir="${target.dir}/package" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_optimizer.properties"/> 
 			</zipfileset>
 			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
@@ -87,9 +90,6 @@
 				<include name="circular.jsp"/>
 			</fileset>
 		</war>
-		<propertyfile file="${target.dir}/package/org_dojotoolkit_optimizer.properties">
-		  <entry  key="jsOptimizerClassName" value="org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizer"/>
-		</propertyfile>		
 		<war destfile="${target.dir}/package/amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
 			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
 			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
@@ -97,7 +97,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
-			<zipfileset dir="${target.dir}/package" prefix="WEB-INF/classes">
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_optimizer.properties"/> 
 			</zipfileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
