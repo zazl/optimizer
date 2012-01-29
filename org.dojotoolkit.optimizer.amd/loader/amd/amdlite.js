@@ -135,7 +135,10 @@ var define;
 	};
 	
 	function _inject(moduleId, cb) {
-		var locale = dojoConfig ? dojoConfig.locale : "en-us";
+		var locale = "en-us";
+		if (window.dojoConfig && window.dojoConfig.locale) {
+			locale = dojoConfig.locale;
+		}
 		var url = cfg.injectUrl+"?modules="+moduleId+"&writeBootstrap=false&locale="+locale+"&exclude=";
 		for (var i = 0; i < analysisKeys.length; i++) {
 			url += analysisKeys[i];
