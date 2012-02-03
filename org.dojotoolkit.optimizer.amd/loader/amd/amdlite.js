@@ -42,7 +42,7 @@ var define;
     function isArray(it) { return opts.call(it) === "[object Array]"; };
     function isString(it) { return (typeof it == "string" || it instanceof String); };
     
-    function _getParentId() {
+    function _getCurrentId() {
     	return moduleStack.length > 0 ? moduleStack[moduleStack.length-1].id : "";
     }
     
@@ -69,10 +69,10 @@ var define;
 		var isRelative = path.search(/^\./) === -1 ? false : true;
 		if (isRelative) {
             var pkg;
-            if ((pkg = pkgs[_getParentId()])) {
+            if ((pkg = pkgs[_getCurrentId()])) {
                 path = pkg.name + "/" + path;
             } else {
-                path = _getParentId() + "/../" + path;
+                path = _getCurrentId() + "/../" + path;
             }
 			path = _normalize(path);
 		}
@@ -186,7 +186,7 @@ var define;
 						iterate(itr);
 					});
 				} else if (dependency === 'require') {
-					args.push(_createRequire(_getParentId()));
+					args.push(_createRequire(_getCurrentId()));
 					iterate(itr);
 				} else if (dependency === 'module') {
 					args.push(m);
@@ -210,7 +210,7 @@ var define;
 			} else {
 				if (m.factory !== undefined) {
 					if (args.length < 1) {
-						var req = _createRequire(_getParentId());
+						var req = _createRequire(_getCurrentId());
 						args = args.concat(req, m.exports, m);
 					}
 					var ret = m.factory.apply(null, args);
