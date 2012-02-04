@@ -12,11 +12,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -32,7 +35,6 @@ import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
-import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
@@ -41,6 +43,7 @@ public abstract class JSHandler {
 	
 	public static final String AMD_HANDLER_TYPE = "amd";
 	public static final String SYNCLOADER_HANDLER_TYPE = "syncloader";
+	private static final JSAnalysisData[] EMPTY_ARRAY = new JSAnalysisData[] {};
 
 	protected JSOptimizer jsOptimizer = null;
 	protected ResourceLoader resourceLoader = null;
@@ -85,6 +88,8 @@ public abstract class JSHandler {
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String[] modules = null;
+		String modulesParam = request.getParameter("modules");
 		String key = request.getParameter("key");
 		String url = request.getPathInfo();
 		if (url != null && url.startsWith("/_javascript")) {
@@ -103,38 +108,44 @@ public abstract class JSHandler {
 		}
 		
 		response.setContentType("text/javascript; charset=UTF-8");
-		
+
 		JSAnalysisData analysisData = null;
-		if (key != null) {
+
+		if (modulesParam != null) {
+            modules = getAsList(modulesParam);
+            JSAnalysisData[] exclude = EMPTY_ARRAY;
+            String excludeParam = request.getParameter("exclude");
+            if (excludeParam != null) {
+                String[] keys = getAsList(excludeParam);
+                exclude = new JSAnalysisData[keys.length];
+                int count = 0;
+                for (String excludeKey : keys) {
+                    exclude[count++] = jsOptimizer.getAnalysisData(excludeKey);
+                }
+            }
+            String configString = request.getParameter("config");
+            @SuppressWarnings("unchecked")
+			Map<String, Object> config = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
+            analysisData = jsOptimizer.getAnalysisData(modules, exclude, config);
+        } else if (key != null) {
 			analysisData = jsOptimizer.getAnalysisData(key);
-			if (logger.getLevel() == Level.FINE) {
-				logger.logp(Level.FINE, getClass().getName(), "handle", "checksum for ["+key+"] = "+analysisData.getChecksum());
-				for (String dependency : analysisData.getDependencies()) {
-					logger.logp(Level.FINER, getClass().getName(), "handle", "dependency for ["+key+"] = ["+dependency+"]");
-				}
-				if (analysisData.getLocalizations() != null) {
-					for (Localization localization : analysisData.getLocalizations()) {
-						logger.logp(Level.FINER, getClass().getName(), "handle", "localization for ["+key+"] = ["+localization.modulePath+"]");
-					}
-				}
-			}
-			if (!debug) {
-				String checksum = analysisData.getChecksum();
-			    String ifNoneMatch = request.getHeader("If-None-Match");
-	
-			    if (ifNoneMatch != null && ifNoneMatch.equals(checksum)) {
-			    	response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-			        return true;
-			    }
-			    
-	 			response.setHeader("ETag", checksum);
-	 			
-				String version = request.getParameter("version");
-				if (version != null && version.equals(checksum)) {
-					Calendar calendar = Calendar.getInstance();
-					calendar.add(Calendar.YEAR, 1);
-					response.setDateHeader("Expires", calendar.getTimeInMillis());
-				}
+		}
+		if (!debug) {
+			String checksum = analysisData.getChecksum();
+		    String ifNoneMatch = request.getHeader("If-None-Match");
+
+		    if (ifNoneMatch != null && ifNoneMatch.equals(checksum)) {
+		    	response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+		        return true;
+		    }
+
+ 			response.setHeader("ETag", checksum);
+
+			String version = request.getParameter("version");
+			if (version != null && version.equals(checksum)) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.add(Calendar.YEAR, 1);
+				response.setDateHeader("Expires", calendar.getTimeInMillis());
 			}
 		}
 		Writer osw = null;
@@ -156,7 +167,14 @@ public abstract class JSHandler {
  			}
  			customHandle(request, osw, analysisData);
 		} catch (IOException e) {
-			logger.logp(Level.SEVERE, getClass().getName(), "handle", "Exception on request for ["+key+"]", e);
+			String msg = "Exception on request for [";
+			if (key == null) {
+				msg += modulesParam;
+			} else {
+				msg += key;
+			}
+			msg += "]";
+			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg, e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} finally {
 			osw.flush();
@@ -188,7 +206,19 @@ public abstract class JSHandler {
 		}
 		return handlerConfig;
 	}
-	
+
+	private String[] getAsList(String param) {
+		String[] list = null;
+		List<String> moduleList = new ArrayList<String>();
+		StringTokenizer st = new StringTokenizer(param, ",");
+		while (st.hasMoreTokens()) {
+			moduleList.add(st.nextToken());
+		}
+		list = new String[moduleList.size()];
+		list = moduleList.toArray(list);
+		return list;
+	}
+
 	public class OptimizerRunnable implements Runnable {
 		private JSOptimizer optimizer = null;
 		private String[] modules = null;

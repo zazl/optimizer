@@ -35,6 +35,7 @@ var define;
 	var pkgs = {};
 	var cache = {};
 	var analysisKeys = [];
+	var cblist = {};
 
 	var opts = Object.prototype.toString;
 	
@@ -43,7 +44,7 @@ var define;
     function isString(it) { return (typeof it == "string" || it instanceof String); };
     
     function _getCurrentId() {
-    	return moduleStack.length > 0 ? moduleStack[moduleStack.length-1].id : "";
+    	return moduleStack.length > 0 ? moduleStack[moduleStack.length-1] : "";
     }
     
 	function _normalize(path) {
@@ -113,15 +114,25 @@ var define;
 	
 	function _loadModule(id, cb) {
 		var expandedId = _expand(id);
-		if (modules[expandedId] && modules[expandedId].exports) {
-			cb(modules[expandedId].exports);
+		var dependentId = _getCurrentId();
+		for (var i = 0; i < moduleStack.length; i++) {
+			if (moduleStack[i] === expandedId) {
+				cb(modules[expandedId].exports);
+				return;
+			}
+		}
+		if (cblist[expandedId] === undefined) {
+			cblist[expandedId] = [];
+		}
+		if (modules[expandedId] && modules[expandedId].cjsreq) {
+			cblist[expandedId].push({cb:cb, mid:dependentId});
 			return;
 		}
     	function _load() {
-    		moduleStack.push(modules[expandedId]);
+    		moduleStack.push(expandedId);
     		_loadModuleDependencies(expandedId, function(exports){
     			moduleStack.pop();
-                cb(exports);
+				cblist[expandedId].push({cb:cb, mid:dependentId});
             });
     	};
 		
@@ -139,7 +150,8 @@ var define;
 		if (window.dojoConfig && window.dojoConfig.locale) {
 			locale = dojoConfig.locale;
 		}
-		var url = cfg.injectUrl+"?modules="+moduleId+"&writeBootstrap=false&locale="+locale+"&exclude=";
+		var configString = JSON.stringify(cfg);
+		var url = cfg.injectUrl+"?modules="+moduleId+"&writeBootstrap=false&locale="+locale+"&config="+configString+"&exclude=";
 		for (var i = 0; i < analysisKeys.length; i++) {
 			url += analysisKeys[i];
 			url += i < (analysisKeys.length - 1) ? "," : "";
@@ -164,12 +176,15 @@ var define;
 	};
 	
 	function _loadModuleDependencies(id, cb) {
-		var args = [];
 		var m = modules[id];
-		m.exports = {};
+		m.args = [];
+		m.deploaded = {};
+		var idx = 0;
 		var iterate = function(itr) {
 			if (itr.hasMore()) {
 				var dependency = itr.next();
+				var argIdx = idx++;
+				var depname;
 				if (dependency.match(pluginRegExp)) {
 					var add = true;
 					if (dependency.match(cjsVarPrefixRegExp)) {
@@ -179,20 +194,32 @@ var define;
 					var pluginName = dependency.substring(0, dependency.indexOf('!'));
 					pluginName = _expand(pluginName);
 					var pluginModuleName = dependency.substring(dependency.indexOf('!')+1);
+					if (add) {
+						m.dependencies[argIdx] = pluginName + "!"+pluginModuleName;
+						m.args[argIdx] = undefined;
+						depname = pluginName + "!"+pluginModuleName;
+					} else {
+						depname = "~#"+pluginName + "!"+pluginModuleName;
+					}
+					m.deploaded[depname] = false;
 					_loadPlugin(pluginName, pluginModuleName, function(pluginInstance) {
 						if (add) {
-							args.push(pluginInstance);
+							m.args[argIdx] = pluginInstance;
 						}
-						iterate(itr);
+						m.deploaded[depname] = true;
 					});
+					iterate(itr);
 				} else if (dependency === 'require') {
-					args.push(_createRequire(_getCurrentId()));
+					m.args[argIdx] = _createRequire(_getCurrentId());
+					m.deploaded['require'] = true;
 					iterate(itr);
 				} else if (dependency === 'module') {
-					args.push(m);
+					m.args[argIdx] = m;
+					m.deploaded['module'] = true;
 					iterate(itr);
 				} else if (dependency === 'exports') {
-					args.push(m.exports);
+					m.args[argIdx] = m.exports;
+					m.deploaded['exports'] = true;
 					iterate(itr);
 				} else {
 					var add = true;
@@ -200,27 +227,26 @@ var define;
 						dependency = dependency.substring(2);
 						add = false;
 					}
+					var expandedId = _expand(dependency);
+					if (add) {
+						m.dependencies[argIdx] = expandedId;
+						m.args[argIdx] = modules[expandedId] === undefined ? undefined : modules[expandedId].exports;
+						depname = expandedId;
+					} else {
+						depname = "~#"+expandedId;
+					}
+					m.deploaded[depname] = false;
 					_loadModule(dependency, function(module){
 						if (add) {
-							args.push(module);
+							m.args[argIdx] = module;
 						}
-						iterate(itr);
+						m.deploaded[depname] = true;
 					});
+					iterate(itr);
 				}
 			} else {
-				if (m.factory !== undefined) {
-					if (args.length < 1) {
-						var req = _createRequire(_getCurrentId());
-						args = args.concat(req, m.exports, m);
-					}
-					var ret = m.factory.apply(null, args);
-					if (ret) {
-						m.exports = ret;
-					}
-				} else {
-					m.exports = m.literal;
-				}
-				cb(m.exports);
+				m.cjsreq = _createRequire(_getCurrentId());
+				cb();
 			}
 		};
 		iterate(new Iterator(m.dependencies));
@@ -240,6 +266,9 @@ var define;
 			}
 			var req = _createRequire(pluginName);
 			var load = function(pluginInstance){
+				if (pluginInstance === undefined) {
+					pluginInstance = null;
+				}
 		    	modules[pluginName+"!"+pluginModuleName] = {};
 		    	modules[pluginName+"!"+pluginModuleName].exports = pluginInstance;
 				cb(pluginInstance);
@@ -255,7 +284,7 @@ var define;
 		var req = function(dependencies, callback) {
 			var root = modules[id];
 			var savedStack = moduleStack;
-			moduleStack = [root];
+			moduleStack = [id];
 			if (isFunction(callback)) {
 				_require(dependencies, function() {
 					moduleStack = savedStack;
@@ -306,9 +335,8 @@ var define;
 		if (modules[id] !== undefined) { 
 			throw new Error("A module with an id of ["+id+"] has already been provided");
 		}
-		
-		modules[id] = {};
-		modules[id].id = id;
+		console.log("defining ["+id+"]");
+		modules[id] = {id: id, exports: {}};
 
 		if (!isArray(dependencies)) {
 			factory = dependencies;
@@ -348,12 +376,16 @@ var define;
 				}
 				id = pluginName+"!"+pluginModuleName;
 			}
-			return modules[id] === undefined ? undefined : modules[id].exports;
+			if (modules[id] === undefined) {
+				throw new Error("Module ["+id+"] has not been loaded");
+			}
+			return modules[id].exports;
 		} else if (isArray(dependencies)) {
 			var args = [];
 			var iterate = function(itr) {
 				if (itr.hasMore()) {
 					var dependency = itr.next();
+					var id = _expand(dependency);
 					if (dependency.match(pluginRegExp)) {
 						var pluginName = dependency.substring(0, dependency.indexOf('!'));
 						pluginName = _expand(pluginName);
@@ -379,6 +411,7 @@ var define;
 	
 	modules["require"] = {};
 	modules["require"].exports = _require;
+	modules["require"].loaded = true;
 	var cfg = {
 		baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./"),
 		injectUrl: "_javascript"
@@ -428,6 +461,7 @@ var define;
 		} else {
 			_require(dependencies);
 		}
+		queueProcessor();
 	};
 	
 	amdlite.addToCache = function(id, value) {
@@ -439,13 +473,12 @@ var define;
 	};
 	
 	var pageLoaded = false;
+	var modulesLoaded = false;
+	var domLoaded = false;
 	var readyCallbacks = [];
     
 	document.addEventListener("DOMContentLoaded", function() {
-		pageLoaded = true;
-		for (var i = 0; i < readyCallbacks.length; i++) {
-			readyCallbacks[i]();
-		}
+		domLoaded = true;
 	}, false);
 	
 	if (!require) {
@@ -455,4 +488,87 @@ var define;
 			return url;
 		};
 	}
+
+	function isComplete(module) {
+		var complete = false;
+		if (module.cjsreq) {
+			complete = true;
+			for (var dep in module.deploaded) {
+				if (module.deploaded[dep] === false) {
+					complete = false;
+					break;
+				}
+			}
+		}
+		return complete;
+	};
+
+	function queueProcessor() {
+		try {
+			var allLoaded = true, timeout = 100, mid, m, ret;
+			for (mid in modules) {
+				if (mid === "require" || mid.match(pluginRegExp)) {
+					continue;
+				}
+				m = modules[mid];
+				if (!m || m.loaded !== true) {
+					allLoaded = false;
+				}
+				if (m.loaded !== true && isComplete(m)) {
+					if (m.factory !== undefined) {
+						if (m.args.length < 1) {
+							m.args = m.args.concat(m.cjsreq, m.exports, m);
+						}
+						ret = m.factory.apply(null, m.args);
+						if (ret) {
+							m.exports = ret;
+						}
+					} else {
+						m.exports = m.literal;
+					}
+					m.loaded = true;
+				}
+			}
+
+			if (allLoaded) {
+				modulesLoaded = true;
+			} else {
+				timeout = 0;
+			}
+
+			var savedStack;
+
+			var cbiterate = function(exports, itr) {
+				if (itr.hasMore()) {
+					var cbinst = itr.next();
+					if (cbinst.mid !== "") {
+						var root = modules[cbinst.mid];
+						savedStack = moduleStack;
+						moduleStack = [cbinst.mid];
+					}
+					cbinst.cb(exports);
+					if (cbinst.mid !== "") {
+						moduleStack = savedStack;
+					}
+					cbiterate(exports, itr);
+				} else {
+					delete cblist[mid];
+				}
+			};
+			for (mid in cblist) {
+				if (modules[mid] && modules[mid].loaded) {
+					cbiterate(modules[mid].exports, new Iterator(cblist[mid]));
+				}
+			}
+			if (!pageLoaded && domLoaded && modulesLoaded) {
+				pageLoaded = true;
+				for (var i = 0; i < readyCallbacks.length; i++) {
+					readyCallbacks[i]();
+				}
+			}
+			setTimeout(function(){ queueProcessor(); }, timeout);
+		} catch (e) {
+			console.log("queueProcessor error : "+e);
+		}
+	};
 }());
