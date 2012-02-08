@@ -335,7 +335,6 @@ var define;
 		if (modules[id] !== undefined) { 
 			throw new Error("A module with an id of ["+id+"] has already been provided");
 		}
-		console.log("defining ["+id+"]");
 		modules[id] = {id: id, exports: {}};
 
 		if (!isArray(dependencies)) {
