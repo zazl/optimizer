@@ -29,6 +29,10 @@
 		value="${workspace.dir}/../targetplatform/nekohtml/plugins/org.cyberneko.html_1.9.15"/>
 	
 	<property
+		name="esprima.dir"
+		value="${workspace.dir}/../targetplatform/esprima/plugins/org.esprima_0.0.1"/>
+	
+	<property
 		name="equinox.dir"
 		value="${workspace.dir}/../targetplatform/equinox-SDK-3.7/plugins"/>
 	
@@ -41,6 +45,9 @@
 		</jar>
 		<jar destfile="${target.dir}/package/warlib/uglifyjs.jar">
 			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
+		</jar>
+		<jar destfile="${target.dir}/package/warlib/esprima.jar">
+			<zipfileset dir="${esprima.dir}/esprima" prefix="esprima"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
 	        <fileset dir="${equinox.dir}">
@@ -112,6 +119,7 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
+				<include name="esprima.jar"/> 
 				<include name="nekohtml.jar"/> 
 				<include name="xercesMinimal.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
@@ -136,6 +144,7 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
+				<include name="esprima.jar"/> 
 				<include name="nekohtml.jar"/> 
 				<include name="xercesMinimal.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 

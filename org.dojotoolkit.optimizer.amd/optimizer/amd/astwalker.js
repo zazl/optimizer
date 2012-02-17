@@ -5,8 +5,9 @@
 */
 var moduleCreator = require("./module");
 var resourceloader = require('zazlutil').resourceloader;
-var jsp = require("uglify-js").parser;
-var uglify = require("uglify-js").uglify;
+
+var opts = Object.prototype.toString;
+function isArray(it) { return opts.call(it) === "[object Array]"; };
 
 function getParentId(pathStack) {
 	return pathStack.length > 0 ? pathStack[pathStack.length-1] : "";
@@ -110,7 +111,148 @@ function processPluginRef(pluginName, resourceName, pathStack, config) {
 	return {name:resourceName, normalizedName: normalizedName, value: value, dependency: dependency, moduleUrl : moduleUrl};
 };
 
-function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
+function scanForRequires(ast, requires) {
+	for (var p in ast) {
+		if (p === "type" && ast[p] === "CallExpression" && ast["callee"]) {
+			var callee = ast["callee"];
+			if (callee.name && callee.name === "require") {
+				var arg1 = ast["arguments"][0];
+				if (arg1.type === "Literal") {
+					requires.push(arg1.value);
+				}
+			}
+		}
+		if (isArray(ast[p])) {
+			var a = ast[p];
+			for (var i = 0; i < a.length; i++) {
+				if (typeof a[i] == 'object') {
+					scanForRequires(a[i], requires);
+				}
+			}
+		} else if (typeof ast[p] == 'object') {
+			scanForRequires(ast[p], requires);
+		}
+	}
+};
+
+function getDependencies(src, ast) {
+	var dependencies = [];
+	var nameIndex;
+
+	for (var i = 0; i < ast.body.length; i++) {
+		if (ast.body[i].type === "ExpressionStatement") {
+			var expression = ast.body[i].expression;
+			if (expression.type === "CallExpression" && expression.callee.name === "define") {
+				var args = expression.arguments;
+				for (var j = 0; j < args.length; j++) {
+					if (args[j].type === "ArrayExpression" && expression.callee.name === "define") {
+						if (j === 0) {
+							nameIndex = expression.callee.range[0] + (src.substring(expression.callee.range[0]).indexOf('(')+1);
+						}
+						var elements = args[j].elements;
+ 						for (var k = 0; k < elements.length; k++) {
+ 							dependencies.push({value: elements[k].value, type: elements[k].type});
+ 						}
+					} else if (args[j].type === "FunctionExpression" && expression.callee.name === "define") {
+						var requires = [];
+						scanForRequires(args[j].body, requires);
+						for (var x = 0; x < requires.length; x++) {
+							dependencies.push({value: requires[x], type: "Literal"});
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return {deps:dependencies, nameIndex: nameIndex};
+};
+
+function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
+	uri = expand(uri, pathStack, config);
+	var url = idToUrl(uri, config);
+	if (moduleMap.get(uri) === undefined) {
+		var src = resourceloader.readText('/'+url+'.js');
+		if (src === null) {
+			throw new Error("Unable to load src for ["+url+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
+		}
+		var esprima = require("esprima/esprima");
+		var ast = esprima.parse(src, {range: true});
+		var id = uri;
+		var module = moduleCreator.createModule(id, url);
+		moduleMap.add(uri, module);
+		var depInfo = getDependencies(src, ast);
+		if (depInfo.nameIndex) {
+			missingNamesList.push({uri: url, id: url, nameIndex: depInfo.nameIndex});
+		}
+
+		var dependency, keepWalking, type;
+		for (var i = 0; i < depInfo.deps.length; i++) {
+			dependency = depInfo.deps[i].value;
+			type = depInfo.deps[i].type;
+			keepWalking = true;
+
+			if (type !== "Literal") {
+				keepWalking = false;
+			} else if (dependency.match(".+!")) {
+				pathStack.push(uri);
+				var pluginName = dependency.substring(0, dependency.indexOf('!'));
+				pluginName = expand(pluginName, pathStack, config);
+				var pluginValue = dependency.substring(dependency.indexOf('!')+1);
+				if (pluginRefList[pluginName] === undefined) {
+					pluginRefList[pluginName] = [];
+				}
+				var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
+				if (pluginRef.dependency) {
+					var dependencyUri = idToUrl(pluginRef.dependency, config);
+					var addDependency = true;
+					for (var k = 0; k < exclude.length; k++) {
+						if (dependencyUri === exclude[k]) {
+							addDependency = false;
+							break;
+						}
+					}
+					if (addDependency) {
+						module.addDependency(pluginRef.dependency);
+						esprimaWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+					}
+				}
+				pluginRefList[pluginName].push(pluginRef);
+				pathStack.pop();
+				dependency = pluginName;
+			} else if (dependency.match(".js$")) {
+				keepWalking = false;
+				pathStack.push(uri);
+				dependency = expand(dependency, pathStack, config);
+				module.addDependency(dependency);
+				pathStack.pop();
+			}
+
+			if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
+				pathStack.push(uri);
+				dependency = expand(dependency, pathStack, config);
+				var dependencyUri = idToUrl(dependency, config);
+				var addDependency = true;
+				for (var k = 0; k < exclude.length; k++) {
+					if (dependencyUri === exclude[k]) {
+						addDependency = false;
+						break;
+					}
+				}
+				if (addDependency) {
+					module.addDependency(dependency);
+					esprimaWalker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+				}
+				pathStack.pop();
+			}
+		}
+	}
+};
+
+function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
+	var jsp = require("uglify-js").parser;
+	var uglify = require("uglify-js").uglify;
+	
 	uri = expand(uri, pathStack, config);
 	var url = idToUrl(uri, config);
 	if (moduleMap.get(uri) === undefined) {
@@ -172,7 +314,7 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 									}
 									if (addDependency) {
 										module.addDependency(pluginRef.dependency);
-										walker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+										uglifyjsWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
 									}
 								}
 								pluginRefList[pluginName].push(pluginRef);
@@ -198,7 +340,7 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 								}
 								if (addDependency) {
 									module.addDependency(dependency);
-									walker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+									uglifyjsWalker(dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
 								}
 								pathStack.pop();
 							}
@@ -212,9 +354,27 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 	}
 };
 
+function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
+	if (!config.astparser) {
+		config.astparser = "uglifyjs";
+	}
+	if (config.astparser === "uglifyjs") {
+		print("Using uglifyjs for the ast parser");
+		uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+	} else 	if (config.astparser === "esprima") {
+		print("Using esprima for the ast parser");
+		esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
+	} else {
+		throw new Error("Unknown astparser value ["+config.astparser+"]");
+	}
+};
+
 exports.walker = walker;
 
 function getMissingNameIndex(src) {
+	var jsp = require("uglify-js").parser;
+	var uglify = require("uglify-js").uglify;
+	
 	var ast = jsp.parse(src, false, true);
 	var w = uglify.ast_walker();
 	var nameIndex = -1;
