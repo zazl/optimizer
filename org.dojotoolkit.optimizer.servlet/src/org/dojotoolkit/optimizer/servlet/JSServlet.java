@@ -36,16 +36,28 @@ public class JSServlet extends HttpServlet {
 	protected boolean javaChecksum = false; 
 	protected String jsHandlerType = null;
 	protected List<List<String>> warmupValues = null;
+	protected List<String> rhinoJSClasses = null;
 	protected JSCompressorFactory jsCompressorFactory = null;
 	
 	public JSServlet() {}
 	
+	public JSServlet(ResourceLoader resourceLoader,
+			         JSOptimizerFactory jsOptimizerFactory,
+	                 RhinoClassLoader rhinoClassLoader,
+	                 boolean javaChecksum,
+	                 String jsHandlerType,
+	                 List<List<String>> warmupValues,
+	                 JSCompressorFactory jsCompressorFactory) {
+		this(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, warmupValues, null, jsCompressorFactory);
+	}
+
 	public JSServlet(ResourceLoader resourceLoader, 
 			         JSOptimizerFactory jsOptimizerFactory, 
 			         RhinoClassLoader rhinoClassLoader, 
 			         boolean javaChecksum, 
 			         String jsHandlerType,
 			         List<List<String>> warmupValues,
+			         List<String> rhinoJSClasses,
 			         JSCompressorFactory jsCompressorFactory) {
 		this();
 		this.jsOptimizerFactory = jsOptimizerFactory;
@@ -54,6 +66,7 @@ public class JSServlet extends HttpServlet {
 		this.javaChecksum = javaChecksum;
 		this.jsHandlerType = jsHandlerType;
 		this.warmupValues = warmupValues;
+		this.rhinoJSClasses = rhinoJSClasses;
 		this.jsCompressorFactory = jsCompressorFactory;
 	}
 	
@@ -75,6 +88,24 @@ public class JSServlet extends HttpServlet {
 				getServletContext().setAttribute("org.dojotoolkit.RhinoClassLoader", rhinoClassLoader);
 			}
 		}
+		String stringRhinoJSClasses = getServletContext().getInitParameter("rhinoJSClasses");
+		if (rhinoJSClasses == null && stringRhinoJSClasses != null) {
+			try {
+				rhinoJSClasses = (List<String>)JSONParser.parse(new StringReader(stringRhinoJSClasses));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (rhinoJSClasses != null) {
+			for (String rhinoJSClass : rhinoJSClasses) {
+				try {
+					logger.logp(Level.INFO, getClass().getName(), "init", "Preloading ["+rhinoJSClass+"]");
+					rhinoClassLoader.loadClass(rhinoJSClass);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		String javaChecksumString = getServletContext().getInitParameter("javaChecksum");
 		if (javaChecksumString != null) {
 			javaChecksum = Boolean.valueOf(javaChecksumString);
@@ -83,7 +114,7 @@ public class JSServlet extends HttpServlet {
 			jsOptimizerFactory = (JSOptimizerFactory)getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory");
 			if (jsOptimizerFactory == null) {
 				jsOptimizerFactory = new JSOptimizerFactoryImpl();
-				logger.log(Level.FINE, getClass().getName(), "Using JSOptimizer of type ["+jsOptimizerFactory.getClass().getName()+"]");
+				logger.logp(Level.FINE, getClass().getName(), "init", "Using JSOptimizer of type ["+jsOptimizerFactory.getClass().getName()+"]");
 			}
 		}
 		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory", jsOptimizerFactory);

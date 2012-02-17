@@ -8,6 +8,7 @@ package org.dojotoolkit.optimizer.servlet.osgi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dojotoolkit.compressor.JSCompressorFactory;
+import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.servlet.JSFilter;
 import org.dojotoolkit.optimizer.servlet.JSHandler;
@@ -127,7 +129,17 @@ public class ZazlServicesTracker {
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 			String jsHandlerType = System.getProperty("jsHandlerType");
 			
-			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null, jsCompressorFactory);
+			String rhinoJSClassesString = System.getProperty("rhinoJSClasses");
+			List<String> rhinoJSClasses = null;
+			if (rhinoJSClassesString != null) {
+				try {
+					rhinoJSClasses = (List<String>)JSONParser.parse(new StringReader(rhinoJSClassesString));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory);
 			jsFilter = new JSFilter(resourceLoader, rhinoClassLoader); 
 			try {
 				System.out.println("Registering servlets and filters");
