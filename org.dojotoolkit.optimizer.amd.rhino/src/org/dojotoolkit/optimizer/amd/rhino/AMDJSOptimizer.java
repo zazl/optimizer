@@ -23,6 +23,7 @@ import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
+import org.dojotoolkit.server.util.rhino.ASTCache;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 import org.dojotoolkit.server.util.rhino.RhinoJSMethods;
 import org.mozilla.javascript.Context;
@@ -36,6 +37,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	private Map<String, Object> config = null;
 	private String amdconfig = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
+	private ASTCache astCacheHandler = null;
 	
 	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
 		this.resourceLoader = resourceLoader;
@@ -49,6 +51,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing configuration", e);
 		}
+		astCacheHandler = new ASTCache();
 	}
 	
 	public Map<String, Object> getConfig() {
@@ -118,7 +121,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		try {
 			ctx = Context.enter();
 			ScriptableObject scope = ctx.initStandardObjects();
-			RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false);
+			RhinoJSMethods.initScope(scope, resourceLoader, rhinoClassLoader, false, astCacheHandler);
 			long start = System.currentTimeMillis();
 			Object o = ctx.evaluateString(scope, sb.toString(), "AMDJSOptimizer", 1, null);//$NON-NLS-1$
 			long end = System.currentTimeMillis();

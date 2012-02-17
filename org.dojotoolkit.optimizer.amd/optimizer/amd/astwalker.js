@@ -5,6 +5,7 @@
 */
 var moduleCreator = require("./module");
 var resourceloader = require('zazlutil').resourceloader;
+var astcache = require('zazlutil').astcache;
 
 var opts = Object.prototype.toString;
 function isArray(it) { return opts.call(it) === "[object Array]"; };
@@ -176,8 +177,11 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 		if (src === null) {
 			throw new Error("Unable to load src for ["+url+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
 		}
-		var esprima = require("esprima/esprima");
-		var ast = esprima.parse(src, {range: true});
+		var ast = astcache.getAst('/'+uri+'.js', config.astparser);
+		if (ast === null) {
+			var esprima = require("esprima/esprima");
+			ast = esprima.parse(src, {range: true});
+		}
 		var id = uri;
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
@@ -260,7 +264,10 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		if (src === null) {
 			throw new Error("Unable to load src for ["+url+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
 		}
-		var ast = jsp.parse(src, false, true);
+		var ast = astcache.getAst('/'+uri+'.js', config.astparser);
+		if (ast === null) {
+			ast = jsp.parse(src, false, true);
+		}
 		var w = uglify.ast_walker();
 		var id = uri;
 		var module = moduleCreator.createModule(id, url);
