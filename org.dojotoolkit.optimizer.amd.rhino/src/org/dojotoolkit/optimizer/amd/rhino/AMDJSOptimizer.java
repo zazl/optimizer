@@ -77,6 +77,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		StringBuffer moduleList = new StringBuffer();
 		StringBuffer sb = new StringBuffer();
         sb.append("var config = "+configString+";\n");
+		sb.append("loadJS('/json/json2.js');\n");
         sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
         sb.append("var analyzer = require('optimizer/amd/AMDAnalyzer').createAnalyzer(config);\n");
         int count = 0;
@@ -112,7 +113,6 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         }
         sb.append("];\n");
 		sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude);\n");
-		sb.append("loadJS('/json/json2.js');\n");
 		sb.append("JSON.stringify(analysisData);\n");
 		Context ctx = null; 
 		try {
@@ -122,7 +122,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			long start = System.currentTimeMillis();
 			Object o = ctx.evaluateString(scope, sb.toString(), "AMDJSOptimizer", 1, null);//$NON-NLS-1$
 			long end = System.currentTimeMillis();
-			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "time : "+(end-start)+" ms for ["+sb+"]");
+			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "time : "+(end-start)+" ms for ["+moduleList+"]");
 			Map<String, Object> analysisData = (Map<String, Object>)JSONParser.parse(new StringReader((String)o));
 			List<String> dependencies = (List<String>)analysisData.get("dependencyList");
 			for (ListIterator<String> itr = dependencies.listIterator(); itr.hasNext();) {
