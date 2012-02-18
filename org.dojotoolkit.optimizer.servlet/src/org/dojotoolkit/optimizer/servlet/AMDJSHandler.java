@@ -28,7 +28,7 @@ public class AMDJSHandler extends JSHandler {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
+	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] excludes) throws ServletException, IOException {
 		if (analysisData != null) {	
 			writer.write("amdlite.addAnalysisKey('"+analysisData.getKey()+"');\n");
 			String suffixCode = (String)config.get("suffixCode");
@@ -40,6 +40,18 @@ public class AMDJSHandler extends JSHandler {
 			List<Localization> localizations = new ArrayList<Localization>();
 			Map<String, Object> amdConfig = (Map<String, Object>)config.get("amdconfig");
 			String i18nPluginId = (String)amdConfig.get("i18nPluginId");
+			List<String> seen = new ArrayList<String>();
+			for (JSAnalysisData exclude : excludes) {
+				Map<String, List<Map<String, String>>> excludePluginRefs = exclude.getPluginRefs();
+				for (String excludePluginId : excludePluginRefs.keySet()) {
+					if (i18nPluginId != null && i18nPluginId.equals(excludePluginId)) {
+						List<Map<String, String>> excludePluginRefInstances = excludePluginRefs.get(excludePluginId);
+						for (Map<String, String> excludePluginRefInstance : excludePluginRefInstances) {
+							seen.add(excludePluginRefInstance.get("normalizedName"));
+						}
+					}
+				}
+			}
 			for (String pluginId : pluginRefs.keySet()) {
 				List<Map<String, String>> pluginRefInstances = pluginRefs.get(pluginId);
 				for (Map<String, String> pluginRefInstance : pluginRefInstances) {
@@ -51,7 +63,6 @@ public class AMDJSHandler extends JSHandler {
 					}
 				}
 				if (i18nPluginId != null && i18nPluginId.equals(pluginId)) {
-					List<String> seen = new ArrayList<String>();
 					for (Map<String, String> pluginRefInstance : pluginRefInstances) {
 						String bundlePackage = pluginRefInstance.get("normalizedName");
 						String moduleUrl = pluginRefInstance.get("moduleUrl");

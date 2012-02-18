@@ -110,10 +110,10 @@ public abstract class JSHandler {
 		response.setContentType("text/javascript; charset=UTF-8");
 
 		JSAnalysisData analysisData = null;
+        JSAnalysisData[] exclude = EMPTY_ARRAY;
 
 		if (modulesParam != null) {
             modules = getAsList(modulesParam);
-            JSAnalysisData[] exclude = EMPTY_ARRAY;
             String excludeParam = request.getParameter("exclude");
             if (excludeParam != null) {
                 String[] keys = getAsList(excludeParam);
@@ -165,7 +165,7 @@ public abstract class JSHandler {
 		 			//osw.write(resourceLoader.readResource(bootstrapModulePath));
 	 			}
  			}
- 			customHandle(request, osw, analysisData);
+ 			customHandle(request, osw, analysisData, exclude);
 		} catch (IOException e) {
 			String msg = "Exception on request for [";
 			if (key == null) {
@@ -189,7 +189,7 @@ public abstract class JSHandler {
 		return jsOptimizer;
 	}
 	
-	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException;
+	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] exclude) throws ServletException, IOException;
 	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, Object> loadHandlerConfig(String handlerConfigFileName) throws IOException {

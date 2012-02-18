@@ -36,6 +36,8 @@ var define;
 	var cache = {};
 	var analysisKeys = [];
 	var cblist = {};
+	var injectQueue = [];
+	var injectInProcess = false;
 
 	var opts = Object.prototype.toString;
 	
@@ -137,9 +139,7 @@ var define;
     	};
 		
 		if (modules[expandedId] === undefined) {
-			_inject(expandedId, function(){
-				_load();
-			});
+			injectQueue.push({id:expandedId, cb: _load});
 		} else {
 			_load();
 		}
@@ -502,6 +502,17 @@ var define;
 		return complete;
 	};
 
+	function processInjectQueue() {
+		if (!injectInProcess && injectQueue.length > 0) {
+			injectInProcess = true;
+			var injection = injectQueue.shift();
+			_inject(injection.id, function() {
+				injection.cb();
+				injectInProcess = false;
+			});
+		}
+	}
+
 	function queueProcessor() {
 		try {
 			var allLoaded = true, timeout = 100, mid, m, ret;
@@ -565,6 +576,7 @@ var define;
 					readyCallbacks[i]();
 				}
 			}
+			processInjectQueue();
 			setTimeout(function(){ queueProcessor(); }, timeout);
 		} catch (e) {
 			console.log("queueProcessor error : "+e);

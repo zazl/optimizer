@@ -44,7 +44,7 @@ public class SyncLoaderJSHandler extends JSHandler {
 		this.removeDojoRequires = removeDojoRequires;
 	}
 	
-	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData) throws ServletException, IOException {
+	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] excludes) throws ServletException, IOException {
 		JSNamespace[] namespaces = null;
 		String namespacesParam = request.getParameter("namespaces");
 		if (namespacesParam != null) {
