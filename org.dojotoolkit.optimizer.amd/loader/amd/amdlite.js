@@ -460,7 +460,15 @@ var define;
 		} else {
 			_require(dependencies);
 		}
-		queueProcessor();
+		var complete = queueProcessor();
+		if (!complete) {
+			var poller = function() {
+				complete = queueProcessor();
+				if (complete) { return; }
+				setTimeout(poller, 0);
+			};
+			poller();
+		}
 	};
 	
 	amdlite.addToCache = function(id, value) {
@@ -514,8 +522,9 @@ var define;
 	}
 
 	function queueProcessor() {
+		var allLoaded = true, timeout = 100, mid, m, ret;
+
 		try {
-			var allLoaded = true, timeout = 100, mid, m, ret;
 			for (mid in modules) {
 				if (mid === "require" || mid.match(pluginRegExp)) {
 					continue;
@@ -577,9 +586,9 @@ var define;
 				}
 			}
 			processInjectQueue();
-			setTimeout(function(){ queueProcessor(); }, timeout);
 		} catch (e) {
 			console.log("queueProcessor error : "+e);
 		}
+		return allLoaded;
 	};
 }());
