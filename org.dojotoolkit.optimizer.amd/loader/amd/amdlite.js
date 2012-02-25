@@ -132,7 +132,7 @@ var define;
 		}
     	function _load() {
     		moduleStack.push(expandedId);
-    		_loadModuleDependencies(expandedId, function(exports){
+    		_loadModuleDependencies(expandedId, function() {
     			moduleStack.pop();
 				cblist[expandedId].push({cb:cb, mid:dependentId});
             });
@@ -522,7 +522,7 @@ var define;
 	}
 
 	function queueProcessor() {
-		var allLoaded = true, timeout = 100, mid, m, ret;
+		var allLoaded = true, mid, m, ret;
 
 		try {
 			for (mid in modules) {
@@ -551,8 +551,6 @@ var define;
 
 			if (allLoaded) {
 				modulesLoaded = true;
-			} else {
-				timeout = 0;
 			}
 
 			var savedStack;
