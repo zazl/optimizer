@@ -9,7 +9,7 @@ var astwalker = require('./astwalker');
 var resourceloader = require('zazlutil').resourceloader;
 
 AMDAnalyzer = function(cfg) {
-	this.config = {paths: {}, pkgs: {}};
+	this.config = {paths: {}, pkgs: {}, baseUrl: ""};
 	if (cfg) {
 		if (cfg.paths) {
 			for (var p in cfg.paths) {

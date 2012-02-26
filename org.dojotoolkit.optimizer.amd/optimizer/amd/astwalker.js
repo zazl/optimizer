@@ -34,6 +34,9 @@ function idToUrl(path, config) {
         }
 	}
 	path = segments.join("/");
+    if (path.charAt(0) !== '/') {
+    	path = config.baseUrl + path;
+    }
 	path = normalize(path);
 	return path;
 };
