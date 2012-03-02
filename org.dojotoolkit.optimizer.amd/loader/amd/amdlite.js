@@ -41,6 +41,8 @@ var define;
 
 	var opts = Object.prototype.toString;
 	
+	var geval = window.execScript || eval;
+
     function isFunction(it) { return opts.call(it) === "[object Function]"; };
     function isArray(it) { return opts.call(it) === "[object Array]"; };
     function isString(it) { return (typeof it == "string" || it instanceof String); };
@@ -114,7 +116,7 @@ var define;
 		return path;
 	};
 	
-	function _loadModule(id, cb) {
+	function _loadModule(id, cb, scriptText) {
 		var expandedId = _expand(id);
 		var dependentId = _getCurrentId();
 		for (var i = 0; i < moduleStack.length; i++) {
@@ -132,14 +134,30 @@ var define;
 		}
     	function _load() {
     		moduleStack.push(expandedId);
+			if (scriptText) {
+				geval(scriptText);
+			}
     		_loadModuleDependencies(expandedId, function() {
     			moduleStack.pop();
 				cblist[expandedId].push({cb:cb, mid:dependentId});
             });
     	};
-		
-		if (modules[expandedId] === undefined) {
-			injectQueue.push({id:expandedId, cb: _load});
+
+    	function inInjectQueue(id) {
+    		for (var i = 0; i < injectQueue.length; i++) {
+    			if (injectQueue[i].id === id) {
+    				return true;
+    			}
+    		}
+    		return false;
+    	};
+
+		if (modules[expandedId] === undefined && scriptText === undefined) {
+			if  (inInjectQueue(expandedId)) {
+				cblist[expandedId].push({cb:cb, mid:dependentId});
+			} else {
+				injectQueue.push({id:expandedId, cb: _load});
+			}
 		} else {
 			_load();
 		}
@@ -165,6 +183,7 @@ var define;
 			if (!script.onloadDone) {
 				script.onloadDone = true;
 				cb();
+				queueProcessor();
 			}
 		};
 		script.onreadystatechange = function(){
@@ -177,8 +196,6 @@ var define;
 	
 	function _loadModuleDependencies(id, cb) {
 		var m = modules[id];
-		m.args = [];
-		m.deploaded = {};
 		var idx = 0;
 		var iterate = function(itr) {
 			if (itr.hasMore()) {
@@ -274,7 +291,8 @@ var define;
 				cb(pluginInstance);
 			};
 			load.fromText = function(name, text) {
-				_loadModule(name, function(){}, text);				
+				_loadModule(name, function(){}, text);
+				queueProcessor();
 			};
 			plugin.load(pluginModuleName, req, load, cfg);
 		});
@@ -329,27 +347,28 @@ var define;
 	
 	define = function (id, dependencies, factory) {
 		if (!isString(id)) { 
-			throw new Error("A string id must be the first parameter of the define statement"); 
+			factory = dependencies;
+			dependencies = id;
+			id = _getCurrentId();
 		}
-		
+
 		if (modules[id] !== undefined) { 
 			throw new Error("A module with an id of ["+id+"] has already been provided");
 		}
-		modules[id] = {id: id, exports: {}};
 
 		if (!isArray(dependencies)) {
 			factory = dependencies;
 			dependencies = [];
 		}
+		modules[id] = {id: id, exports: {}, args: [], deploaded: {}, dependencies: dependencies};
 		if (isFunction(factory)) {
 			factory.toString().replace(commentRegExp, "").replace(cjsRequireRegExp, function (match, dep) {
-				dependencies.push("~#"+dep);
+				modules[id].dependencies.push("~#"+dep);
             });
 			modules[id].factory = factory;
 		} else {
 			modules[id].literal = factory;
 		}
-		modules[id].dependencies = dependencies; 
 	};
 	
     define.amd = {
@@ -411,6 +430,7 @@ var define;
 	modules["require"] = {};
 	modules["require"].exports = _require;
 	modules["require"].loaded = true;
+	modules["require"].dependencies = [];
 	var cfg = {
 		baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./"),
 		injectUrl: "_javascript"
@@ -460,15 +480,7 @@ var define;
 		} else {
 			_require(dependencies);
 		}
-		var complete = queueProcessor();
-		if (!complete) {
-			var poller = function() {
-				complete = queueProcessor();
-				if (complete) { return; }
-				setTimeout(poller, 0);
-			};
-			poller();
-		}
+		queueProcessor();
 	};
 	
 	amdlite.addToCache = function(id, value) {
@@ -522,6 +534,14 @@ var define;
 	}
 
 	function queueProcessor() {
+		var poller = function() {
+			if (processQueues()) { return; }
+			setTimeout(poller, 0);
+		};
+		poller();
+	};
+
+	function processQueues() {
 		var allLoaded = true, mid, m, ret;
 
 		try {
@@ -586,6 +606,7 @@ var define;
 			processInjectQueue();
 		} catch (e) {
 			console.log("queueProcessor error : "+e);
+			allLoaded = true;
 		}
 		return allLoaded;
 	};

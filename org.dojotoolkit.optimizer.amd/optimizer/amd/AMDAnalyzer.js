@@ -96,7 +96,11 @@ AMDAnalyzer.prototype = {
 		var dependencyList = [];
 		var seen = {};
 		for (i = 0; i < modules.length; i++) {
-			var module = this.moduleMap.get(modules[i]);
+			var m = modules[i];
+			if (m.match(".+!")) {
+				m = m.substring(0, m.indexOf('!'));
+			}
+			var module = this.moduleMap.get(m);
 			this._buildDependencyList(module, dependencyList, seen);
 			this._scanForCircularDependencies(module, []);
 		}

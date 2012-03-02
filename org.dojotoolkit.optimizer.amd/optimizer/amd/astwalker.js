@@ -139,32 +139,25 @@ function scanForRequires(ast, requires) {
 	}
 };
 
-function getDependencies(src, ast) {
+function getDependencies(src, expression) {
 	var dependencies = [];
 	var nameIndex;
 
-	for (var i = 0; i < ast.body.length; i++) {
-		if (ast.body[i].type === "ExpressionStatement") {
-			var expression = ast.body[i].expression;
-			if (expression.type === "CallExpression" && expression.callee.name === "define") {
-				var args = expression.arguments;
-				for (var j = 0; j < args.length; j++) {
-					if (args[j].type === "ArrayExpression" && expression.callee.name === "define") {
-						if (j === 0) {
-							nameIndex = expression.callee.range[0] + (src.substring(expression.callee.range[0]).indexOf('(')+1);
-						}
-						var elements = args[j].elements;
- 						for (var k = 0; k < elements.length; k++) {
- 							dependencies.push({value: elements[k].value, type: elements[k].type});
- 						}
-					} else if (args[j].type === "FunctionExpression" && expression.callee.name === "define") {
-						var requires = [];
-						scanForRequires(args[j].body, requires);
-						for (var x = 0; x < requires.length; x++) {
-							dependencies.push({value: requires[x], type: "Literal"});
-						}
-					}
-				}
+	var args = expression.arguments;
+	for (var j = 0; j < args.length; j++) {
+		if (j === 0 && args[j].type !== "Literal") {
+			nameIndex = expression.callee.range[0] + (src.substring(expression.callee.range[0]).indexOf('(')+1);
+		}
+		if (args[j].type === "ArrayExpression" && expression.callee.name === "define") {
+			var elements = args[j].elements;
+			for (var k = 0; k < elements.length; k++) {
+				dependencies.push({value: elements[k].value, type: elements[k].type});
+			}
+		} else if (args[j].type === "FunctionExpression" && expression.callee.name === "define") {
+			var requires = [];
+			scanForRequires(args[j].body, requires);
+			for (var x = 0; x < requires.length; x++) {
+				dependencies.push({value: requires[x], type: "Literal"});
 			}
 		}
 	}
@@ -172,25 +165,91 @@ function getDependencies(src, ast) {
 	return {deps:dependencies, nameIndex: nameIndex};
 };
 
+function findDefine(ast) {
+	var expr;
+	for (var p in ast) {
+		if (p === "type" && ast[p] === "ExpressionStatement") {
+			var expression = ast["expression"];
+			if (expression.type === "CallExpression" && expression.callee.name === "define") {
+				return expression;
+			}
+		} else {
+			if (isArray(ast[p])) {
+				var a = ast[p];
+				for (var i = 0; i < a.length; i++) {
+					if (typeof a[i] == 'object') {
+						expr = findDefine(a[i]);
+						if (expr) {
+							return expr;
+						}
+					}
+				}
+			} else if (typeof ast[p] == 'object') {
+				expr = findDefine(ast[p]);
+				if (expr) {
+					return expr;
+				}
+			}
+		}
+	}
+	return expr;
+};
+
 function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
-	uri = expand(uri, pathStack, config);
+	if (uri === "require" || uri === "exports" || uri === "module") {
+		moduleMap.add(uri, moduleCreator.createModule(uri, uri));
+		return;
+	}
+
+	if (uri.match(".+!")) {
+		var pluginName = uri.substring(0, uri.indexOf('!'));
+		pluginName = expand(pluginName, pathStack, config);
+		var pluginValue = uri.substring(uri.indexOf('!')+1);
+		if (pluginRefList[pluginName] === undefined) {
+			pluginRefList[pluginName] = [];
+		}
+		var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
+		if (pluginRef.dependency) {
+			var dependencyUri = idToUrl(pluginRef.dependency, config);
+			var addDependency = true;
+			for (var k = 0; k < exclude.length; k++) {
+				if (dependencyUri === exclude[k]) {
+					addDependency = false;
+					break;
+				}
+			}
+			if (addDependency) {
+				module.addDependency(pluginRef.dependency);
+				esprimaWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+			}
+		}
+		pluginRefList[pluginName].push(pluginRef);
+		uri = pluginName;
+	} else {
+		uri = expand(uri, pathStack, config);
+	}
 	var url = idToUrl(uri, config);
+	if (url.charAt(0) !== '/') {
+		url = '/'+url;
+	}
+
 	if (moduleMap.get(uri) === undefined) {
-		var src = resourceloader.readText('/'+url+'.js');
+		var src = resourceloader.readText(url+'.js');
 		if (src === null) {
 			throw new Error("Unable to load src for ["+url+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
 		}
-		var ast = astcache.getAst('/'+uri+'.js', config.astparser);
+		var ast = astcache.getAst(url+'.js', config.astparser);
 		if (ast === null) {
 			var esprima = require("esprima/esprima");
 			ast = esprima.parse(src, {range: true});
 		}
+		var defineExpr = findDefine(ast);
 		var id = uri;
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
-		var depInfo = getDependencies(src, ast);
+		var depInfo = getDependencies(src, defineExpr);
 		if (depInfo.nameIndex) {
-			missingNamesList.push({uri: url, id: url, nameIndex: depInfo.nameIndex});
+			missingNamesList.push({uri: url, id: id, nameIndex: depInfo.nameIndex});
 		}
 
 		var dependency, keepWalking, type;
@@ -235,7 +294,11 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 				pathStack.pop();
 			}
 
-			if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
+			if (keepWalking &&
+				dependency !== config.baseUrl+"require" &&
+				dependency !== config.baseUrl+"exports" &&
+				dependency !== config.baseUrl+"module" &&
+				dependency.indexOf("!") === -1) {
 				pathStack.push(uri);
 				dependency = expand(dependency, pathStack, config);
 				var dependencyUri = idToUrl(dependency, config);
@@ -257,17 +320,52 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 };
 
 function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack) {
+	if (uri === "require" || uri === "exports" || uri === "module") {
+		moduleMap.add(uri, moduleCreator.createModule(uri, uri));
+		return;
+	}
+
 	var jsp = require("uglify-js").parser;
 	var uglify = require("uglify-js").uglify;
 	
-	uri = expand(uri, pathStack, config);
+	if (uri.match(".+!")) {
+		var pluginName = uri.substring(0, uri.indexOf('!'));
+		pluginName = expand(pluginName, pathStack, config);
+		var pluginValue = uri.substring(uri.indexOf('!')+1);
+		if (pluginRefList[pluginName] === undefined) {
+			pluginRefList[pluginName] = [];
+		}
+		var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
+		if (pluginRef.dependency) {
+			var dependencyUri = idToUrl(pluginRef.dependency, config);
+			var addDependency = true;
+			for (var k = 0; k < exclude.length; k++) {
+				if (dependencyUri === exclude[k]) {
+					addDependency = false;
+					break;
+				}
+			}
+			if (addDependency) {
+				module.addDependency(pluginRef.dependency);
+				uglifyjsWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+			}
+		}
+		pluginRefList[pluginName].push(pluginRef);
+		uri = pluginName;
+	} else {
+		uri = expand(uri, pathStack, config);
+	}
 	var url = idToUrl(uri, config);
+	if (url.charAt(0) !== '/') {
+		url = '/'+url;
+	}
+
 	if (moduleMap.get(uri) === undefined) {
-		var src = resourceloader.readText('/'+url+'.js');
+		var src = resourceloader.readText(url+'.js');
 		if (src === null) {
 			throw new Error("Unable to load src for ["+url+"]. Module ["+(pathStack.length > 0 ? pathStack[pathStack.length-1] : "root")+"] has a dependency on it.");
 		}
-		var ast = astcache.getAst('/'+uri+'.js', config.astparser);
+		var ast = astcache.getAst(uri+'.js', config.astparser);
 		if (ast === null) {
 			ast = jsp.parse(src, false, true);
 		}
@@ -279,6 +377,11 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		    "call": function(expr, args) {
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
+                    if (expr[1] === "define" && args[0][0].name !== "string") {
+	                    var start = w.parent()[0].start;
+						var nameIndex = start.pos + (src.substring(start.pos).indexOf('(')+1);
+                    	missingNamesList.push({uri: url, id: id, nameIndex: nameIndex});
+                    }
 				    if (expr[1] === "require") { 
 				    	if (args[0][0].name === "string") {
 							dependencyArg = [args[0][1]];
@@ -288,15 +391,8 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 					} else if (args[0][0].name === "string" && args[1][0].name === "array") {
 						id = args[0][1];
 						dependencyArg = args[1][1];
-					} else if (args[0][0].name === "array" || args[0][0].name === "function") {
-                        if (expr[1] === "define") {
-    	                    var start = w.parent()[0].start;
-    						var nameIndex = start.pos + (src.substring(start.pos).indexOf('(')+1);
-                        	missingNamesList.push({uri: url, id: id, nameIndex: nameIndex});
-                        }
-                        if (args[0][0].name === "array") {
-                        	dependencyArg = args[0][1];
-                        }
+					} else if (args[0][0].name === "array") {
+                        dependencyArg = args[0][1];
 					}
 					if (dependencyArg !== undefined) {
 						for (var i = 0; i < dependencyArg.length; i++) {
@@ -337,7 +433,11 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 								module.addDependency(dependency);
 								pathStack.pop();
 							}
-							if (keepWalking && dependency !== "require" && dependency !== "exports" && dependency !== "module" && dependency.indexOf("!") === -1) {
+							if (keepWalking &&
+								dependency !== config.baseUrl+"require" &&
+								dependency !== config.baseUrl+"exports" &&
+								dependency !== config.baseUrl+"module" &&
+								dependency.indexOf("!") === -1) {
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack, config);
 								var dependencyUri = idToUrl(dependency, config);
