@@ -24,7 +24,7 @@ AMDAnalyzer = function(cfg) {
 			}
 		}
 		if (cfg.useBaseUrl && cfg.baseUrl) {
-			this.config = cfg.baseUrl;
+			this.config.baseUrl = cfg.baseUrl;
 		}
 		for (var p in cfg) {
 			if (p !== "paths" && p !== "packages" && p !== 'baseUrl') {
