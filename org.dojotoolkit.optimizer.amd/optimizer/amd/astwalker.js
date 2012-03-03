@@ -211,6 +211,9 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 		var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
 		if (pluginRef.dependency) {
 			var dependencyUri = idToUrl(pluginRef.dependency, config);
+			if (dependencyUri.charAt(0) !== '/') {
+				dependencyUri = '/'+dependencyUri;
+			}
 			var addDependency = true;
 			for (var k = 0; k < exclude.length; k++) {
 				if (dependencyUri === exclude[k]) {
@@ -271,6 +274,9 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 				var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
 				if (pluginRef.dependency) {
 					var dependencyUri = idToUrl(pluginRef.dependency, config);
+					if (dependencyUri.charAt(0) !== '/') {
+						dependencyUri = '/'+dependencyUri;
+					}
 					var addDependency = true;
 					for (var k = 0; k < exclude.length; k++) {
 						if (dependencyUri === exclude[k]) {
@@ -302,6 +308,9 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 				pathStack.push(uri);
 				dependency = expand(dependency, pathStack, config);
 				var dependencyUri = idToUrl(dependency, config);
+				if (dependencyUri.charAt(0) !== '/') {
+					dependencyUri = '/'+dependencyUri;
+				}
 				var addDependency = true;
 				for (var k = 0; k < exclude.length; k++) {
 					if (dependencyUri === exclude[k]) {
@@ -338,6 +347,9 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
 		if (pluginRef.dependency) {
 			var dependencyUri = idToUrl(pluginRef.dependency, config);
+			if (dependencyUri.charAt(0) !== '/') {
+				dependencyUri = '/'+dependencyUri;
+			}
 			var addDependency = true;
 			for (var k = 0; k < exclude.length; k++) {
 				if (dependencyUri === exclude[k]) {
@@ -411,6 +423,9 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 								var pluginRef = processPluginRef(pluginName, pluginValue, pathStack, config);
 								if (pluginRef.dependency) {
 									var dependencyUri = idToUrl(pluginRef.dependency, config);
+									if (dependencyUri.charAt(0) !== '/') {
+										dependencyUri = '/'+dependencyUri;
+									}
 									var addDependency = true;
 									for (var k = 0; k < exclude.length; k++) {
 										if (dependencyUri === exclude[k]) {
@@ -441,6 +456,9 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 								pathStack.push(uri);
 								dependency = expand(dependency, pathStack, config);
 								var dependencyUri = idToUrl(dependency, config);
+								if (dependencyUri.charAt(0) !== '/') {
+									dependencyUri = '/'+dependencyUri;
+								}
 								var addDependency = true;
 								for (var k = 0; k < exclude.length; k++) {
 									if (dependencyUri === exclude[k]) {
