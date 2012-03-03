@@ -92,7 +92,7 @@ exports.analyze = function (script) {
 
 	w.with_walkers({
 	    "call": function(expr, args) {
-			if (expr[0] === "name" && expr[1] === "amdlite") {
+			if (expr[0] === "name" && expr[1] === "zazl") {
 				if (args[0][0].name === "array") {
 					readDependencies(args[0][1]);
 				} else if (args[0][0].name === "object" && args[1][0].name === "array") {

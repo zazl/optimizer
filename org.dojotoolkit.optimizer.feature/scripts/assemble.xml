@@ -108,7 +108,7 @@
 				<include name="org_dojotoolkit_optimizer.properties"/> 
 			</zipfileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
-				<include name="amdlite.json"/> 
+				<include name="zazl.json"/> 
 			</zipfileset>
 			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
 				<include name="org.dojotoolkit.json*.jar"/> 

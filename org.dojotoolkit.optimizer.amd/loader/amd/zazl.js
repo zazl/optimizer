@@ -436,7 +436,7 @@ var define;
 		injectUrl: "_javascript"
 	};
 
-	amdlite = function(config, dependencies, callback) {
+	zazl = function(config, dependencies, callback) {
 		if (!isArray(config) && typeof config == "object") {
 			var i;
 			cfg = config;
@@ -483,11 +483,11 @@ var define;
 		queueProcessor();
 	};
 	
-	amdlite.addToCache = function(id, value) {
+	zazl.addToCache = function(id, value) {
 		cache[id] = value;
 	};
 	
-	amdlite.addAnalysisKey = function(key) {
+	zazl.addAnalysisKey = function(key) {
 		analysisKeys.push(key);
 	};
 	

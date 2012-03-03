@@ -30,7 +30,7 @@ public class AMDJSHandler extends JSHandler {
 	@SuppressWarnings("unchecked")
 	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] excludes) throws ServletException, IOException {
 		if (analysisData != null) {	
-			writer.write("amdlite.addAnalysisKey('"+analysisData.getKey()+"');\n");
+			writer.write("zazl.addAnalysisKey('"+analysisData.getKey()+"');\n");
 			String suffixCode = (String)config.get("suffixCode");
 			if (suffixCode != null) {
 				writer.write(suffixCode);

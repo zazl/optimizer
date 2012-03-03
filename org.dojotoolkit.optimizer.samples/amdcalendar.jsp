@@ -41,7 +41,7 @@
 	%>
 	<script type="text/javascript" src="<%=urlGenerator.generateURL("amdtest/Calendar", cfg)%>"></script>
 	<script type="text/javascript">
-        amdlite({
+        zazl({
             packages: [
                 {
                     name: 'dojo',

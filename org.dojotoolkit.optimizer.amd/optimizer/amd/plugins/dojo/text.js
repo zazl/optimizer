@@ -16,6 +16,6 @@ function jsEscape(content) {
 exports.write = function(pluginName, moduleName, write, moduleUrl) {
 	var textContent = require('zazlutil').resourceloader.readText(moduleUrl);
 	if (textContent) {
-		write("amdlite.addToCache('"+moduleName+"', '"+jsEscape(textContent)+"');\n");
+		write("zazl.addToCache('"+moduleName+"', '"+jsEscape(textContent)+"');\n");
 	}
 };
