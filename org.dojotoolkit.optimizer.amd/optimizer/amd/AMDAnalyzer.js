@@ -23,8 +23,11 @@ AMDAnalyzer = function(cfg) {
 				this.config.pkgs[pkg.name] = pkg;
 			}
 		}
+		if (cfg.useBaseUrl && cfg.baseUrl) {
+			this.config = cfg.baseUrl;
+		}
 		for (var p in cfg) {
-			if (p !== "paths" && p !== "packages") {
+			if (p !== "paths" && p !== "packages" && p !== 'baseUrl') {
 				this.config[p] = cfg[p];
 			}
 		}
