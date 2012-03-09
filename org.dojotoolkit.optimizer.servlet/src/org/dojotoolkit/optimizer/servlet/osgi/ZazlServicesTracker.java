@@ -46,6 +46,7 @@ public class ZazlServicesTracker {
 	private boolean registered = false;
 	private ServiceReference httpServiceReference = null;
 	private JSFilter jsFilter = null;
+	private boolean useHTMLFilter = false;
 	private String httpContextName = null;
 	private List<ZazlServicesListener> listenerList = null;
 	
@@ -140,12 +141,18 @@ public class ZazlServicesTracker {
 			}
 
 			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory);
-			jsFilter = new JSFilter(resourceLoader, rhinoClassLoader); 
+			useHTMLFilter = Boolean.valueOf(System.getProperty("useHTMLFilter", "false"));
+			if (useHTMLFilter) {
+				jsFilter = new JSFilter(resourceLoader, rhinoClassLoader);
+			}
 			try {
-				System.out.println("Registering servlets and filters");
+				System.out.println("Registering servlets");
 				httpService.registerServlet("/_javascript", jsServlet, null, httpContext);
 				httpService.registerServlet("/", new ResourceServlet(resourceLoader), null, httpContext);
-				httpService.registerFilter("/*.html", jsFilter, null, httpContext);
+				if (useHTMLFilter) {
+					System.out.println("Registering HTML Filter");
+					httpService.registerFilter("/*.html", jsFilter, null, httpContext);
+				}
 				registered = true;
 				for (ZazlServicesListener listener : listenerList) {
 					listener.servicesAvailable(httpService, httpContextExtensionService, jsCompressorFactory, jsOptimizerFactory, httpContext);
@@ -176,7 +183,9 @@ public class ZazlServicesTracker {
 			if (registered) {
 				httpService.unregister("/_javascript");
 				httpService.unregister("/");
-				httpService.unregisterFilter(jsFilter);
+				if (useHTMLFilter) {
+					httpService.unregisterFilter(jsFilter);
+				}
 			}
 			super.removedService(reference, service);
 		}			

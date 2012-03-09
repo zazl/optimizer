@@ -33,7 +33,7 @@ public class JSServlet extends HttpServlet {
 	protected JSOptimizerFactory jsOptimizerFactory = null;
 	protected ResourceLoader resourceLoader = null;
 	protected RhinoClassLoader rhinoClassLoader = null;
-	protected boolean javaChecksum = false; 
+	protected boolean javaChecksum = true;
 	protected String jsHandlerType = null;
 	protected List<List<String>> warmupValues = null;
 	protected List<String> rhinoJSClasses = null;

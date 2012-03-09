@@ -51,7 +51,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing configuration", e);
 		}
-		astCacheHandler = new ASTCache();
+		Boolean useAstCache = (Boolean)config.get("astCache");
+		if (useAstCache != null && useAstCache == Boolean.TRUE) {
+			astCacheHandler = new ASTCache();
+		}
 	}
 	
 	public Map<String, Object> getConfig() {

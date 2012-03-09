@@ -97,7 +97,7 @@
 				<include name="circular.jsp"/>
 			</fileset>
 		</war>
-		<war destfile="${target.dir}/package/amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml">
+		<war destfile="${target.dir}/package/filter_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/filter_amdoptimizer_web.xml">
 			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
 			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
 			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
@@ -129,11 +129,51 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
-				<include name="amdcalendar*.*"/>
-				<include name="amddeclarative.*"/>
+				<include name="filter_*.html"/>
+				<include name="amdcalendar.jsp"/>
+				<include name="amddeclarative.jsp"/>
 			</fileset>
 		</war>
-		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdoptimizerjsp_web.xml" tofile="${target.dir}/package/sample_web.xml"/>
+		<war destfile="${target.dir}/package/inject_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml">
+			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
+			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
+			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_compressor.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_optimizer.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
+				<include name="zazl.json"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
+				<include name="org.dojotoolkit.json*.jar"/> 
+				<include name="org.dojotoolkit.optimizer*.jar"/> 
+				<include name="org.dojotoolkit.compressor*.jar"/> 
+				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
+				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="org.dojotoolkit.server.util*.jar"/> 
+				<include name="json*.jar"/> 
+				<include name="uglifyjs*.jar"/> 
+				<include name="esprima.jar"/> 
+				<include name="nekohtml.jar"/> 
+				<include name="xercesMinimal.jar"/> 
+				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
+				<exclude name="*v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
+			</zipfileset>	
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
+			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
+				<include name="inject_*.html"/>
+			</fileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd" prefix="loader/amd">
+				<include name="zazl.js"/>
+			</zipfileset>	
+		</war>
+		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml" tofile="${target.dir}/package/inject_web.xml"/>
+		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/filter_amdoptimizer_web.xml" tofile="${target.dir}/package/filter_web.xml"/>
 		<zip destfile="${target.dir}/package/optimizer.zip">
 			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
 				<include name="org.dojotoolkit.json*.jar"/> 
@@ -163,9 +203,49 @@
 				<include name="*.json"/> 
 			</zipfileset>
 			<zipfileset dir="${target.dir}/package" prefix="WEB-INF">
-				<include name="sample_web.xml"/>
+				<include name="filter_web.xml"/>
+				<include name="inject_web.xml"/>
 			</zipfileset>
+			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd">
+				<include name="zazl.js"/>
+			</fileset>
 		</zip>
+		<zip destfile="${target.dir}/package/amdjs-tests.zip">
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_compressor.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer/src" prefix="WEB-INF/classes">
+				<include name="org_dojotoolkit_optimizer.properties"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.servlet" prefix="WEB-INF/classes">
+				<include name="zazl.json"/> 
+			</zipfileset>
+			<zipfileset dir="${target.dir}/package/warlib" prefix="WEB-INF/lib">
+				<include name="org.dojotoolkit.json*.jar"/> 
+				<include name="org.dojotoolkit.optimizer*.jar"/> 
+				<include name="org.dojotoolkit.compressor*.jar"/> 
+				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
+				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="org.dojotoolkit.server.util*.jar"/> 
+				<include name="json*.jar"/> 
+				<include name="uglifyjs*.jar"/> 
+				<include name="esprima.jar"/> 
+				<include name="nekohtml.jar"/> 
+				<include name="xercesMinimal.jar"/> 
+				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
+				<exclude name="*v8*.jar"/> 
+				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
+			</zipfileset>	
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/amdjs-tests/impl/zazl" prefix="impl/zazl">
+				<include name="config.js"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd" prefix="impl/zazl">
+				<include name="zazl.js"/> 
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/amdjs-tests" prefix="WEB-INF">
+				<include name="web.xml"/> 
+			</zipfileset>
+		</zip>	
 	</target>
 
 	<!-- Clean up the target directory -->

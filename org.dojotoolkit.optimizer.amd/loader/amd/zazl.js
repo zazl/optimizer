@@ -163,13 +163,18 @@ var define;
 		}
 	};
 	
-	function _inject(moduleId, cb) {
+	function _inject(moduleIds, cb) {
 		var locale = "en-us";
 		if (window.dojoConfig && window.dojoConfig.locale) {
 			locale = dojoConfig.locale;
 		}
 		var configString = JSON.stringify(cfg);
-		var url = cfg.injectUrl+"?modules="+moduleId+"&writeBootstrap=false&locale="+locale+"&config="+configString+"&exclude=";
+		var url = cfg.injectUrl+"?modules=";
+		for (var i = 0; i < moduleIds.length; i++) {
+			url += moduleIds[i];
+			url += i < (moduleIds.length - 1) ? "," : "";
+		}
+		url += "&writeBootstrap=false&locale="+locale+"&config="+configString+"&exclude=";
 		for (var i = 0; i < analysisKeys.length; i++) {
 			url += analysisKeys[i];
 			url += i < (analysisKeys.length - 1) ? "," : "";
@@ -462,25 +467,35 @@ var define;
 			cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/'+ cfg.baseUrl);
 		}
 
-		for (var id in cache) {
-			var resolvedId = _idToUrl(id);
-			var cacheValue = cache[id];
-			delete cache[id];
-			cache[resolvedId] = cacheValue;
-		}
-		
 		if (!isArray(dependencies)) {
 			callback = dependencies;
 			dependencies = [];
 		}
-		if (isFunction(callback)) {
-			_require(dependencies, function() {
-				callback.apply(null, arguments);
-			});
+
+		function _load() {
+			if (isFunction(callback)) {
+				_require(dependencies, function() {
+					callback.apply(null, arguments);
+				});
+			} else {
+				_require(dependencies);
+			}
+			for (var id in cache) {
+				var resolvedId = _idToUrl(id);
+				var cacheValue = cache[id];
+				delete cache[id];
+				cache[resolvedId] = cacheValue;
+			}
+			queueProcessor();
+		};
+
+		if (cfg.directInject && dependencies.length > 0) {
+			_inject(dependencies, function(){
+				_load();
+			})
 		} else {
-			_require(dependencies);
+			_load();
 		}
-		queueProcessor();
 	};
 	
 	zazl.addToCache = function(id, value) {
@@ -526,7 +541,7 @@ var define;
 		if (!injectInProcess && injectQueue.length > 0) {
 			injectInProcess = true;
 			var injection = injectQueue.shift();
-			_inject(injection.id, function() {
+			_inject([injection.id], function() {
 				injection.cb();
 				injectInProcess = false;
 			});
