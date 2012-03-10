@@ -13,7 +13,7 @@
 	</style>
 	<style type="text/css">
     	html, body { width: 100%; height: 100%; margin: 0; overflow:hidden; }
-    	#borderContainerTwo { width: 100%; height: 100%; }
+    	#borderContainerTwo { width: 100%; height: 100%; visibility:hidden; }
 	</style>
 	<script type="text/javascript">
         var dojoConfig = {
@@ -62,8 +62,9 @@
                 }
             ]
         }, 
-        ["amdtest/Declarative"], 
-        function(declarative) {
+        ["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], 
+        function(declarative, dom, domStyle) {
+        	domStyle.set(dom.byId("borderContainerTwo"), "visibility", "visible");
             console.log("done");
         });
 	</script>
