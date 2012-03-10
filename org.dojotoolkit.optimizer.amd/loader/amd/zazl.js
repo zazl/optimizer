@@ -613,6 +613,11 @@ var define;
 				}
 			}
 			if (!pageLoaded && domLoaded && modulesLoaded) {
+				for (mid in cblist) {
+					if (modules[mid] && modules[mid].loaded) {
+						cbiterate(modules[mid].exports, new Iterator(cblist[mid]));
+					}
+				}
 				pageLoaded = true;
 				for (var i = 0; i < readyCallbacks.length; i++) {
 					readyCallbacks[i]();
