@@ -18,7 +18,7 @@ AMD Optimizer Features
 * Includes its own AMD Compliant Loader (It passes all the current AMD JS Tests)
 * Can optimize Dojo 1.6.x and 1.7.x based applications.
 * Optimizes locale messages based on the browsers locale when the dojo/i18n plugin is used.
-* Optimizes text data when the dojo/text.
+* Optimizes text data when the dojo/text plugin is used.
 * Can Optimize jQuery 1.7.x based applications that use AMD.
 * Provides a JEE HTML Filter that will parse HTML and insert required javascript tags.
 
