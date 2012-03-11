@@ -49,6 +49,13 @@ The Zazl AMD Loader should work in the following browsers :
 * Mobile Safari on iOS 4+
 * Android Browser 1.6+
 
+Setting up a Development Environment
+====================================
+
+* Follow the development environment steps described in the README on https://github.com/zazl/serverutils.
+* Clone the Optimizer git repo (git clone https://github.com/zazl/optimizer.git) from within the "zazldev/workspace" directory.
+* Import the projects found in the "zazldev/workspace/optimizer" directory via "File->Import->General->Existing Projects into Workspace".
+
 License
 =======
 
