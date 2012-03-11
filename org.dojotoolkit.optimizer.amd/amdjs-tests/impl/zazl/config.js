@@ -26,9 +26,8 @@ var config = function(cfg) {
 var go = function(dependencies, callback) {
 	var cfg = zazlConfig ? zazlConfig : {};
 	cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./");
-	cfg.useBaseUrl = true;
 	cfg.directInject = true;
-	cfg.injectUrl = "/_javascript";
+	cfg.injectUrl = "/amdjs-tests/_javascript";
 	zazl(cfg, dependencies, callback);
 };
 

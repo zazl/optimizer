@@ -17,9 +17,11 @@ import org.dojotoolkit.server.util.resource.CachingResourceLoader;
 public class ServletResourceLoader extends CachingResourceLoader {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	private ServletContext servletContext = null;
+	private String contextPath = null;
 
 	public ServletResourceLoader(ServletContext servletContext) {
 		this.servletContext = servletContext;
+		this.contextPath = servletContext.getContextPath();
 	}
 	
 	protected URL _getResource(String path) throws IOException {
@@ -28,16 +30,26 @@ public class ServletResourceLoader extends CachingResourceLoader {
 		}
 		URL url = servletContext.getResource(path);
 		if (url != null) {
-			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+			logger.logp(Level.FINE, getClass().getName(), "_getResource", "servlet context["+path+"] ["+url+"]");
 			return url;
 		}
 		url = getClass().getClassLoader().getResource(path);	
 		if (url != null) {
-			logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path+"] ["+url+"]");
+			logger.logp(Level.FINE, getClass().getName(), "_getResource", "classloader getResource["+path+"] ["+url+"]");
 			return url;
 		}
-		url = getClass().getClassLoader().getResource(path.substring(1));	
-		logger.logp(Level.FINE, getClass().getName(), "_getResource", "["+path.substring(1)+"] ["+url+"]");
+		url = getClass().getClassLoader().getResource(path.substring(1));
+		if (url != null) {
+			logger.logp(Level.FINE, getClass().getName(), "_getResource", "classloader getResource + 1["+path.substring(1)+"] ["+url+"]");
+			return url;
+		}
+		if (path.startsWith(contextPath)) {
+			path = path.substring(contextPath.length());
+			url = servletContext.getResource(path);
+			if (url != null) {
+				logger.logp(Level.FINE, getClass().getName(), "_getResource", "servlet context - context path["+path+"] ["+url+"]");
+			}
+		}
 		return url;
 	}
 }
