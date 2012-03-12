@@ -74,24 +74,33 @@ public class Util {
 		for (Localization localization : localizations) {
 			//System.out.println("["+localization.bundlePackage+"]["+localization.modulePath+"]["+localization.bundleName+"]");
 			String rootModuleUrl = normalizePath(localization.moduleUrl+'/'+localization.bundleName);
+			if (rootModuleUrl.charAt(0) != '/') {
+				rootModuleUrl = '/'+rootModuleUrl;
+			}
 			String rootModule = normalizePath(localization.modulePath+'/'+localization.bundleName);
 			String intermediateModuleUrl = null;
 			String intermediateModule = null;
 			String fullModuleUrl = normalizePath(localization.moduleUrl+'/'+localeString+'/'+localization.bundleName);
+			if (fullModuleUrl.charAt(0) != '/') {
+				fullModuleUrl = '/'+fullModuleUrl;
+			}
 			String fullModule = normalizePath(localization.modulePath+'/'+localeString+'/'+localization.bundleName);
 			if (intermediateLocaleString != null) {
 				intermediateModuleUrl = normalizePath(localization.moduleUrl+'/'+intermediateLocaleString+'/'+localization.bundleName);
+				if (intermediateModuleUrl.charAt(0) != '/') {
+					intermediateModuleUrl = '/'+intermediateModuleUrl;
+				}
 				intermediateModule = normalizePath(localization.modulePath+'/'+intermediateLocaleString+'/'+localization.bundleName);
 			}
-			String root = resourceLoader.readResource('/'+rootModuleUrl+".js");
+			String root = resourceLoader.readResource(rootModuleUrl+".js");
 			if (root != null) {
 				writeLocalization(w, root, rootModule);
 			}
-			String lang = (intermediateModuleUrl == null) ? null : resourceLoader.readResource('/'+intermediateModuleUrl+".js");
+			String lang = (intermediateModuleUrl == null) ? null : resourceLoader.readResource(intermediateModuleUrl+".js");
 			if (lang != null) {
 				writeLocalization(w, lang, intermediateModule);
 			}
-			String langCountry = resourceLoader.readResource('/'+fullModuleUrl+".js");
+			String langCountry = resourceLoader.readResource(fullModuleUrl+".js");
 			if (langCountry != null) {
 				writeLocalization(w, langCountry, fullModule);
 			}
