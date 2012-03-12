@@ -39,7 +39,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 
 	public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		V8OptimizerScriptRunner v8OptimizerScriptRunner = new V8OptimizerScriptRunner(resourceLoader);
-		return v8OptimizerScriptRunner._getAnalysisData(modules, exclude);
+		return v8OptimizerScriptRunner._getAnalysisData(modules, exclude, pageConfig);
 	}
 	
 	public Map<String, Object> getConfig() {
@@ -68,7 +68,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 		
 		
 		@SuppressWarnings("unchecked")
-		public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude) throws IOException {
+		public JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 			JSAnalysisDataImpl jsAnalysisData = null;
 			
 			StringBuffer moduleList = new StringBuffer();
@@ -129,7 +129,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 					Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 					localizationList.add(localization);
 				}
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, null, resourceLoader, exclude);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, null, resourceLoader, exclude, pageConfig);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {

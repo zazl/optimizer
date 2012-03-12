@@ -36,7 +36,7 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 	}
 
 	public JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
-		String key = JSAnalysisDataImpl.getKey(modules, exclude);
+		String key = JSAnalysisDataImpl.getKey(modules, exclude, pageConfig);
 		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
 		Object lock = null;
 		synchronized (lockMap) {

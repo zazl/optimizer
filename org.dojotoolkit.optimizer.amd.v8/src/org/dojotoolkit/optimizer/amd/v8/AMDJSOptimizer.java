@@ -148,7 +148,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					missingNamesList.addAll(modulesMissingNames);
 				}
 				Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)analysisData.get("pluginRefs");
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude, pageConfig);
 				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {

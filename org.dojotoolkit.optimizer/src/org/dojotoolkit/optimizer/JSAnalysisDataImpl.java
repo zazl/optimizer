@@ -5,6 +5,8 @@
 */
 package org.dojotoolkit.optimizer;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dojotoolkit.json.JSONSerializer;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class JSAnalysisDataImpl implements JSAnalysisData {
@@ -27,6 +30,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private Map<String, Long> timestampLookup = null;
 	private String[] excludes = null;
 	private String key = null;
+	private Map<String, Object> pageConfig = null;
 	
 	public JSAnalysisDataImpl(String[] modules, 
 			                  List<String> dependencies, 
@@ -36,7 +40,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  List<Map<String, Object>> modulesMissingNames,
 			                  Map<String, List<Map<String, String>>> pluginRefs,
 			                  ResourceLoader resourceLoader,
-			                  JSAnalysisData[] exclude) {
+			                  JSAnalysisData[] exclude,
+			                  Map<String, Object> pageConfig) {
 		timestampLookup = new HashMap<String, Long>();
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
@@ -53,7 +58,18 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.pluginRefs = pluginRefs;
 		this.resourceLoader = resourceLoader;
         excludes = _getExludes(exclude);
-        key = _getKey(this.modules, excludes);
+        String config = null;
+        if (pageConfig != null) {
+        	this.pageConfig = pageConfig;
+        	StringWriter sw = new StringWriter();
+        	try {
+				JSONSerializer.serialize(sw, pageConfig);
+				config = sw.toString();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        key = _getKey(this.modules, excludes, config);
 	}
 	
 	public String[] getModules() {
@@ -108,11 +124,21 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		return false;
 	}
 	
-	public static String getKey(String[] keyValues, JSAnalysisData[] exclude) {
-		return _getKey(keyValues, _getExludes(exclude));
+	public static String getKey(String[] keyValues, JSAnalysisData[] exclude, Map<String, Object> pageConfig) {
+		String config = null;
+		if (pageConfig != null) {
+        	StringWriter sw = new StringWriter();
+        	try {
+				JSONSerializer.serialize(sw, pageConfig);
+				config = sw.toString();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return _getKey(keyValues, _getExludes(exclude), config);
 	}
 	
-	private static String _getKey(String[] keyValues, String[] excludes) {
+	private static String _getKey(String[] keyValues, String[] excludes, String config) {
 		StringBuffer key = new StringBuffer();
 		key.append("keyValues:");
 		for (String keyValue : keyValues) {
@@ -122,6 +148,10 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
         for (String excludeModule : excludes) {
     		key.append(excludeModule);
     	}
+        if (config != null) {
+        	key.append("configValue:");
+        	key.append(config);
+        }
 		try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(key.toString().getBytes());
