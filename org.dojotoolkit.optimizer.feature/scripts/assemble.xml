@@ -14,7 +14,7 @@
 	
 	<property
 		name="dojo17.dir"
-		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.7.1"/>
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.7.2"/>
 	
 	<property
 		name="json.dir"
@@ -22,7 +22,7 @@
 	
 	<property
 		name="uglifyjs.dir"
-		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.2.3"/>
+		value="${workspace.dir}/../targetplatform/uglifyjs/plugins/org.uglifyjs_1.2.5"/>
 	
 	<property
 		name="nekohtml.dir"
