@@ -28,7 +28,7 @@ public class AMDErrorTest extends OptimizerTest {
 			assertNotNull(config);
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 
-			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, true, config);
+			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, config, new java.io.File("."));
 			optimizer.getAnalysisData(new String[] {"test/amd/error/A"});
 		} catch (Exception e) {
 			if (!e.getMessage().contains("Error: Unable to load src for [test/amd/error/E]. Module [test/amd/error/C] has a dependency on it.")) {

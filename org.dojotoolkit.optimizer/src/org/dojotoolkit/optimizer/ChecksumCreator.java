@@ -24,6 +24,8 @@ public class ChecksumCreator {
 			String contentElement = resourceLoader.readResource(Util.normalizePath(dependency));
 			if (contentElement != null) {
 				content.append(contentElement);
+			} else {
+				throw new IOException("Unable to locate resource ["+dependency+"]");
 			}
 		}
 		try {

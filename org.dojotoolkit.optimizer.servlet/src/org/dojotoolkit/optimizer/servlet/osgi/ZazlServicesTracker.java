@@ -115,7 +115,6 @@ public class ZazlServicesTracker {
 					return registered;
 				}
 			}
-			boolean javaChecksum = Boolean.valueOf(System.getProperty("javaChecksum", "false"));
 			List<String> bundleIdList = new ArrayList<String>();
 			String bundleIdsString = System.getProperty("searchBundleIds");
 			if (bundleIdsString != null) {
@@ -140,7 +139,7 @@ public class ZazlServicesTracker {
 				}
 			}
 
-			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory);
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory);
 			useHTMLFilter = Boolean.valueOf(System.getProperty("useHTMLFilter", "false"));
 			if (useHTMLFilter) {
 				jsFilter = new JSFilter(resourceLoader, rhinoClassLoader);

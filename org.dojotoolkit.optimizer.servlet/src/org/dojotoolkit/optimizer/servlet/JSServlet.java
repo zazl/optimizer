@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -33,7 +34,6 @@ public class JSServlet extends HttpServlet {
 	protected JSOptimizerFactory jsOptimizerFactory = null;
 	protected ResourceLoader resourceLoader = null;
 	protected RhinoClassLoader rhinoClassLoader = null;
-	protected boolean javaChecksum = true;
 	protected String jsHandlerType = null;
 	protected List<List<String>> warmupValues = null;
 	protected List<String> rhinoJSClasses = null;
@@ -48,13 +48,12 @@ public class JSServlet extends HttpServlet {
 	                 String jsHandlerType,
 	                 List<List<String>> warmupValues,
 	                 JSCompressorFactory jsCompressorFactory) {
-		this(resourceLoader, jsOptimizerFactory, rhinoClassLoader, javaChecksum, jsHandlerType, warmupValues, null, jsCompressorFactory);
+		this(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, warmupValues, null, jsCompressorFactory);
 	}
 
 	public JSServlet(ResourceLoader resourceLoader, 
 			         JSOptimizerFactory jsOptimizerFactory, 
 			         RhinoClassLoader rhinoClassLoader, 
-			         boolean javaChecksum, 
 			         String jsHandlerType,
 			         List<List<String>> warmupValues,
 			         List<String> rhinoJSClasses,
@@ -63,7 +62,6 @@ public class JSServlet extends HttpServlet {
 		this.jsOptimizerFactory = jsOptimizerFactory;
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
-		this.javaChecksum = javaChecksum;
 		this.jsHandlerType = jsHandlerType;
 		this.warmupValues = warmupValues;
 		this.rhinoJSClasses = rhinoJSClasses;
@@ -106,10 +104,6 @@ public class JSServlet extends HttpServlet {
 				}
 			}
 		}
-		String javaChecksumString = getServletContext().getInitParameter("javaChecksum");
-		if (javaChecksumString != null) {
-			javaChecksum = Boolean.valueOf(javaChecksumString);
-		}
 		if (jsOptimizerFactory == null) {
 			jsOptimizerFactory = (JSOptimizerFactory)getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory");
 			if (jsOptimizerFactory == null) {
@@ -151,7 +145,8 @@ public class JSServlet extends HttpServlet {
 				jsCompressorFactory = new JSCompressorFactoryImpl();
 			}
 		}
-		jsHandler.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, warmupValues, jsCompressorFactory);
+		File tempDir = (File)config.getServletContext().getAttribute("javax.servlet.context.tempdir");
+		jsHandler.initialize(resourceLoader, rhinoClassLoader, jsOptimizerFactory, warmupValues, jsCompressorFactory, tempDir);
 		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizer", jsHandler.getJSOptimizer());
 	}
 	

@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -55,7 +56,7 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 				logger.logp(Level.INFO, getClass().getName(), "JSOptimizerFactoryImpl", "jsOptimizerClassName is default of  ["+DEFAULT_JS_OPTIMIZER_CLASS+"]");
 				jsOptimizerClass = (Class<JSOptimizer>) getClass().getClassLoader().loadClass(DEFAULT_JS_OPTIMIZER_CLASS);
 			}
-			jsOptimizerConstructor = jsOptimizerClass.getConstructor(new Class[] {ResourceLoader.class, RhinoClassLoader.class, boolean.class, Map.class});
+			jsOptimizerConstructor = jsOptimizerClass.getConstructor(new Class[] {ResourceLoader.class, RhinoClassLoader.class, Map.class, File.class});
 		} catch (ClassNotFoundException e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "JSOptimizerFactoryImpl", "Implementation of JSOptimizer defined in org_dojotoolkit_optimizer.properties is unavailable", e);
 			throw new IllegalStateException("Implementation of JSOptimizer defined in org_dojotoolkit_optimizer.properties is unavailable");		
@@ -66,10 +67,10 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 		
 	}
 	
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
 		JSOptimizer jsOptimizer = null;
 		try {
-			jsOptimizer = jsOptimizerConstructor.newInstance(new Object[] {resourceLoader, rhinoClassLoader, javaChecksum, config});
+			jsOptimizer = jsOptimizerConstructor.newInstance(new Object[] {resourceLoader, rhinoClassLoader, config, tempDir});
 		} catch (Exception e) {
 			logger.logp(Level.SEVERE, getClass().getName(), "createJSOptimizer", "Exception thrown while creating and instance of "+jsOptimizerConstructor.toString(), e);
 		} 

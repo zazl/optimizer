@@ -7,6 +7,7 @@ package org.dojotoolkit.optimizer.servlet;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -60,19 +61,22 @@ public abstract class JSHandler {
 		}
 	}
 
-	public void initialize(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, JSOptimizerFactory jsOptimizerFactory, JSCompressorFactory jsCompressorFactory) {
-		this.initialize(resourceLoader, rhinoClassLoader, javaChecksum, jsOptimizerFactory, null, jsCompressorFactory);
+	public void initialize(ResourceLoader resourceLoader, 
+			               RhinoClassLoader rhinoClassLoader, 
+			               JSOptimizerFactory jsOptimizerFactory, 
+			               JSCompressorFactory jsCompressorFactory) {
+		this.initialize(resourceLoader, rhinoClassLoader, jsOptimizerFactory, null, jsCompressorFactory, new File("."));
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void initialize(ResourceLoader resourceLoader, 
 			               RhinoClassLoader rhinoClassLoader, 
-			               boolean javaChecksum, 
 			               JSOptimizerFactory jsOptimizerFactory, 
 			               List<List<String>> warmupValues, 
-			               JSCompressorFactory jsCompressorFactory) {
+			               JSCompressorFactory jsCompressorFactory, 
+			               File tempDir) {
 		this.resourceLoader = resourceLoader;
-		jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
+		jsOptimizer = jsOptimizerFactory.createJSOptimizer(resourceLoader, rhinoClassLoader, config, tempDir);
 		List<String> bootstrapModuleList = (List<String>)config.get("bootstrapModules");
 		bootstrapModules = new String[bootstrapModuleList.size()];
 		bootstrapModules = bootstrapModuleList.toArray(bootstrapModules);

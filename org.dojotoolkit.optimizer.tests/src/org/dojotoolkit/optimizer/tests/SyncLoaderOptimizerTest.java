@@ -25,7 +25,7 @@ public abstract class SyncLoaderOptimizerTest extends OptimizerTest {
 
 	protected void runTest() throws Throwable {
 		RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
-		JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, true, null);
+		JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, null, new java.io.File("."));
 		JSAnalysisData analysisData;
 		try {
 			analysisData = optimizer.getAnalysisData(new String[] {"dijit.layout.TabContainer"});

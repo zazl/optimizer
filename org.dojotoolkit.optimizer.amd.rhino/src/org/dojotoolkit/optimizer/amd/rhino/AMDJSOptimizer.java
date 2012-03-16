@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.amd.rhino;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -19,7 +20,6 @@ import java.util.logging.Logger;
 import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.json.JSONSerializer;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
-import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
@@ -33,14 +33,13 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer.amd.rhino");
 
 	private RhinoClassLoader rhinoClassLoader = null;
-	private ResourceLoader resourceLoader = null;
 	private Map<String, Object> config = null;
 	private String amdconfig = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
 	private ASTCache astCacheHandler = null;
 	
-	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
-		this.resourceLoader = resourceLoader;
+	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
+		super(tempDir, resourceLoader);
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.config = config;
 		loadModulesMissingNames();
@@ -140,8 +139,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				missingNamesList.addAll(modulesMissingNames);
 			}
 			Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)analysisData.get("pluginRefs");
-			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude, pageConfig);
-			jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
+			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
 		}
 		catch(Throwable t) {
 			logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", t);

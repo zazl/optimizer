@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.rhino;
 
+import java.io.File;
 import java.util.Map;
 
 import org.dojotoolkit.optimizer.JSOptimizer;
@@ -13,7 +14,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class RhinoJSOptimizerFactory implements JSOptimizerFactory {
-	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
-		return new RhinoJSOptimizer(resourceLoader, rhinoClassLoader, javaChecksum, config);
+	public JSOptimizer createJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
+		return new RhinoJSOptimizer(resourceLoader, rhinoClassLoader, config, tempDir);
 	}
 }

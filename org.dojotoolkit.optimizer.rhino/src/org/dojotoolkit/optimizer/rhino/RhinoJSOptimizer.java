@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.rhino;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
-import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
@@ -29,14 +29,11 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 
 	private RhinoClassLoader rhinoClassLoader = null;
-	private ResourceLoader resourceLoader = null;
-	private boolean javaChecksum = false;
 	private Map<String, Object> config = null;
 	
-	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
-		this.resourceLoader = resourceLoader;
+	public RhinoJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
+		super(tempDir, resourceLoader);
 		this.rhinoClassLoader = rhinoClassLoader;
-		this.javaChecksum = javaChecksum;
 		this.config = config;
 	}
 	
@@ -87,11 +84,7 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
         sb.append("];\n");
         sb.append("var analyzer = new dojo.optimizer.Analyzer();\n"); 
         
-		if (javaChecksum) {
-			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude, true);\n");
-		} else {
-			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude);\n");
-		}
+		sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude, true);\n");
 		sb.append("JSON.stringify(analysisData);\n");
 		Context ctx = null; 
 		try {
@@ -104,14 +97,13 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "time : "+(end-start)+" ms for ["+moduleList+"]");
 			Map<String, Object> analysisData = (Map<String, Object>)JSONParser.parse(new StringReader((String)o));
 			List<String> dependencies = (List<String>)analysisData.get("dependencyList");
-			String checksum = (String)analysisData.get("checksum");
 			List<Localization> localizationList = new ArrayList<Localization>();
 			List<Map<String, Object>> localizations = (List<Map<String, Object>>)analysisData.get("localizations");
 			for (Map<String, Object> localizationMap : localizations) {
 				Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 				localizationList.add(localization);
 			}
-			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, null, resourceLoader, exclude, pageConfig);
+			jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, localizationList, null, null, null, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
 		}
 		catch(Throwable t) {
 			logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", t);
@@ -119,9 +111,6 @@ public class RhinoJSOptimizer extends CachingJSOptimizer {
 		}
 		finally {
 			Context.exit();
-		}
-		if (javaChecksum) {
-			jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 		}
 		return jsAnalysisData;
 	}

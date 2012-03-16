@@ -32,7 +32,7 @@ public class AMDCircularDependencyTest extends OptimizerTest {
 			assertNotNull(config);
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 			
-			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, true, config);
+			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, config, new java.io.File("."));
 			JSAnalysisData  analysisData = optimizer.getAnalysisData(new String[] {"test/amd/circular/A"});
 			StringBuffer sb = new StringBuffer();
 			for (String dependency: analysisData.getDependencies()) {

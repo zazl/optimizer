@@ -97,7 +97,7 @@ AMDAnalyzer.prototype = {
 	getDependencyList: function(modules, exclude) {
 		this._analyze(modules, exclude);
 		var dependencyList = [];
-		var seen = {};
+		var seen = {require: "require", module: "module", exports: "exports"};
 		for (i = 0; i < modules.length; i++) {
 			var m = modules[i];
 			if (m.match(".+!")) {

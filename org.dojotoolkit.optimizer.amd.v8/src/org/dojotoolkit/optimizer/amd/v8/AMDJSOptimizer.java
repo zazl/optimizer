@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.amd.v8;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -19,7 +20,6 @@ import java.util.logging.Logger;
 
 import org.dojotoolkit.json.JSONSerializer;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
-import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.rt.v8.V8JavaBridge;
@@ -28,13 +28,12 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class AMDJSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer.amd.v8");
-	private ResourceLoader resourceLoader = null;
 	private Map<String, Object> config = null;
 	private String amdconfig = "{}";
 	private List<Map<String, Object>> modulesMissingNames = null;
 
-	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
-		this.resourceLoader = resourceLoader;
+	public AMDJSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
+		super(tempDir, resourceLoader);
 		this.config = config;
 		AMDOptimizerScriptRunner scriptRunner = new AMDOptimizerScriptRunner(resourceLoader);
 		scriptRunner.loadtModulesMissingNames(config); 
@@ -148,8 +147,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					missingNamesList.addAll(modulesMissingNames);
 				}
 				Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)analysisData.get("pluginRefs");
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, null, missingNamesList, pluginRefs, resourceLoader, exclude, pageConfig);
-				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {

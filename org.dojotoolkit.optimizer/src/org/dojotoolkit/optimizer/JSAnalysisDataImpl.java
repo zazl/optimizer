@@ -5,20 +5,32 @@
 */
 package org.dojotoolkit.optimizer;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.json.JSONSerializer;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class JSAnalysisDataImpl implements JSAnalysisData {
+	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	private String[] modules = null;
 	private String[] dependencies = null;
 	private String checksum = null;
@@ -34,30 +46,30 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	
 	public JSAnalysisDataImpl(String[] modules, 
 			                  List<String> dependencies, 
-			                  String checksum, 
 			                  List<Localization> localizations, 
 			                  List<String> textDependencies, 
 			                  List<Map<String, Object>> modulesMissingNames,
 			                  Map<String, List<Map<String, String>>> pluginRefs,
 			                  ResourceLoader resourceLoader,
-			                  JSAnalysisData[] exclude,
-			                  Map<String, Object> pageConfig) {
+			                  String[] excludes,
+			                  Map<String, Object> pageConfig) throws IOException {
 		timestampLookup = new HashMap<String, Long>();
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
 		int i = 0;
 		for (String dependency : dependencies) {
 			String normalized = Util.normalizePath(dependency);
-			timestampLookup.put(normalized, resourceLoader.getTimestamp(dependency));
+			resourceLoader.getResource(normalized);
+			timestampLookup.put(normalized, resourceLoader.getTimestamp(normalized));
 			this.dependencies[i++] = normalized; 
 		}
-		this.checksum = checksum;
+		this.checksum = ChecksumCreator.createChecksum(this.dependencies, resourceLoader);
 		this.localizations = localizations;
 		this.textDependencies = textDependencies;
 		this.modulesMissingNames = modulesMissingNames;
 		this.pluginRefs = pluginRefs;
 		this.resourceLoader = resourceLoader;
-        excludes = _getExludes(exclude);
+        this.excludes = excludes;
         String config = null;
         if (pageConfig != null) {
         	this.pageConfig = pageConfig;
@@ -66,7 +78,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 				JSONSerializer.serialize(sw, pageConfig);
 				config = sw.toString();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "JSAnalysisDataImpl", "Failed to serialize page config", e);
 			}
         }
         key = _getKey(this.modules, excludes, config);
@@ -82,10 +94,6 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 
 	public String getChecksum() {
 		return checksum;
-	}
-	
-	public void setChecksum(String checksum) {
-		this.checksum = checksum;
 	}
 
 	public List<Localization> getLocalizations() {
@@ -117,11 +125,114 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			Long timestamp = timestampLookup.get(dependency);
 			if (timestamp != null) {
 				if (timestamp.longValue() != resourceLoader.getTimestamp(dependency)) {
+					try {
+						checksum = ChecksumCreator.createChecksum(this.dependencies, resourceLoader);
+					} catch (IOException e) {
+						logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "getChecksum", "Failed to calculate checksum", e);
+					}
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+	
+	public void save(File tempDir) {
+		File implFile = new File(tempDir, key+".json");
+		Writer w = null;
+		
+		try {
+			w = new BufferedWriter(new FileWriter(implFile));
+			Map<String, Object> implDetails = new HashMap<String, Object>();
+			implDetails.put("modules", Arrays.asList(modules));
+			implDetails.put("dependencies", Arrays.asList(dependencies));
+			if (localizations != null) {
+				List<Map<String, Object>> localizationsList = new ArrayList<Map<String, Object>>();
+				for (Localization localization : localizations) {
+					Map<String, Object> localizationMap = new HashMap<String, Object>();
+					localizationMap.put("bundlePackage", localization.bundlePackage);
+					localizationMap.put("bundleName", localization.bundleName);
+					localizationMap.put("modulePath", localization.modulePath);
+					localizationMap.put("moduleUrl", localization.moduleUrl);
+					localizationsList.add(localizationMap);
+				}
+				implDetails.put("localizations", localizationsList);
+			}
+			if (textDependencies != null) {
+				implDetails.put("textDependencies", textDependencies);
+			}
+			if (modulesMissingNames != null) {
+				implDetails.put("modulesMissingNames", modulesMissingNames);
+			}
+			if (pluginRefs != null) {
+				implDetails.put("pluginRefs", pluginRefs);
+			}
+			if (excludes != null) {
+				implDetails.put("excludes", Arrays.asList(excludes));
+			}
+			if (pageConfig != null) {
+				implDetails.put("pageConfig", pageConfig);
+			}
+			JSONSerializer.serialize(w, implDetails, true);
+		} catch (IOException e) {
+			logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "load", "Failed to save ["+implFile.getPath()+"]", e);
+		} finally {
+			if (w != null) { try { w.close(); } catch (IOException e) {}}
+		}
+	}
+	
+	public static JSAnalysisDataImpl load(String key, File tempDir, ResourceLoader resourceLoader) {
+		JSAnalysisDataImpl impl = null;
+		File implFile = new File(tempDir, key+".json");
+		if (implFile.exists()) {
+			Reader r = null;
+			try {
+				r = new BufferedReader(new FileReader(implFile));
+				Map<String, Object> implDetails = (Map<String, Object>)JSONParser.parse(r);
+				List<String> modulesList = (List<String>)implDetails.get("modules");
+				String[] modules = new String[modulesList.size()];
+				modules = modulesList.toArray(modules);
+				List<String> dependencies = (List<String>)implDetails.get("dependencies");
+				List<Localization> localizations = null;
+				List<Map<String, Object>> localizationsList = (List<Map<String, Object>>)implDetails.get("localizations");
+				if (localizationsList != null) {
+					localizations = new ArrayList<Localization>();
+					for (Map<String, Object> localizationMap : localizationsList) {
+						String bundlePackage = (String)localizationMap.get("bundlePackage");
+						String modulePath = (String)localizationMap.get("modulePath");
+						String bundleName = (String)localizationMap.get("bundleName");
+						String moduleUrl = (String)localizationMap.get("moduleUrl");
+						Localization localization = new Localization(bundlePackage, modulePath, bundleName, moduleUrl);
+						localizations.add(localization);
+					}
+				}
+				List<String> textDependencies = (List<String>)implDetails.get("textDependencies");
+				List<Map<String, Object>> modulesMissingNames = (List<Map<String, Object>>)implDetails.get("modulesMissingNames");
+				Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)implDetails.get("pluginRefs");
+				List<String> excludesList = (List<String>)implDetails.get("excludes");
+				String[] excludes = null;
+				if (excludesList != null) {
+					excludes = new String[excludesList.size()];
+					excludes = excludesList.toArray(excludes);
+				}
+				Map<String, Object> pageConfig = (Map<String, Object>)implDetails.get("pageConfig");;
+				
+				impl = new JSAnalysisDataImpl(modules, 
+						                      dependencies, 
+						                      localizations, 
+						                      textDependencies, 
+						                      modulesMissingNames, 
+						                      pluginRefs, 
+						                      resourceLoader, 
+						                      excludes, 
+						                      pageConfig);
+			} catch (IOException e) {
+				logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "load", "Failed to load ["+implFile.getPath()+"]", e);
+			} finally {
+				if (r != null) { try { r.close(); } catch (IOException e) {}}
+			}
+		}
+		return impl;
 	}
 	
 	public static String getKey(String[] keyValues, JSAnalysisData[] exclude, Map<String, Object> pageConfig) {
@@ -135,7 +246,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 				e.printStackTrace();
 			}
 		}
-		return _getKey(keyValues, _getExludes(exclude), config);
+		return _getKey(keyValues, getExludes(exclude), config);
 	}
 	
 	private static String _getKey(String[] keyValues, String[] excludes, String config) {
@@ -162,7 +273,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
         }
 	}
 
-	private static String[] _getExludes(JSAnalysisData[] exclude) {
+	public static String[] getExludes(JSAnalysisData[] exclude) {
         List<String> excludeList = new ArrayList<String>();
         for (JSAnalysisData analysisData : exclude) {
 	        for (String excludeModule : analysisData.getDependencies()) {

@@ -34,7 +34,7 @@ public abstract class AMDOptimizerTest extends OptimizerTest {
 			assertNotNull(config);
 			RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 			
-			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, true, config);
+			JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, config, new java.io.File("."));
 			JSAnalysisData  analysisData = optimizer.getAnalysisData(new String[] {"dijit/layout/TabContainer"});
 			StringBuffer sb = new StringBuffer();
 			for (String dependency: analysisData.getDependencies()) {

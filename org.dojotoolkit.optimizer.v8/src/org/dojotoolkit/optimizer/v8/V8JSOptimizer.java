@@ -5,6 +5,7 @@
 */
 package org.dojotoolkit.optimizer.v8;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,7 +18,6 @@ import java.util.logging.Logger;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.Localization;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
-import org.dojotoolkit.optimizer.ChecksumCreator;
 import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.rt.v8.V8JavaBridge;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
@@ -26,14 +26,10 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 public class V8JSOptimizer extends CachingJSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	
-	private ResourceLoader resourceLoader = null;
-	private boolean javaChecksum = false;
 	private Map<String, Object> config = null;
 
-	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, boolean javaChecksum, Map<String, Object> config) {
-		super();
-		this.resourceLoader = resourceLoader;
-		this.javaChecksum = javaChecksum;
+	public V8JSOptimizer(ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, Map<String, Object> config, File tempDir) {
+		super(tempDir, resourceLoader);
 		this.config = config;
 	}
 
@@ -110,11 +106,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 	        sb.append("];\n");
 	        sb.append("var analyzer = new dojo.optimizer.Analyzer();\n");
 	        
-			if (javaChecksum) {
-				sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude, true);\n");
-			} else {
-				sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude);\n");
-			}
+			sb.append("var analysisData = analyzer.getAnalysisData(modules, exclude, true);\n");
 			sb.append("JSON.stringify(analysisData);\n");
 			try {
 				long start = System.currentTimeMillis();
@@ -122,14 +114,13 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 				long end = System.currentTimeMillis();
 				logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "time : "+(end-start)+" ms for ["+moduleList+"]");
 				List<String> dependencies = (List<String>)analysisData.get("dependencyList");
-				String checksum = (String)analysisData.get("checksum");
 				List<Localization> localizationList = new ArrayList<Localization>();
 				List<Map<String, Object>> localizations = (List<Map<String, Object>>)analysisData.get("localizations");
 				for (Map<String, Object> localizationMap : localizations) {
 					Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 					localizationList.add(localization);
 				}
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, checksum, localizationList, null, null, null, resourceLoader, exclude, pageConfig);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, localizationList, null, null, null, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {
@@ -138,9 +129,6 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 				}
 				logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on getAnalysisData for ["+moduleList+"]", e);
 				throw new IOException("Exception on getAnalysisData for ["+moduleList+"] : "+e.getMessage());
-			}
-			if (javaChecksum) {
-				jsAnalysisData.setChecksum(ChecksumCreator.createChecksum(jsAnalysisData.getDependencies(), resourceLoader));
 			}
 			return jsAnalysisData;
 		}

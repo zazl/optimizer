@@ -23,7 +23,7 @@ public class SyncLoaderCircularDepTest extends OptimizerTest {
 
 	protected void runTest() throws Throwable {
 		RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
-		JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, true, null);
+		JSOptimizer optimizer = factory.createJSOptimizer(resourceLoader, rhinoClassLoader, null, new java.io.File("."));
 		try {
 			JSAnalysisData analysisData = optimizer.getAnalysisData(new String[] {"test.syncloader.circular.A"});
 			StringBuffer sb = new StringBuffer();
