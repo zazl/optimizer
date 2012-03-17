@@ -181,6 +181,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static JSAnalysisDataImpl load(String key, File tempDir, ResourceLoader resourceLoader) {
 		JSAnalysisDataImpl impl = null;
 		File implFile = new File(tempDir, key+".json");
