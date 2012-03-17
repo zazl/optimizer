@@ -18,14 +18,13 @@
 <booleanAttribute key="includeOptional" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true -DjsHandlerType=requirejs"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true -DjsHandlerType=zazl"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
 <setEntry value="org.dojotoolkit.compressor.feature:default"/>
 <setEntry value="org.dojotoolkit.compressor.v8.feature:default"/>
 <setEntry value="org.dojotoolkit.optimizer.feature:default"/>
 <setEntry value="org.dojotoolkit.optimizer.v8.feature:default"/>
-<setEntry value="org.dojotoolkit.prereq.dojo16:default"/>
 <setEntry value="org.dojotoolkit.prereqs.feature:default"/>
 <setEntry value="org.dojotoolkit.rt.v8.feature:default"/>
 <setEntry value="org.dojotoolkit.server.util.feature:default"/>
