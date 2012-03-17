@@ -102,9 +102,18 @@
 			</fileset>
 		</war>
 		<war destfile="${target.dir}/package/filter_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/filter_amdoptimizer_web.xml">
-			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
-			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
-			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
@@ -139,9 +148,18 @@
 			</fileset>
 		</war>
 		<war destfile="${target.dir}/package/inject_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml">
-			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo"/>
-			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit"/>
-			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox"/>
+			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
