@@ -1,0 +1,91 @@
+<project name="assemble" basedir=".." default="assemble">
+    <!-- Properties -->
+	<property
+		name="target.dir"
+		value="${basedir}/build"/>
+	
+	<property
+		name="targetplatform.dir"
+		value="${basedir}/../../../targetplatform"/>
+	
+	<property
+		name="serverutils.dir"
+		value="${basedir}/../../serverutils"/>
+	
+	<property
+		name="optimizer.dir"
+		value="${basedir}/.."/>
+	
+	<property
+		name="json.dir"
+		value="${target.dir}/plugins/org.json_1.0.0"/>
+	
+	<property
+		name="uglifyjs.dir"
+		value="${target.dir}/plugins/org.uglifyjs_1.2.5"/>
+	
+	<property
+		name="equinox.dir"
+		value="${targetplatform.dir}/equinox-SDK-3.7/plugins"/>
+	
+	<target name="assemble">
+		<mkdir dir="${target.dir}/package"/>
+		<mkdir dir="${target.dir}/package/server"/>
+		<mkdir dir="${target.dir}/package/server/lib"/>
+		<mkdir dir="${target.dir}/package/server/jslib"/>
+		<copy todir="${target.dir}/package/server/lib">
+	        <fileset dir="${equinox.dir}">
+	            <include name="javax.servlet_2.5.0*.jar"/>
+	            <include name="org.mortbay.jetty.server_6.*.jar"/>
+	            <include name="org.mortbay.jetty.util_6.*.jar"/>
+	        </fileset>
+	        <fileset dir="${target.dir}/plugins">
+	            <include name="*.jar"/>
+	        </fileset>
+		</copy>
+		<copy todir="${target.dir}/package/server/jslib">
+			<fileset dir="${json.dir}">
+	            <include name="json/*.js"/>
+    	    </fileset>
+			<fileset dir="${uglifyjs.dir}">
+	            <include name="uglifyjs/*.js"/>
+    	    </fileset>
+			<fileset dir="${serverutils.dir}/org.dojotoolkit.server.util.js">
+	            <include name="**/*.js"/>
+    	    </fileset>
+			<fileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.amd">
+	            <include name="**/*.js"/>
+    	    </fileset>
+			<fileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.servlet">
+	            <include name="**/*.js"/>
+    	    </fileset>
+		</copy>
+		<path id="classpath">
+	        <fileset dir="${target.dir}/package/server/lib">
+    	        <include name="*.jar"/>
+        	</fileset>
+		</path>	
+	    <manifestclasspath property="jar.classpath"
+	                       jarfile="${target.dir}/package/server/lib/optimizerserver.jar">
+	      <classpath refid="classpath" />
+	    </manifestclasspath>
+		
+		<jar destfile="${target.dir}/package/server/lib/optimizerserver.jar"
+			basedir="${basedir}/bin">
+			<manifest>
+				<attribute name="Class-Path" value="${jar.classpath}" />
+				<attribute name="Main-Class" value="org.dojotoolkit.optimizer.jetty.ZazlOptimizerServer" />
+			</manifest>	
+		</jar>
+		<zip destfile="${target.dir}/package/optimizerserver.zip">
+			<fileset dir="${target.dir}/package">
+				<exclude name="**/*v8*.jar"/> 
+			</fileset>
+	    </zip>
+	</target>
+
+	<target name="clean">
+		<delete	dir="${target.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+</project>
