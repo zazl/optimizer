@@ -1,4 +1,0 @@
-{ 
-	"name" : "jsoptimizer",
-	"main" : "./lib/jsoptimizer.js" 
-}
