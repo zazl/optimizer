@@ -25,11 +25,13 @@ public class ZazlOptimizerServer {
 	private File root = null;
 	private File lib = null;
 	private int port = 8080;
+	private boolean compress = true;
 	
-	public ZazlOptimizerServer(File root, File lib, int port) {
+	public ZazlOptimizerServer(File root, File lib, int port, boolean compress) {
 		this.root = root;
 		this.lib = lib;
 		this.port = port;
+		this.compress = compress;
 	}
 
 	public void start() throws Exception {
@@ -52,7 +54,10 @@ public class ZazlOptimizerServer {
 		} else {
 			jsOptimizerFactory = new org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizerFactory();
 		}
-		JSCompressorFactory jsCompressorFactory = new JSCompressorFactoryImpl();
+		JSCompressorFactory jsCompressorFactory = null;
+		if (compress) {
+			jsCompressorFactory = new JSCompressorFactoryImpl();
+		}
 		MultiRootResourceLoader resourceLoader = new MultiRootResourceLoader(new File[] {root, lib});
 		RhinoClassLoader rhinoClassLoader = new RhinoClassLoader(resourceLoader);
 
@@ -91,9 +96,13 @@ public class ZazlOptimizerServer {
 						System.out.println("Unable to use port number ["+args[1]+"] it must be a valid number");
 					}
 				}
-				File lib = null;
+				Boolean compress = Boolean.TRUE;
 				if (args.length > 2) {
-					lib = new File(args[2]);
+					compress = Boolean.valueOf(args[2]);
+				}
+				File lib = null;
+				if (args.length > 3) {
+					lib = new File(args[3]);
 				} else {
 					lib = new File("./server/jslib");
 				}
@@ -101,7 +110,7 @@ public class ZazlOptimizerServer {
 					System.out.println("Unable to locate the jslib directory ["+lib.getPath()+"]");
 					return;
 				}
-				ZazlOptimizerServer server = new ZazlOptimizerServer(root, lib, port);
+				ZazlOptimizerServer server = new ZazlOptimizerServer(root, lib, port, compress);
 				server.start();
 			} catch (Exception e) {
 				e.printStackTrace();
