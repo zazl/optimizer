@@ -21,6 +21,8 @@ AMD Optimizer Features
 * Optimizes text data when the dojo/text plugin is used.
 * Can Optimize jQuery 1.7.x based applications that use AMD.
 * Provides a JEE HTML Filter that will parse HTML and insert required javascript tags.
+* Includes a Standalone Jetty Zazl Optimizer Server
+* Includes a NodeJS Zazl Optimizer
 
 Dojo Syncloader Optimizer Features
 ==================================
