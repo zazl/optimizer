@@ -117,7 +117,7 @@ public class ZazlOptimizerServer {
 			}
 		}
 		else {
-			System.out.println("optimizerserver <resource directory> <port> <jslib directory>");
+			System.out.println("optimizerserver <resource directory> <port> <compress> <jslib directory>");
 		}
 	}
 }
