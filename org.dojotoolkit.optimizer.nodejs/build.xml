@@ -1,0 +1,39 @@
+<project name="build" basedir="." default="build">
+	<property
+		name="target.dir"
+		value="${basedir}/build"/>
+	
+	<property
+		name="serverutils.dir"
+		value="${basedir}/../../serverutils"/>
+	
+	<property
+		name="optimizer.dir"
+		value="${basedir}/.."/>
+	
+	<target name="build" depends="clean">
+		<tar destfile="${target.dir}/zazloptimizer.tgz" compression="gzip">
+			<tarfileset dir="${basedir}/zazloptimizer" uid="1000" gid="1000" prefix="package"/>
+			<tarfileset dir="${serverutils.dir}/org.dojotoolkit.server.util.nodejs" uid="1000" gid="1000" prefix="package">
+				<include name="zazlutil/**"/>
+			</tarfileset>
+			<tarfileset dir="${serverutils.dir}/org.dojotoolkit.server.util.js" uid="1000" gid="1000" prefix="package/zazlutil/lib">
+				<include name="astcache.js"/>
+			</tarfileset>
+			<tarfileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.amd" uid="1000" gid="1000" prefix="package">
+				<include name="optimizer/**"/>
+			</tarfileset>
+			<tarfileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.amd" uid="1000" gid="1000" prefix="package">
+				<include name="loader/**"/>
+			</tarfileset>
+			<tarfileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.servlet" uid="1000" gid="1000" prefix="package/lib">
+				<include name="zazl.json"/>
+			</tarfileset>
+		</tar>
+	</target>
+	
+	<target name="clean">
+		<delete	dir="${target.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+</project>

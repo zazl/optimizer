@@ -1,0 +1,25 @@
+{ 
+	"name" : "zazloptimizer",
+	"version" : "0.2.0",
+	"author" : "Richard Backhouse <richardabackhouse@gmail.com>",
+	"main" : "./lib/zazloptimizer.js",
+	"dependencies" : {
+		"connect" : "*",
+		"uglify-js" : "*",
+		"node-static" : "*"
+	},
+	"license" : "Dojo",
+	"scripts" : {
+		"start" : "node ./jsbin/zazlconnect.js",
+		"install" : "npm install zazlutil optimizer"
+	},
+	"config" : {
+		"port" : 8080,
+		"compress" : true,
+		"appdir" : "./"
+	},
+	"bin" : {
+		"zazlconnect" : "./jsbin/zazlconnect.js",
+		"zazlnodestatic" : "./jsbin/zazlnodestatic.js"
+	}
+}
