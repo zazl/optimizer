@@ -268,6 +268,25 @@
 				<include name="web.xml"/> 
 			</zipfileset>
 		</zip>	
+		<zip destfile="${target.dir}/package/examples.zip">
+			<zipfileset dir="${dojo17.dir}/dojo" prefix="dojo">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dijit" prefix="dijit">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
+				<exclude name="**/tests/**"/>
+				<exclude name="**/demos**"/>
+			</zipfileset>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
+			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
+				<include name="inject_*.html"/>
+			</fileset>
+		</zip>
 	</target>
 
 	<!-- Clean up the target directory -->
