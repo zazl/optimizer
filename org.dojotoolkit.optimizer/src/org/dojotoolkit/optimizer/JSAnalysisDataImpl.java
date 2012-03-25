@@ -42,7 +42,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private Map<String, Long> timestampLookup = null;
 	private String[] excludes = null;
 	private String key = null;
-	private Map<String, Object> pageConfig = null;
+	private String config = null;
 	private boolean checksumStale = false;
 	
 	public JSAnalysisDataImpl(String[] modules,
@@ -54,10 +54,10 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
             ResourceLoader resourceLoader,
             String[] excludes,
             Map<String, Object> pageConfig) throws IOException {
-		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, null);
+		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, null, null);
 	}
 
-	public JSAnalysisDataImpl(String[] modules,
+	private JSAnalysisDataImpl(String[] modules,
 			                  List<String> dependencies,
 			                  List<Localization> localizations,
 			                  List<String> textDependencies,
@@ -66,7 +66,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  ResourceLoader resourceLoader,
 			                  String[] excludes,
 			                  Map<String, Object> pageConfig,
-			                  String checksum) throws IOException {
+			                  String checksum,
+			                  String config) throws IOException {
 		timestampLookup = new HashMap<String, Long>();
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
@@ -87,9 +88,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.pluginRefs = pluginRefs;
 		this.resourceLoader = resourceLoader;
         this.excludes = excludes;
-        String config = null;
         if (pageConfig != null) {
-        	this.pageConfig = pageConfig;
         	StringWriter sw = new StringWriter();
         	try {
 				JSONSerializer.serialize(sw, pageConfig);
@@ -97,6 +96,9 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			} catch (IOException e) {
 				logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "JSAnalysisDataImpl", "Failed to serialize page config", e);
 			}
+        }
+        if (config != null) {
+        	this.config = config;
         }
         key = _getKey(this.modules, excludes, config);
 	}
@@ -191,8 +193,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			if (excludes != null) {
 				implDetails.put("excludes", Arrays.asList(excludes));
 			}
-			if (pageConfig != null) {
-				implDetails.put("pageConfig", pageConfig);
+			if (config != null) {
+				implDetails.put("pageConfig", config);
 			}
 			JSONSerializer.serialize(w, implDetails, true);
 		} catch (IOException e) {
@@ -237,7 +239,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 					excludes = new String[excludesList.size()];
 					excludes = excludesList.toArray(excludes);
 				}
-				Map<String, Object> pageConfig = (Map<String, Object>)implDetails.get("pageConfig");
+				String config = (String)implDetails.get("pageConfig");
 				String checksum = (String)implDetails.get("checksum");
 				impl = new JSAnalysisDataImpl(modules, 
 						                      dependencies, 
@@ -247,8 +249,9 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 						                      pluginRefs, 
 						                      resourceLoader, 
 						                      excludes, 
-						                      pageConfig,
-						                      checksum);
+						                      null,
+						                      checksum,
+						                      config);
 			} catch (IOException e) {
 				logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "load", "Failed to load ["+implFile.getPath()+"]", e);
 			} finally {
