@@ -110,10 +110,12 @@
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			<!--
 			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			-->
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
@@ -156,10 +158,12 @@
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			<!--
 			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			-->
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
 				<include name="org_dojotoolkit_compressor.properties"/> 
 			</zipfileset>
@@ -277,10 +281,12 @@
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			<!--
 			<zipfileset dir="${dojo17.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
+			-->
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/amdtest" prefix="amdtest"/>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
