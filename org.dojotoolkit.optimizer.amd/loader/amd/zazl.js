@@ -174,7 +174,7 @@ var define;
 			url += moduleIds[i];
 			url += i < (moduleIds.length - 1) ? "," : "";
 		}
-		url += "&writeBootstrap=false&locale="+locale+"&config="+configString+"&exclude=";
+		url += "&writeBootstrap=false&locale="+locale+"&config="+encodeURIComponent(configString)+"&exclude=";
 		for (var i = 0; i < analysisKeys.length; i++) {
 			url += analysisKeys[i];
 			url += i < (analysisKeys.length - 1) ? "," : "";
