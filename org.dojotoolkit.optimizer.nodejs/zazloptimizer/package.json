@@ -1,12 +1,12 @@
 { 
 	"name" : "zazloptimizer",
-	"version" : "0.2.0",
+	"version" : "0.2.1",
 	"author" : "Richard Backhouse <richardabackhouse@gmail.com>",
 	"main" : "./lib/zazloptimizer.js",
 	"dependencies" : {
-		"connect" : "*",
-		"uglify-js" : "*",
-		"node-static" : "*"
+		"connect" : ">= 2.0.0",
+		"uglify-js" : ">= 1.2.5",
+		"node-static" : ">= 0.5.9"
 	},
 	"license" : "Dojo",
 	"scripts" : {
@@ -21,5 +21,8 @@
 	"bin" : {
 		"zazlconnect" : "./jsbin/zazlconnect.js",
 		"zazlnodestatic" : "./jsbin/zazlnodestatic.js"
+	},
+	"engine": {
+    	"node": ">=0.6"
 	}
 }
