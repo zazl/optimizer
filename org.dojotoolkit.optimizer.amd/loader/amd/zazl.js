@@ -305,7 +305,6 @@ var define;
 	
 	function _createRequire(id) {
 		var req = function(dependencies, callback) {
-			var root = modules[id];
 			var savedStack = moduleStack;
 			moduleStack = [id];
 			if (isFunction(callback)) {
@@ -408,7 +407,6 @@ var define;
 			var iterate = function(itr) {
 				if (itr.hasMore()) {
 					var dependency = itr.next();
-					var id = _expand(dependency);
 					if (dependency.match(pluginRegExp)) {
 						var pluginName = dependency.substring(0, dependency.indexOf('!'));
 						pluginName = _expand(pluginName);
@@ -492,7 +490,7 @@ var define;
 		if (cfg.directInject && dependencies.length > 0) {
 			_inject(dependencies, function(){
 				_load();
-			})
+			});
 		} else {
 			_load();
 		}
@@ -594,7 +592,6 @@ var define;
 				if (itr.hasMore()) {
 					var cbinst = itr.next();
 					if (cbinst.mid !== "") {
-						var root = modules[cbinst.mid];
 						savedStack = moduleStack;
 						moduleStack = [cbinst.mid];
 					}
