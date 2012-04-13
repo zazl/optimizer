@@ -434,15 +434,13 @@ var define;
 	modules["require"].exports = _require;
 	modules["require"].loaded = true;
 	modules["require"].dependencies = [];
-	var cfg = {
-		baseUrl: _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./"),
-		injectUrl: "_javascript"
-	};
 
-	zazl = function(config, dependencies, callback) {
-		if (!isArray(config) && typeof config == "object") {
+	var cfg;
+
+	function processConfig(config) {
+		if (!cfg) {
 			var i;
-			cfg = config;
+			cfg = config || {};
 			if (cfg.paths) {
 				for (var p in cfg.paths) {
 					var path = cfg.paths[p];
@@ -452,17 +450,32 @@ var define;
 			if (cfg.packages) {
 				for (i = 0; i < cfg.packages.length; i++) {
 					var pkg = cfg.packages[i];
+					if (!pkg.location) {
+						pkg.location = pkg.name; 
+					}
+					if (!pkg.main) {
+						pkg.main = "main";
+					}
 					pkgs[pkg.name] = pkg;
 				}
 			}
 			cfg.baseUrl = cfg.baseUrl || "./";
+
+			if (cfg.baseUrl.charAt(0) !== '/') {
+				cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/'+ cfg.baseUrl);
+			}
+
 			cfg.injectUrl = cfg.injectUrl || "_javascript";
+		}
+	};
+
+	zazl = function(config, dependencies, callback) {
+		if (!isArray(config) && typeof config == "object") {
+			processConfig(config);
 		} else {	
 			callback = dependencies;
 			dependencies = config;
-		}
-		if (cfg.baseUrl.charAt(0) !== '/') {
-			cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/'+ cfg.baseUrl);
+			processConfig(zazlConfig);
 		}
 
 		if (!isArray(dependencies)) {
@@ -514,7 +527,7 @@ var define;
 	}, false);
 	
 	if (!require) {
-		require = _require;
+		require = zazl;
 		require.toUrl = function(moduleResource) {
 			var url = _idToUrl(_expand(moduleResource)); 
 			return url;
