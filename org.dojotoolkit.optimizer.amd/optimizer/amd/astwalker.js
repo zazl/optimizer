@@ -487,10 +487,10 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 		config.astparser = "uglifyjs";
 	}
 	if (config.astparser === "uglifyjs") {
-		print("Using uglifyjs for the ast parser");
+		print("AST parsing ["+uri+"] using uglifyjs");
 		uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
 	} else 	if (config.astparser === "esprima") {
-		print("Using esprima for the ast parser");
+		print("AST parsing ["+uri+"] using esprima");
 		esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);
 	} else {
 		throw new Error("Unknown astparser value ["+config.astparser+"]");
