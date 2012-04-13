@@ -13,30 +13,11 @@
 	<script type="text/javascript">
         var dojoConfig = {
             locale : __localePlaceholder__,
-            has:{
-                "dojo-1x-base":1
-            }
 		};
 	</script>
 	<script type="text/javascript">
         zazl({
-            packages: [
-                {
-                    name: 'dojo',
-                    location: 'dojo',
-                    main:'main'
-                },
-                {
-                    name: 'dijit',
-                    location: 'dijit',
-                    main:'main'
-                },
-                {
-                    name: 'dojox',
-                    location: 'dojox',
-                    main:'main'
-                }
-            ]
+            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
         }, 
         ["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], 
         function(declarative, dom, domStyle) {

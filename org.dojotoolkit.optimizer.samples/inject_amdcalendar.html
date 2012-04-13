@@ -9,30 +9,9 @@
 	</style>
 	<script type="text/javascript" src="loader/amd/zazl.js"></script>
 	<script type="text/javascript">
-	    var dojoConfig = {
-            has:{
-                "dojo-1x-base":1
-            }
-		};
         zazl({
         	directInject: true,
-            packages: [
-                {
-                    name: 'dojo',
-                    location: 'dojo',
-                    main:'main'
-                },
-                {
-                    name: 'dijit',
-                    location: 'dijit',
-                    main:'main'
-                },
-                {
-                    name: 'dojox',
-                    location: 'dojox',
-                    main:'main'
-                }
-            ]
+            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
         }, 
         ["amdtest/Calendar"], 
         function(calendar) {

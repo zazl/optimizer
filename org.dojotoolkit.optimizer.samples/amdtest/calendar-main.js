@@ -1,21 +1,5 @@
 zazl({
-    packages: [
-        {
-            name: 'dojo',
-            location: 'dojo',
-            main:'main'
-        },
-        {
-            name: 'dijit',
-            location: 'dijit',
-            main:'main'
-        },
-        {
-            name: 'dojox',
-            location: 'dojox',
-            main:'main'
-        }
-    ]
+	packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
 }, 
 ["amdtest/Calendar"], 
 function(calendar) {
