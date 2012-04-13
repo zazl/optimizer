@@ -475,7 +475,7 @@ var define;
 		} else {	
 			callback = dependencies;
 			dependencies = config;
-			processConfig(typeof zazlConfig === 'undefined' ? {} : lsjsConfig);
+			processConfig(typeof zazlConfig === 'undefined' ? {} : zazlConfig);
 		}
 
 		if (!isArray(dependencies)) {
