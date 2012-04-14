@@ -20,6 +20,12 @@ AMDAnalyzer = function(cfg) {
 		if (cfg.packages) {
 			for (i = 0; i < cfg.packages.length; i++) {
 				var pkg = cfg.packages[i];
+				if (!pkg.location) {
+					pkg.location = pkg.name;
+				}
+				if (!pkg.main) {
+					pkg.main = "main";
+				}
 				this.config.pkgs[pkg.name] = pkg;
 			}
 		}
