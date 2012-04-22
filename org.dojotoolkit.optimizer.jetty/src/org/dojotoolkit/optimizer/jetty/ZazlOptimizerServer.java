@@ -65,7 +65,7 @@ public class ZazlOptimizerServer {
 		if (!tempDir.exists()) {
 			tempDir.mkdirs();
 		}
-		JSContentHandler jsContentHandler = new JSContentHandler(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsCompressorFactory, new File("./tmp"));
+		JSContentHandler jsContentHandler = new JSContentHandler(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsCompressorFactory, tempDir);
 		handlerList.addHandler(jsContentHandler);
 		handlerList.addHandler(rootHandler);
 		handlerList.addHandler(libHandler);
