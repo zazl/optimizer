@@ -91,7 +91,6 @@ AMDAnalyzer.prototype = {
 	},
 	
 	_analyze: function(modules, exclude) {
-		this.dependencyStack = [];
 		this.pluginRefList = {};
 		this.missingNamesList = [];
 		this.moduleMap = map.createMap();
