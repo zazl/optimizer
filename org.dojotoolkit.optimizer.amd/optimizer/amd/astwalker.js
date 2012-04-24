@@ -222,8 +222,7 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 				}
 			}
 			if (addDependency) {
-				module.addDependency(pluginRef.dependency);
-				esprimaWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+				esprimaWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [uri]);
 			}
 		}
 		pluginRefList[pluginName].push(pluginRef);
@@ -358,8 +357,7 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 				}
 			}
 			if (addDependency) {
-				module.addDependency(pluginRef.dependency);
-				uglifyjsWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [dependency]);
+				uglifyjsWalker(pluginRef.dependency, exclude, moduleMap, pluginRefList, missingNamesList, config, [uri]);
 			}
 		}
 		pluginRefList[pluginName].push(pluginRef);
