@@ -59,6 +59,9 @@
 			<fileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.servlet">
 	            <include name="**/*.js"/>
     	    </fileset>
+			<fileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.amd.rhinoast">
+	            <include name="**/*.js"/>
+    	    </fileset>
 		</copy>
 		<path id="classpath">
 	        <fileset dir="${target.dir}/package/server/lib">

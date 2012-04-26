@@ -48,12 +48,17 @@ public class ZazlOptimizerServer {
 		libHandler.setBaseResource(new FileResource(new URL("file:"+lib.getCanonicalPath())));
 		
 		boolean useV8 = Boolean.valueOf(System.getProperty("V8", "false"));
+		boolean useRhinoAST = Boolean.valueOf(System.getProperty("rhinoAST", "false"));
 		JSOptimizerFactory jsOptimizerFactory = null;
 		if (useV8) {
 			jsOptimizerFactory = new org.dojotoolkit.optimizer.amd.v8.AMDJSOptimizerFactory();
+		} else if (useRhinoAST) {
+			jsOptimizerFactory = new org.dojotoolkit.optimizer.amd.rhinoast.AMDJSOptimizerFactory();
 		} else {
 			jsOptimizerFactory = new org.dojotoolkit.optimizer.amd.rhino.AMDJSOptimizerFactory();
 		}
+		System.out.println("Using jsOptimizerFactory ["+jsOptimizerFactory.getClass().getName()+"]");
+
 		JSCompressorFactory jsCompressorFactory = null;
 		if (compress) {
 			jsCompressorFactory = new JSCompressorFactoryImpl();
