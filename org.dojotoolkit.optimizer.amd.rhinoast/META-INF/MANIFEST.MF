@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Rhinoast
+Bundle-SymbolicName: org.dojotoolkit.optimizer.amd.rhinoast
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.dojotoolkit.optimizer;bundle-version="1.0.0"
+Import-Package: org.dojotoolkit.json,
+ org.dojotoolkit.server.util.osgi,
+ org.dojotoolkit.server.util.resource,
+ org.dojotoolkit.server.util.rhino,
+ org.mozilla.javascript,
+ org.mozilla.javascript.ast
+Bundle-Activator: org.dojotoolkit.server.util.osgi.DojoServiceActivator
+Export-DojoService: org.dojotoolkit.optimizer.JSOptimizerFactory;impl=org.dojotoolkit.optimizer.amd.rhinoast.AMDJSOptimizerFactory;id=AMDRhinoASTJSOptimizer
+Export-Package: org.dojotoolkit.optimizer.amd.rhinoast
