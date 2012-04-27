@@ -255,7 +255,7 @@ public class ZazlServicesTracker {
 				if (useV8) {
 					dojoServiceId = "AMDV8JSOptimizer";
 				} else {
-					dojoServiceId = System.getProperty("optimizerId", "AMDRhinoJSOptimizer");
+					dojoServiceId = System.getProperty("optimizerId", "AMDRhinoASTJSOptimizer");
 				}
 			}
 			if (dojoServiceId != null && reference.getProperty("dojoServiceId").equals(dojoServiceId)) {
