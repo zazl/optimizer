@@ -353,69 +353,74 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 						missingName.put("id", this.moduleId);
 						missingNamesList.add(missingName);
 					}
-					ArrayLiteral dependencies = null;
-					if (callName.equals("require") && args.get(0) instanceof StringLiteral && args.get(1) instanceof ArrayLiteral) {
-						dependencies = (ArrayLiteral) args.get(1);
+					List<String> dependencies = new ArrayList<String>();
+					if (callName.equals("require") && args.get(0) instanceof StringLiteral) {
+						dependencies.add(((StringLiteral)args.get(0)).getValue());
 					} else if (args.get(0) instanceof StringLiteral && args.get(1) instanceof ArrayLiteral) {
-						dependencies = (ArrayLiteral) args.get(1);
-					} else if (args.get(0) instanceof ArrayLiteral) {
-						dependencies = (ArrayLiteral) args.get(0);
-					}
-					if (dependencies != null) {
-						for (AstNode dependency : dependencies.getElements()) {
-							String dependencyId = null;
-							
+						ArrayLiteral al = (ArrayLiteral) args.get(1);
+						for (AstNode dependency : al.getElements()) {
 							if (dependency instanceof StringLiteral) {
-								dependencyId = ((StringLiteral)dependency).getValue();
-								if (dependencyId.indexOf('!') != -1) {
-									pathStack.push(this.moduleId);
-									String pluginName = dependencyId.substring(0, dependencyId.indexOf('!'));
-									pluginName = expand(pluginName, pathStack, config);
-									String pluginValue = dependencyId.substring(dependencyId.indexOf('!')+1);
-									List<Map<String, String>> l = (List<Map<String, String>>)pluginRefList.get(pluginName);
-									if (l == null) {
-										l = new ArrayList<Map<String, String>>();
-										pluginRefList.put(pluginName, l);
-									}
-									Map<String, String> pluginRef = processPluginRef(pluginName, pluginValue);
-									if (pluginRef.containsKey("dependency")) {
-										String pluginDep = (String)pluginRef.get("dependency");
-										String dependencyUri = idToUrl(pluginDep, config);
-										if (dependencyUri.charAt(0) != '/') {
-											dependencyUri = '/'+dependencyUri;
-										}
-										boolean addDep = true;
-										for (String exclude : excludeList) {
-											if (exclude.equals(dependencyUri)) {
-												addDep = false;
-												break;
-											}
-										}
-										if (addDep) {
-											module.dependencies.add(pluginDep);
-											try {
-												new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
-											} catch (IOException e) {
-												logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", e.getMessage());
-											}
-										}
-									}
-									l.add(pluginRef);
-									pathStack.pop();
-									dependencyId = pluginName;
-								} else if (dependencyId.equals(this.baseUrl+"require")) {
-									dependencyId = null;
-								} else if (dependencyId.equals(this.baseUrl+"exports")) {
-									dependencyId = null;
-								} else if (dependencyId.equals(this.baseUrl+"module")) {
-									dependencyId = null;
-								}
+								dependencies.add(((StringLiteral)dependency).getValue());
 							}
-							
+						}
+					} else if (callName.equals("define") && args.get(0) instanceof ArrayLiteral) {
+						ArrayLiteral al = (ArrayLiteral) args.get(0);
+						for (AstNode dependency : al.getElements()) {
+							if (dependency instanceof StringLiteral) {
+								dependencies.add(((StringLiteral)dependency).getValue());
+							}
+						}
+					}
+					if (dependencies.size() > 0) {
+						String dependencyId = null;
+						for (String dependency : dependencies) {
+							dependencyId = dependency;
+							if (dependencyId.indexOf('!') != -1) {
+								pathStack.push(this.moduleId);
+								String pluginName = dependencyId.substring(0, dependencyId.indexOf('!'));
+								pluginName = expand(pluginName, pathStack, config);
+								String pluginValue = dependencyId.substring(dependencyId.indexOf('!')+1);
+								List<Map<String, String>> l = (List<Map<String, String>>)pluginRefList.get(pluginName);
+								if (l == null) {
+									l = new ArrayList<Map<String, String>>();
+									pluginRefList.put(pluginName, l);
+								}
+								Map<String, String> pluginRef = processPluginRef(pluginName, pluginValue);
+								if (pluginRef.containsKey("dependency")) {
+									String pluginDep = (String)pluginRef.get("dependency");
+									String dependencyUri = idToUrl(pluginDep, config);
+									if (dependencyUri.charAt(0) != '/') {
+										dependencyUri = '/'+dependencyUri;
+									}
+									boolean addDep = true;
+									for (String exclude : excludeList) {
+										if (exclude.equals(dependencyUri)) {
+											addDep = false;
+											break;
+										}
+									}
+									if (addDep) {
+										module.dependencies.add(pluginDep);
+										try {
+											new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
+										} catch (IOException e) {
+											logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", e.getMessage());
+										}
+									}
+								}
+								l.add(pluginRef);
+								pathStack.pop();
+								dependencyId = pluginName;
+							} else if (dependencyId.equals(this.baseUrl+"require")) {
+								dependencyId = null;
+							} else if (dependencyId.equals(this.baseUrl+"exports")) {
+								dependencyId = null;
+							} else if (dependencyId.equals(this.baseUrl+"module")) {
+								dependencyId = null;
+							}
 							if (dependencyId != null) {
 								pathStack.push(this.moduleId);
 								dependencyId = expand(dependencyId, pathStack, config);
-								//System.out.println(this.moduleId+":"+dependencyId);
 								String dependencyUri = idToUrl(dependencyId, config);
 								if (dependencyUri.charAt(0) != '/') {
 									dependencyUri = '/'+dependencyUri;
@@ -438,6 +443,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 								pathStack.pop();
 							}
 						}
+						
 					}
 				}
 			}
