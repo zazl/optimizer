@@ -31,6 +31,7 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 import org.dojotoolkit.server.util.rhino.RhinoJSMethods;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.ast.ArrayLiteral;
@@ -107,7 +108,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			JSONSerializer.serialize(sw, cfg);
 			pageConfigString = sw.toString();
 		} catch (IOException e) {
-			logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing page configuration data", e);
+			logger.logp(Level.SEVERE, getClass().getName(), "_getAnalysisData", "IOException while parsing page configuration data", e);
 			throw new IOException("IOException while parsing page configuration data", e);
 		}
 		
@@ -125,7 +126,12 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		Map<String, Module> moduleMap = new HashMap<String, Module>();
 		
         for (String moduleId : modules) {
-        	new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString);
+        	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing ["+moduleId+"] using the Rhino AST API");
+        	AstVisitor visitor = new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString);
+        	if (visitor.getError() != null) {
+            	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing error for ["+moduleId+"] error : "+visitor.getError());
+            	throw new IOException("AST parsing error for ["+moduleId+"] error : "+visitor.getError());
+        	}
         }
         
         List<String> dependencies = new ArrayList<String>();
@@ -135,7 +141,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         seen.put("exports", Boolean.TRUE);
         for (String moduleId : modules) {
         	Module m = moduleMap.get(moduleId);
-            _buildDependencyList(m, moduleMap, dependencies, seen);
+            buildDependencyList(m, moduleMap, dependencies, seen);
+            scanForCircularDependencies(m, new Stack<String>(), moduleMap);
         }
         
 		jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
@@ -227,13 +234,13 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		return path;
 	}
 	
-	private void _buildDependencyList(Module m, Map<String, Module> moduleMap, List<String> dependencyList, Map<String, Boolean> seen) {
+	private void buildDependencyList(Module m, Map<String, Module> moduleMap, List<String> dependencyList, Map<String, Boolean> seen) {
 		if (!seen.containsKey(m.uri)) {
 			seen.put(m.uri, Boolean.TRUE);
 			for (String dep : m.dependencies) {
 				Module depModule = moduleMap.get(dep);
 				if (depModule != null) {
-					_buildDependencyList(depModule, moduleMap, dependencyList, seen);
+					buildDependencyList(depModule, moduleMap, dependencyList, seen);
 				} else {
 					if (!seen.containsKey(dep)) {
 						dependencyList.add(dep+".js");
@@ -245,6 +252,38 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		}
 	}
 	
+	private void scanForCircularDependencies(Module module, Stack<String> check, Map<String, Module> moduleMap) {
+		check.push(module.id);
+		for (String dep : module.dependencies) {
+			Module moduleDependency = moduleMap.get(dep);
+			if (moduleDependency.scanned) {
+				continue;
+			}
+			boolean found = false;
+			String dup = null;
+			for (String s : check) {
+				if (s.equals(moduleDependency.id)) {
+					found = true;
+					dup = moduleDependency.id;
+					break;
+				}
+			}
+			if (found) {
+				StringBuffer msg = new StringBuffer("Circular dependency found : ");
+				for (String s : check) {
+					msg.append(s);
+					msg.append("->");
+				}
+				msg.append(dup);
+	        	logger.logp(Level.INFO, getClass().getName(), "scanForCircularDependencies", msg.toString());
+			} else {
+				scanForCircularDependencies(moduleDependency, check, moduleMap);
+			}
+		}
+		module.scanned = true;
+		check.pop();
+	}
+
 	private class AstVisitor implements NodeVisitor {
 		private List<Map<String, Object>> missingNamesList = null;
 		private String moduleId = null;
@@ -257,6 +296,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		private Module module = null;
 		private String baseUrl = null;
 		private String pageConfigString = null;
+		private String error = null;
 		
 		public AstVisitor(String moduleId, 
 				          Map<String, Module> moduleMap,
@@ -265,7 +305,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				          Map<String, Object> config,
 				          Stack<String> pathStack,
 				          List<String> excludeList,
-				          String pageConfigString) throws IOException {
+				          String pageConfigString) {
 			
 			if (moduleId.equals("require") || moduleId.equals("exports") || moduleId.equals("module")) {
 				moduleMap.put(moduleId, new Module(moduleId, moduleId));
@@ -307,12 +347,12 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 						}
 					}
 					if (addDep) {
-						try {
-							Stack<String> s = new Stack<String>();
-							s.push(this.moduleId);
-							new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString);
-						} catch (IOException e) {
-							e.printStackTrace();
+						Stack<String> s = new Stack<String>();
+						s.push(this.moduleId);
+						AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString);
+						if (visitor.getError() != null) {
+							error = visitor.getError();
+							return;
 						}
 					}
 				}
@@ -325,19 +365,33 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				url = "/"+url;
 			}
 			if (moduleMap.get(this.moduleId) == null) {
-	            String source = resourceLoader.readResource(url+".js");
-	            if (source != null) {
-	            	module = new Module(this.moduleId, url);
-					moduleMap.put(this.moduleId, module);
-			        CompilerEnvirons compilerEnv = new CompilerEnvirons();
-			        Parser parser = new Parser(compilerEnv, compilerEnv.getErrorReporter());
-					
-	                AstRoot ast = parser.parse(source, null, 1);
-	                ast.visit(this);
-	            } else {
-	            	throw new IOException("Unable to obtain source for Module ["+url+"]");
-	            }
+	            String source;
+				try {
+					source = resourceLoader.readResource(url+".js");
+		            if (source != null) {
+		            	module = new Module(this.moduleId, url);
+						moduleMap.put(this.moduleId, module);
+				        CompilerEnvirons compilerEnv = new CompilerEnvirons();
+				        Parser parser = new Parser(compilerEnv, compilerEnv.getErrorReporter());
+						
+		                AstRoot ast;
+						try {
+							ast = parser.parse(source, null, 1);
+			                ast.visit(this);
+						} catch (EvaluatorException e) {
+							error = "Failed to parse ["+url+"] [line:"+e.lineNumber()+" column:"+e.columnNumber()+"] reason ["+e.details()+"]";
+						}
+		            } else {
+		            	error = "Unable to obtain source for Module ["+url+"]";
+		            }
+				} catch (IOException e) {
+	            	error = "Unable to obtain source for Module ["+url+"] error : "+e.getMessage();
+				}
 			}
+		}
+		
+		public String getError() {
+			return error;
 		}
 		
 		public boolean visit(AstNode astNode) {
@@ -401,10 +455,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 									}
 									if (addDep) {
 										module.dependencies.add(pluginDep);
-										try {
-											new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
-										} catch (IOException e) {
-											logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", e.getMessage());
+										AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
+										if (visitor.getError() != null) {
+											error = visitor.getError();
+											return false;
 										}
 									}
 								}
@@ -434,16 +488,15 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 								}
 								if (addDep) {
 									module.dependencies.add(dependencyId);
-									try {
-										new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
-									} catch (IOException e) {
-										logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", e.getMessage());
+									AstVisitor visitor = new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
+									if (visitor.getError() != null) {
+										error = visitor.getError();
+										return false;
 									}
 								}
 								pathStack.pop();
 							}
 						}
-						
 					}
 				}
 			}
@@ -539,6 +592,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	private class Module {
 		public String id = null;
 		public String uri = null;
+		public boolean scanned = false;
 		public List<String> dependencies = new ArrayList<String>();
 		
 		public Module(String id, String uri) {
