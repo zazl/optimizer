@@ -33,6 +33,7 @@ var define;
 	var moduleStack = [];
 	var paths = {};
 	var pkgs = {};
+	var precache = {};
 	var cache = {};
 	var analysisKeys = [];
 	var cblist = {};
@@ -187,6 +188,7 @@ var define;
 		script.onload = function() {
 			if (!script.onloadDone) {
 				script.onloadDone = true;
+				processCache();
 				cb();
 				queueProcessor();
 			}
@@ -491,12 +493,7 @@ var define;
 			} else {
 				_require(dependencies);
 			}
-			for (var id in cache) {
-				var resolvedId = _idToUrl(id);
-				var cacheValue = cache[id];
-				delete cache[id];
-				cache[resolvedId] = cacheValue;
-			}
+			processCache();
 			queueProcessor();
 		};
 
@@ -510,9 +507,18 @@ var define;
 	};
 	
 	zazl.addToCache = function(id, value) {
-		cache[id] = value;
+		precache[id] = value;
 	};
-	
+
+	function processCache() {
+		for (var id in precache) {
+			var resolvedId = _idToUrl(id);
+			var cacheValue = precache[id];
+			cache[resolvedId] = cacheValue;
+		}
+		precache = {};
+	};
+
 	zazl.addAnalysisKey = function(key) {
 		analysisKeys.push(key);
 	};
