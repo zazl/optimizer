@@ -131,7 +131,7 @@ public class HTMLParser extends DefaultFilter {
     @SuppressWarnings("unchecked")
 	private static String analyzeScript(String scriptContents, ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, JSURLGenerator urlGenerator) {
     	String url = null;
-    	ScriptAnalyzer scriptAnalyzer = new ScriptAnalyzer(resourceLoader, rhinoClassLoader);
+    	ScriptAnalyzer scriptAnalyzer = new RhinoASTScriptAnalyzer(resourceLoader, rhinoClassLoader);
     	try {
     		Map<String, Object> results = scriptAnalyzer.analyze(scriptContents);
     		List<String> depList = (List<String>)results.get("dependencies");
