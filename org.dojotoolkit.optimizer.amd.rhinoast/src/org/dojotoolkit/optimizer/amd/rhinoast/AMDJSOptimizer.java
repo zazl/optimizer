@@ -376,7 +376,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 						
 		                AstRoot ast;
 						try {
-							ast = parser.parse(source, null, 1);
+							ast = parser.parse(source, this.moduleId, 1);
 			                ast.visit(this);
 						} catch (EvaluatorException e) {
 							error = "Failed to parse ["+url+"] [line:"+e.lineNumber()+" column:"+e.columnNumber()+"] reason ["+e.details()+"]";
@@ -543,7 +543,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			try {
 				JSONSerializer.serialize(sw, pathStack);
 			} catch (IOException e) {
-				logger.logp(Level.SEVERE, getClass().getName(), "AMDJSOptimizer", "IOException while parsing page configuration data", e);
+				logger.logp(Level.SEVERE, getClass().getName(), "callProxy", "IOException while parsing page configuration data", e);
 			}
 			
 			StringBuffer sb = new StringBuffer();
@@ -580,7 +580,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				proxyReturn = (Map<String, Object>)JSONParser.parse(new StringReader((String)o));
 			}
 			catch(Throwable t) {
-				logger.logp(Level.SEVERE, getClass().getName(), "getAnalysisData", "Exception on callProxy for ["+proxy+"]", t);
+				logger.logp(Level.SEVERE, getClass().getName(), "callProxy", "Exception on callProxy for ["+proxy+"]", t);
 			}
 			finally {
 				Context.exit();
