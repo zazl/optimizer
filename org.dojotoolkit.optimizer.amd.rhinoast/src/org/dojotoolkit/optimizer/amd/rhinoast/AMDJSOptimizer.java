@@ -140,6 +140,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         seen.put("module", Boolean.TRUE);
         seen.put("exports", Boolean.TRUE);
         for (String moduleId : modules) {
+        	if (moduleId.indexOf('!') != -1) {
+        		moduleId = moduleId.substring(0, moduleId.indexOf('!'));
+        	}
         	Module m = moduleMap.get(moduleId);
             buildDependencyList(m, moduleMap, dependencies, seen);
             scanForCircularDependencies(m, new Stack<String>(), moduleMap);
@@ -357,6 +360,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					}
 				}
 				l.add(pluginRef);
+				this.moduleId = pluginName;
 			} else {
 				this.moduleId = expand(moduleId, pathStack, config);
 			}
