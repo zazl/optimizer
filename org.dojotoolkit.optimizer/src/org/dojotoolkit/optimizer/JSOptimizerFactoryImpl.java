@@ -20,7 +20,7 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
-	private static final String DEFAULT_JS_OPTIMIZER_CLASS = "org.dojotoolkit.optimizer.rhino.RhinoJSOptimizer"; 
+	private static final String DEFAULT_JS_OPTIMIZER_CLASS = "org.dojotoolkit.optimizer.rhinoast.RhinoJSOptimizer"; 
 	private Constructor<JSOptimizer> jsOptimizerConstructor = null;
 	
 	@SuppressWarnings("unchecked")
