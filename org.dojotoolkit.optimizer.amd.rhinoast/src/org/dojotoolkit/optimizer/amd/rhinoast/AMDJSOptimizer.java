@@ -38,6 +38,7 @@ import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NodeVisitor;
 import org.mozilla.javascript.ast.StringLiteral;
 
@@ -401,7 +402,11 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		public boolean visit(AstNode astNode) {
 			if (astNode instanceof FunctionCall) {
 				FunctionCall functionCall = (FunctionCall)astNode;
-				String callName = functionCall.getTarget().toSource(0); 
+				AstNode target = functionCall.getTarget();
+				String callName = "";
+				if (target instanceof Name) {
+					callName = ((Name)target).getIdentifier();
+				}
 				if (callName.equals("define") || callName.equals("require")) {
 					List<AstNode> args = functionCall.getArguments();
 					if (callName.equals("define") && args.get(0) instanceof StringLiteral == false) {

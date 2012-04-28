@@ -70,7 +70,11 @@ public class RhinoASTScriptAnalyzer extends ScriptAnalyzer implements NodeVisito
 	public boolean visit(AstNode astNode) {
 		if (astNode instanceof FunctionCall) {
 			FunctionCall functionCall = (FunctionCall)astNode;
-			String callName = functionCall.getTarget().toSource(0); 
+			AstNode target = functionCall.getTarget();
+			String callName = "";
+			if (target instanceof Name) {
+				callName = ((Name)target).getIdentifier();
+			}
 			if (callName.equals("zazl")) {
 				List<AstNode> args = functionCall.getArguments();
 				if (args.get(0) instanceof ArrayLiteral) {
