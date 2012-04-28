@@ -48,7 +48,7 @@ public class ZazlOptimizerServer {
 		libHandler.setBaseResource(new FileResource(new URL("file:"+lib.getCanonicalPath())));
 		
 		boolean useV8 = Boolean.valueOf(System.getProperty("V8", "false"));
-		boolean useRhinoAST = Boolean.valueOf(System.getProperty("rhinoAST", "false"));
+		boolean useRhinoAST = Boolean.valueOf(System.getProperty("rhinoAST", "true"));
 		JSOptimizerFactory jsOptimizerFactory = null;
 		if (useV8) {
 			jsOptimizerFactory = new org.dojotoolkit.optimizer.amd.v8.AMDJSOptimizerFactory();
