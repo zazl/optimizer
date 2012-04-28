@@ -190,7 +190,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			Map<String, Object> pkg;
 	        String parent = join(segments.subList(0, i), '/');
 	        if (paths.get(parent) != null) {
-	        	splice(segments, 0, i, (String)config.get(parent));
+	        	splice(segments, 0, i, (String)paths.get(parent));
 	            break;
 	        }else if ((pkg = (Map<String, Object>)packages.get(parent)) != null) {
 	        	String pkgPath;
