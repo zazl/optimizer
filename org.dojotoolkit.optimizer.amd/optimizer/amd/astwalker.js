@@ -79,6 +79,8 @@ function expand(path, pathStack, config) {
 	return path;
 };
 
+exports.expand = expand;
+
 function processPluginRef(pluginName, resourceName, pathStack, config) {
 	var value;
 	var normalizedName;

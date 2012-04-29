@@ -557,8 +557,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			
 			StringBuffer sb = new StringBuffer();
 			sb.append("loadJS('/json/json2.js');\n");
-			sb.append("loadJS('/rhinoast/expand.js');\n");
 	        sb.append("loadJS('/jsutil/commonjs/loader.js');\n");
+	        sb.append("var astwalker = require('optimizer/amd/astwalker');\n");
 	        sb.append("var config = "+pageConfigString+";\n");
 	        sb.append("var pathStack = "+sw.toString()+";\n");
 	        sb.append("var plugin = require('"+proxy+"');\n");
@@ -576,7 +576,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	        sb.append("}\n");
 	        sb.append("if (plugin.normalize) {\n");
 	        sb.append("newNormalizedName = dependency = plugin.normalize(resourceName, config, function(id) {\n");
-	        sb.append("return expand(id, pathStack, config);\n");
+	        sb.append("return astwalker.expand(id, pathStack, config);\n");
 	        sb.append("});\n");
 	        sb.append("}\n");
 	        sb.append("JSON.stringify({normalizedName: newNormalizedName, dependency: dependency, value: value});\n");
