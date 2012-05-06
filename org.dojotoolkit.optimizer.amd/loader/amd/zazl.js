@@ -361,12 +361,14 @@ var define;
 		if (modules[id] !== undefined) { 
 			throw new Error("A module with an id of ["+id+"] has already been provided");
 		}
-
+		var args;
 		if (!isArray(dependencies)) {
 			factory = dependencies;
 			dependencies = [];
+		} else {
+			args = [];
 		}
-		modules[id] = {id: id, exports: {}, args: [], deploaded: {}, dependencies: dependencies};
+		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies};
 		if (isFunction(factory)) {
 			factory.toString().replace(commentRegExp, "").replace(cjsRequireRegExp, function (match, dep) {
 				modules[id].dependencies.push("~#"+dep);
@@ -587,8 +589,8 @@ var define;
 				}
 				if (m.loaded !== true && isComplete(m)) {
 					if (m.factory !== undefined) {
-						if (m.args.length < 1) {
-							m.args = m.args.concat(m.cjsreq, m.exports, m);
+						if (m.args === undefined) {
+							m.args = [m.cjsreq, m.exports, m];
 						}
 						ret = m.factory.apply(null, m.args);
 						if (ret) {
