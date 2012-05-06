@@ -486,6 +486,15 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 	if (!config.astparser) {
 		config.astparser = "uglifyjs";
 	}
+	if (config.excludes) {
+		for (var i = 0; i < config.excludes.length; i++) {
+			var excludeModule = config.excludes[i];
+			if (excludeModule.charAt(0) != '/') {
+				excludeModule = '/'+excludeModule;
+			}
+			exclude.push(excludeModule);
+		}
+	}
 	if (config.astparser === "uglifyjs") {
 		print("AST parsing ["+uri+"] using uglifyjs");
 		uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config, pathStack);

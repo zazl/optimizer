@@ -116,12 +116,23 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         List<String> excludeList = new ArrayList<String>();
         for (JSAnalysisData analysisData : exclude) {
 	        for (String excludeModule : analysisData.getDependencies()) {
+        		excludeModule = excludeModule.substring(0, excludeModule.indexOf(".js"));
 	        	if (!excludeList.contains(excludeModule)) {
-	        		excludeList.add(excludeModule.substring(0, excludeModule.indexOf(".js")));
+	        		excludeList.add(excludeModule);
 	        	}
 	        }
         }
-        
+        if (fullConfig.containsKey("excludes")) {
+        	List<String> configExcludes = (List<String>)fullConfig.get("excludes");
+	        for (String excludeModule : configExcludes) {
+				if (excludeModule.charAt(0) != '/') {
+					excludeModule = '/'+excludeModule;
+				}
+	        	if (!excludeList.contains(excludeModule)) {
+	        		excludeList.add(excludeModule);
+	        	}
+	        }
+        }
 		Map<String, List<Map<String, String>>> pluginRefs = new HashMap<String, List<Map<String, String>>>();
 		List<Map<String, Object>> missingNamesList = new ArrayList<Map<String, Object>>();
 		Map<String, Module> moduleMap = new HashMap<String, Module>();
