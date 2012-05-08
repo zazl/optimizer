@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>AMD Declarative Example via JSP/Zazl Optimizer</title>
 	<style type="text/css">
 		@import "dojo/resources/dojo.css";
 		@import "dijit/themes/claro/claro.css";
