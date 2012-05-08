@@ -23,7 +23,7 @@ function getExcludes(excludeKeys) {
 	var analysisData;
 	
 	for (var i = 0; i < excludeKeys.length; i++) {
-		analysisData = cache[excludeKeys[i]];
+		analysisData = cache[excludeKeys[i]].analysisData;
 		for (var j = 0; j < analysisData.dependencyList.length; j++) {
 			var dep = analysisData.dependencyList[j];
 			if (!seen[dep]) {
@@ -103,7 +103,7 @@ exports.getAnalysisData = function(modules, excludes, config) {
 	}
 	
 	if (doAnalysis) {
-		var analysisData = analyzer.createAnalyzer(config).getAnalysisData(modules, excludes);
+		var analysisData = analyzer.createAnalyzer(config).getAnalysisData(modules, getExcludes(excludes));
 		analysisData.checksum = createChecksum(analysisData);
 		analysisData.key = key;
 		var timestamps = getTimestamps(analysisData.dependencyList);

@@ -149,7 +149,7 @@ function writeResponse(params, analysisData, excludes, request, response, config
 	
 	if (i18nPluginId) {
 		for (i = 0; i < excludes.length; i++) {
-			exludeAnalysisData = jsoptimizer.getAnalysisDataFromKey(excludes[i]);
+			exludeAnalysisData = analyzer.getAnalysisDataFromKey(excludes[i]);
 			pluginRefs = exludeAnalysisData.pluginRefs;
 			if (pluginRefs && pluginRefs[i18nPluginId]) {
 				pluginRefList = pluginRefs[i18nPluginId];
@@ -248,8 +248,8 @@ function handle(request, response, config, compress) {
 		var modules = params.modules.split(',');
 		var p;
 		var excludes = [];
-		if (params.excludes) {
-			excludes = params.excludes.split(',');
+		if (params.exclude) {
+			excludes = params.exclude.split(',');
 		}
 		var fullConfig = {};
 		for (p in config.amdconfig) {
