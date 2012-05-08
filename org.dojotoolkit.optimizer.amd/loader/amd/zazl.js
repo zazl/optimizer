@@ -158,6 +158,7 @@ var define;
 				cblist[expandedId].push({cb:cb, mid:dependentId});
 			} else {
 				injectQueue.push({id:expandedId, cb: _load});
+				processInjectQueue();
 			}
 		} else {
 			_load();
