@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JS Optimizer Rhino
 Bundle-SymbolicName: org.dojotoolkit.optimizer.rhino
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.3.2
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Require-Bundle: org.dojotoolkit.optimizer;bundle-version="1.0.0"
+Require-Bundle: org.dojotoolkit.optimizer
 Import-Package: org.dojotoolkit.json,
  org.dojotoolkit.server.util.resource,
  org.dojotoolkit.server.util.rhino,

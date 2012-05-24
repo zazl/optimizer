@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Samples
 Bundle-SymbolicName: org.dojotoolkit.optimizer.samples;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.3.2
 Bundle-Activator: org.dojotoolkit.optimizer.samples.Activator
 Import-Package: org.dojotoolkit.optimizer.servlet.osgi,
  org.osgi.framework;version="1.3.0",

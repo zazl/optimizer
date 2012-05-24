@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: V8 AMD Optimizer
 Bundle-SymbolicName: org.dojotoolkit.optimizer.amd.v8
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.3.2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.dojotoolkit.optimizer;bundle-version="1.0.0"
+Require-Bundle: org.dojotoolkit.optimizer
 Import-Package: org.dojotoolkit.json,
  org.dojotoolkit.rt.v8,
  org.dojotoolkit.server.util.resource,
