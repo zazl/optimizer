@@ -1,0 +1,49 @@
+<project name="assemble" basedir=".." default="assemble">
+	<property
+		name="target.dir"
+		value="${basedir}/bin/build.artifacts/plugins"/>
+	
+	<target name="assemble">
+		<loadfile property="project.template" srcFile="${basedir}/scripts/project.template"/>	
+		<loadfile property="classpath.template" srcFile="${basedir}/scripts/classpath.template"/>
+		<scriptdef name="createProjects" language="javascript">
+			<element name="dirset" type="dirset"/>
+			<![CDATA[
+				importClass(java.io.File);
+				var projectTemplate = project.getProperty("project.template");
+				var classpathTemplate = project.getProperty("classpath.template");
+				var fs = elements.get("dirset").get(0);
+		      	var ds = fs.getDirectoryScanner(project);
+		      	var dirs = ds.getIncludedDirectories();		
+				var dirname;
+				var basedir  = fs.getDir(project);
+				for (var i = 0; i < dirs.length; i++) {
+					dirname = dirs[i];
+					dirname = dirname.substring(0, dirname.indexOf('_'));
+					var newProjectTemplate = projectTemplate.replace("__projectname__", dirname);
+					var oldDir = new File(basedir, dirs[i]);
+					var newDir = new File(basedir, dirname);
+					oldDir.renameTo(newDir);
+					var echo = project.createTask("echo");
+			        echo.setMessage(newProjectTemplate);
+	       	 		echo.setFile(new File(newDir, ".project"));
+			        echo.perform();
+					echo = project.createTask("echo");
+			        echo.setMessage(classpathTemplate);
+		   	 		echo.setFile(new File(newDir, ".classpath"));
+			        echo.perform();
+				}
+			]]>
+		</scriptdef>
+		<createProjects>
+			<dirset dir="${target.dir}">
+				<include name="*"/>
+			</dirset>	
+		</createProjects>	
+	</target>
+	
+	<target name="clean">
+		<delete	dir="${target.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+</project>
