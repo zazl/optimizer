@@ -466,7 +466,7 @@ var define;
 			}
 			cfg.baseUrl = cfg.baseUrl || "./";
 
-			if (cfg.baseUrl.charAt(0) !== '/') {
+			if (cfg.baseUrl.charAt(0) !== '/' && !cfg.baseUrl.match(/^[\w\+\.\-]+:/)) {
 				cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/'+ cfg.baseUrl);
 			}
 
