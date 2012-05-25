@@ -21,7 +21,7 @@
 			destination="${destination}"
 			exportType="directory" 
 			useJARFormat="false"
-			exportSource="false"/>
+			exportSource="true"/>
 	</target>
 
 	<!-- Clean up the target directory -->
