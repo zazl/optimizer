@@ -125,11 +125,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         if (fullConfig.containsKey("excludes")) {
         	List<String> configExcludes = (List<String>)fullConfig.get("excludes");
 	        for (String excludeModule : configExcludes) {
-				if (excludeModule.charAt(0) != '/') {
-					excludeModule = '/'+excludeModule;
-				}
-	        	if (!excludeList.contains(excludeModule)) {
-	        		excludeList.add(excludeModule);
+	        	String excludeUri = idToUrl(excludeModule, cfg);
+	        	if (!excludeList.contains(excludeUri)) {
+	        		excludeList.add(excludeUri);
 	        	}
 	        }
         }

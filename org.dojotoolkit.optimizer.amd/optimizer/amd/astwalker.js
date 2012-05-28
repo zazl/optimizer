@@ -488,11 +488,8 @@ function walker(uri, exclude, moduleMap, pluginRefList, missingNamesList, config
 	}
 	if (config.excludes) {
 		for (var i = 0; i < config.excludes.length; i++) {
-			var excludeModule = config.excludes[i];
-			if (excludeModule.charAt(0) != '/') {
-				excludeModule = '/'+excludeModule;
-			}
-			exclude.push(excludeModule);
+			var excludeUri = idToUrl(config.excludes[i], config);
+			exclude.push(excludeUri);
 		}
 	}
 	if (config.astparser === "uglifyjs") {
