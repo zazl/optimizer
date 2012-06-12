@@ -312,9 +312,9 @@ var define;
 			moduleStack = [id];
 			if (isFunction(callback)) {
 				_require(dependencies, function() {
-					moduleStack = savedStack;
 					callback.apply(null, arguments);
 				});
+				moduleStack = savedStack;
 			} else {
 				var mod = _require(dependencies, callback);
 				moduleStack = savedStack;
@@ -348,6 +348,11 @@ var define;
         };
         req.isXdUrl = function(url) {
         	return false;
+        };
+        req.idle = function() {
+        	return pageLoaded;
+        };
+        req.on = function(type, cb) {
         };
 		return req;
 	};
