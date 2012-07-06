@@ -352,13 +352,13 @@ var define;
         req.idle = function() {
         	return pageLoaded;
         };
-        req.on = function(type, cb) {
+        req.on = function(type, callback) {
         	if (type === "idle") {
-				if (pageLoaded) {
-					callback();
-				} else {
-					readyCallbacks.push(callback);
-				}
+        		if (pageLoaded) {
+        			callback();
+        		} else {
+        			readyCallbacks.push(callback);
+        		}
         	} else {
         		console.log("Unsupported 'on' type ["+type+"]");
         	}
