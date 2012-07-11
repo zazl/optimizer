@@ -4,7 +4,7 @@
 	"author" : "Richard Backhouse <richardabackhouse@gmail.com>",
 	"main" : "./lib/zazloptimizer.js",
 	"dependencies" : {
-		"connect" : ">= 2.0.0",
+		"connect" : "2.3.6",
 		"uglify-js" : ">= 1.2.5",
 		"node-static" : ">= 0.5.9"
 	},
@@ -23,6 +23,6 @@
 		"zazlnodestatic" : "./jsbin/zazlnodestatic.js"
 	},
 	"engine": {
-    	"node": ">=0.6"
+    	"node": ">=0.8"
 	}
 }
