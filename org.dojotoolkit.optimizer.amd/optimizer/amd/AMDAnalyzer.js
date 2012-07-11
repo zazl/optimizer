@@ -37,6 +37,7 @@ AMDAnalyzer = function(cfg) {
 				this.config[p] = cfg[p];
 			}
 		}
+		this.config.scanCJSRequires = cfg.scanCJSRequires || false;
 	}
 };
 

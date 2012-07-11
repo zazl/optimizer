@@ -385,9 +385,12 @@ var define;
 		}
 		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies};
 		if (isFunction(factory)) {
-			factory.toString().replace(commentRegExp, "").replace(cjsRequireRegExp, function (match, dep) {
-				modules[id].dependencies.push("~#"+dep);
-            });
+			var scancjs = cfg ? cfg.scanCJSRequires : false;
+			if (scancjs) {
+				factory.toString().replace(commentRegExp, "").replace(cjsRequireRegExp, function (match, dep) {
+					modules[id].dependencies.push("~#"+dep);
+	            });
+			}
 			modules[id].factory = factory;
 		} else {
 			modules[id].literal = factory;
@@ -485,6 +488,8 @@ var define;
 			}
 
 			cfg.injectUrl = cfg.injectUrl || "_javascript";
+			cfg.scanCJSRequires = cfg.scanCJSRequires || false;
+			cfg.debug = cfg.debug || false;
 		}
 	};
 
@@ -651,6 +656,7 @@ var define;
 						cbiterate(modules[mid].exports, new Iterator(cblist[mid]));
 					}
 				}
+				if (cfg.debug) {console.log("Page load complete");}
 				pageLoaded = true;
 				for (var i = 0; i < readyCallbacks.length; i++) {
 					readyCallbacks[i]();

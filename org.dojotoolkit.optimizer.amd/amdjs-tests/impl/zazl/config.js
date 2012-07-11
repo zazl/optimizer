@@ -28,6 +28,7 @@ var go = function(dependencies, callback) {
 	cfg.baseUrl = _normalize(window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + "/./");
 	cfg.directInject = true;
 	cfg.injectUrl = "/amdjs-tests/_javascript";
+	cfg.scanCJSRequires = true;
 	zazl(cfg, dependencies, callback);
 };
 

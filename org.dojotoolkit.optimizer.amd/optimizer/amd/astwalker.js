@@ -141,7 +141,7 @@ function scanForRequires(ast, requires) {
 	}
 };
 
-function getDependencies(src, expression) {
+function getDependencies(src, expression, scanCJSRequires) {
 	var dependencies = [];
 	var nameIndex;
 
@@ -156,10 +156,12 @@ function getDependencies(src, expression) {
 				dependencies.push({value: elements[k].value, type: elements[k].type});
 			}
 		} else if (args[j].type === "FunctionExpression" && expression.callee.name === "define") {
-			var requires = [];
-			scanForRequires(args[j].body, requires);
-			for (var x = 0; x < requires.length; x++) {
-				dependencies.push({value: requires[x], type: "Literal"});
+			if (scanCJSRequires) {
+				var requires = [];
+				scanForRequires(args[j].body, requires);
+				for (var x = 0; x < requires.length; x++) {
+					dependencies.push({value: requires[x], type: "Literal"});
+				}
 			}
 		}
 	}
@@ -251,7 +253,7 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 		var id = uri;
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
-		var depInfo = getDependencies(src, defineExpr);
+		var depInfo = getDependencies(src, defineExpr, config.scanCJSRequires);
 		if (depInfo.nameIndex) {
 			missingNamesList.push({uri: url, id: id, nameIndex: depInfo.nameIndex});
 		}
@@ -395,7 +397,7 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
                     	missingNamesList.push({uri: url, id: id, nameIndex: nameIndex});
                     }
 				    if (expr[1] === "require") { 
-				    	if (args[0][0].name === "string") {
+				    	if (args[0][0].name === "string" && config.scanCJSRequires) {
 							dependencyArg = [args[0][1]];
 				    	} else {
 							dependencyArg = undefined;

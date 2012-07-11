@@ -103,6 +103,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				cfg.put(key, fullConfig.get(key));
 			}
 		}
+		boolean scanCJSRequires = cfg.get("scanCJSRequires") == null ? false : (Boolean)cfg.get("scanCJSRequires");
+
 		StringWriter sw = new StringWriter();
 		String pageConfigString = "";
 		try {
@@ -137,7 +139,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		
         for (String moduleId : modules) {
         	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing ["+moduleId+"] using the Rhino AST API");
-        	AstVisitor visitor = new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString);
+        	AstVisitor visitor = new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString, scanCJSRequires);
         	if (visitor.getError() != null) {
             	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing error for ["+moduleId+"] error : "+visitor.getError());
             	throw new IOException("AST parsing error for ["+moduleId+"] error : "+visitor.getError());
@@ -310,6 +312,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		private String baseUrl = null;
 		private String pageConfigString = null;
 		private String error = null;
+		private boolean scanCJSRequires = false;
 		
 		public AstVisitor(String moduleId, 
 				          Map<String, Module> moduleMap,
@@ -318,7 +321,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				          Map<String, Object> config,
 				          Stack<String> pathStack,
 				          List<String> excludeList,
-				          String pageConfigString) {
+				          String pageConfigString,
+				          boolean scanCJSRequires) {
 			
 			if (moduleId.equals("require") || moduleId.equals("exports") || moduleId.equals("module")) {
 				moduleMap.put(moduleId, new Module(moduleId, moduleId));
@@ -333,6 +337,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			this.pathStack = pathStack;
 			this.excludeList = excludeList;
 			this.pageConfigString = pageConfigString;
+			this.scanCJSRequires = scanCJSRequires;
 			
 			this.baseUrl = (String)config.get("baseUrl");
 			
@@ -362,7 +367,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					if (addDep) {
 						Stack<String> s = new Stack<String>();
 						s.push(this.moduleId);
-						AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString);
+						AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString, scanCJSRequires);
 						if (visitor.getError() != null) {
 							error = visitor.getError();
 							return;
@@ -427,7 +432,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					}
 					List<String> dependencies = new ArrayList<String>();
 					if (callName.equals("require") && args.get(0) instanceof StringLiteral) {
-						dependencies.add(((StringLiteral)args.get(0)).getValue());
+						if  (scanCJSRequires) {
+							System.out.println("require:"+((StringLiteral)args.get(0)).getValue());
+							dependencies.add(((StringLiteral)args.get(0)).getValue());
+						}
 					} else if (args.get(0) instanceof StringLiteral && args.get(1) instanceof ArrayLiteral) {
 						ArrayLiteral al = (ArrayLiteral) args.get(1);
 						for (AstNode dependency : al.getElements()) {
@@ -473,7 +481,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 									}
 									if (addDep) {
 										module.dependencies.add(pluginDep);
-										AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
+										AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires);
 										if (visitor.getError() != null) {
 											error = visitor.getError();
 											return false;
@@ -506,7 +514,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 								}
 								if (addDep) {
 									module.dependencies.add(dependencyId);
-									AstVisitor visitor = new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString);
+									AstVisitor visitor = new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires);
 									if (visitor.getError() != null) {
 										error = visitor.getError();
 										return false;
