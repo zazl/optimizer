@@ -18,11 +18,11 @@
 	</style>
 	<script type="text/javascript">
         var dojoConfig = {
-            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>",
-            has:{
-                "dojo-1x-base":1
-            }
+            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
 		};
+        var zazlConfig = {
+            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
+        };
 	</script>
 	<%
 		JSOptimizer jsOptimizer = (JSOptimizer)pageContext.getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
@@ -44,26 +44,7 @@
 	%>
 	<script type="text/javascript" src="<%=urlGenerator.generateURL("amdtest/Declarative", cfg)%>"></script>
 	<script type="text/javascript">
-        zazl({
-            packages: [
-                {
-                    name: 'dojo',
-                    location: 'dojo',
-                    main:'main'
-                },
-                {
-                    name: 'dijit',
-                    location: 'dijit',
-                    main:'main'
-                },
-                {
-                    name: 'dojox',
-                    location: 'dojox',
-                    main:'main'
-                }
-            ]
-        }, 
-        ["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], 
+        require(["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], 
         function(declarative, dom, domStyle) {
         	domStyle.set(dom.byId("borderContainerTwo"), "visibility", "visible");
             console.log("done");
