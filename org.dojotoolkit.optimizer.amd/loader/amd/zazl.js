@@ -39,6 +39,7 @@ var define;
 	var cblist = {};
 	var injectQueue = [];
 	var injectInProcess = false;
+	var requireInProcess = false;
 
 	var opts = Object.prototype.toString;
 	
@@ -166,15 +167,29 @@ var define;
 	};
 	
 	function _inject(moduleIds, cb) {
+		var notLoaded = [];
+		for (var i = 0; i < moduleIds.length; i++) {
+			var id = moduleIds[i];
+			if (id.match(pluginRegExp)) {
+				id = id.substring(0, id.indexOf('!'));
+			}
+			if (modules[id] === undefined) {
+				notLoaded.push(moduleIds[i]);
+			}
+		}
+		if (notLoaded.length < 1) {
+			cb();
+			return;
+		}
 		var locale = "en-us";
 		if (window.dojoConfig && window.dojoConfig.locale) {
 			locale = dojoConfig.locale;
 		}
 		var configString = JSON.stringify(cfg);
 		var url = cfg.injectUrl+"?modules=";
-		for (var i = 0; i < moduleIds.length; i++) {
-			url += moduleIds[i];
-			url += i < (moduleIds.length - 1) ? "," : "";
+		for (var i = 0; i < notLoaded.length; i++) {
+			url += notLoaded[i];
+			url += i < (notLoaded.length - 1) ? "," : "";
 		}
 		url += "&writeBootstrap=false&locale="+locale+"&config="+encodeURIComponent(configString)+"&exclude=";
 		for (var i = 0; i < analysisKeys.length; i++) {
@@ -507,22 +522,38 @@ var define;
 			dependencies = [];
 		}
 
-		function _load() {
-			if (isFunction(callback)) {
-				_require(dependencies, function() {
+		function _callRequire() {
+			_require(dependencies, function() {
+				if (isFunction(callback)) {
 					callback.apply(null, arguments);
-				});
-			} else {
-				_require(dependencies);
-			}
+				}
+				requireInProcess = false;
+			});
 			processCache();
 			queueProcessor();
 		};
 
-		if (cfg.directInject && dependencies.length > 0) {
-			_inject(dependencies, function(){
-				_load();
-			});
+		function _load() {
+			requireInProcess = true;
+
+			if (cfg.directInject && dependencies.length > 0) {
+				_inject(dependencies, function(){
+					_callRequire();
+				});
+			} else {
+				_callRequire();
+			}
+		};
+
+		if (requireInProcess) {
+			var poller = function() {
+				if (requireInProcess) {
+					setTimeout(poller, 100);
+				} else {
+					_load();
+				}
+			};
+			poller();
 		} else {
 			_load();
 		}
@@ -666,6 +697,7 @@ var define;
 		} catch (e) {
 			console.log("queueProcessor error : "+e);
 			allLoaded = true;
+			if (requireInProcess) { requireInProcess = false; }
 		}
 		return allLoaded;
 	};
