@@ -2,4 +2,4 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AMD Optimizer
 Bundle-SymbolicName: org.dojotoolkit.optimizer.amd;singleton:=true
-Bundle-Version: 0.3.6
+Bundle-Version: 0.3.7
