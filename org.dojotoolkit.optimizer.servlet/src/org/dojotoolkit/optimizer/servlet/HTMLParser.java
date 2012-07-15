@@ -50,6 +50,7 @@ public class HTMLParser extends DefaultFilter {
 	private Locale locale = null;
 	private String path = null;
 	private String contextRoot = null;
+	private Map<String, Object> config = null;
 	
     public HTMLParser(java.io.Writer out, 
     	String encoding, 
@@ -129,13 +130,15 @@ public class HTMLParser extends DefaultFilter {
     }
     
     @SuppressWarnings("unchecked")
-	private static String analyzeScript(String scriptContents, ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, JSURLGenerator urlGenerator) {
+	private String analyzeScript(String scriptContents, ResourceLoader resourceLoader, RhinoClassLoader rhinoClassLoader, JSURLGenerator urlGenerator) {
     	String url = null;
     	ScriptAnalyzer scriptAnalyzer = new RhinoASTScriptAnalyzer(resourceLoader, rhinoClassLoader);
     	try {
     		Map<String, Object> results = scriptAnalyzer.analyze(scriptContents);
     		List<String> depList = (List<String>)results.get("dependencies");
-    		Map<String, Object> config = (Map<String, Object>)results.get("config");
+    		if (results.containsKey("config")) {
+    			config = (Map<String, Object>)results.get("config");
+    		}
     		if (depList.size() > 0) {
     			String[] deps = new String[depList.size()];
     			deps = depList.toArray(deps);

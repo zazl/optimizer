@@ -11,12 +11,12 @@
         var dojoConfig = {
             locale : __localePlaceholder__
 		};
+        var zazlConfig = {
+            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
+        };
 	</script>
 	<script type="text/javascript">
-        zazl({
-            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
-        }, 
-        ["amdtest/Calendar"], 
+        require(["amdtest/Calendar"],
         function(calendar) {
             console.log("done");
         });

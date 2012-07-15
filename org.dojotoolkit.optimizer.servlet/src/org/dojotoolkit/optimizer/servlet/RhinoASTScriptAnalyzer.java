@@ -32,6 +32,8 @@ import org.mozilla.javascript.ast.NumberLiteral;
 import org.mozilla.javascript.ast.ObjectLiteral;
 import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.StringLiteral;
+import org.mozilla.javascript.ast.VariableDeclaration;
+import org.mozilla.javascript.ast.VariableInitializer;
 
 public class RhinoASTScriptAnalyzer extends ScriptAnalyzer implements NodeVisitor {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer.servlet");
@@ -68,14 +70,24 @@ public class RhinoASTScriptAnalyzer extends ScriptAnalyzer implements NodeVisito
 	}
 
 	public boolean visit(AstNode astNode) {
-		if (astNode instanceof FunctionCall) {
+		if (astNode instanceof VariableDeclaration) {
+			VariableDeclaration vd = (VariableDeclaration)astNode;
+			for (VariableInitializer vi : vd.getVariables()) {
+				if (vi.getTarget().getType() == Token.NAME) {
+					Name name = (Name)vi.getTarget();
+					if (name.getIdentifier().equals("zazlConfig") && vi.getInitializer() instanceof ObjectLiteral) {
+						results.put("config", parseObject((ObjectLiteral)vi.getInitializer()));
+					}
+				}
+			}
+		} else if (astNode instanceof FunctionCall) {
 			FunctionCall functionCall = (FunctionCall)astNode;
 			AstNode target = functionCall.getTarget();
 			String callName = "";
 			if (target instanceof Name) {
 				callName = ((Name)target).getIdentifier();
 			}
-			if (callName.equals("zazl")) {
+			if (callName.equals("zazl") || callName.equals("require")) {
 				List<AstNode> args = functionCall.getArguments();
 				if (args.get(0) instanceof ArrayLiteral) {
 					results.put("dependencies", getDependencies((ArrayLiteral)args.get(0)));
