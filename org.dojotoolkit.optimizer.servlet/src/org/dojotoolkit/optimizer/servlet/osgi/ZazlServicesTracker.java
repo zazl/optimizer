@@ -223,6 +223,8 @@ public class ZazlServicesTracker {
 					} else {
 						dojoServiceId = "RhinoUglifyJSCompressor";
 					}
+				} else {
+					dojoServiceId = compressorType;
 				}
 			}
 			if (dojoServiceId != null && reference.getProperty("dojoServiceId").equals(dojoServiceId)) {
