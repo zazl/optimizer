@@ -35,7 +35,7 @@ public class JSCompressorContentFilter extends CachingContentFilter {
 	protected String _runFilter(String content, String path) {
 		if (doCompress(path)) {
 			try {
-				return jsCompressor.compress(content);
+				return jsCompressor.compress(path, content);
 			} catch (IOException e) {
 				logger.logp(Level.SEVERE, getClass().getName(), "_runFilter", "Unable to compress ["+path+"]", e);
 				return content;

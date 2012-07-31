@@ -19,7 +19,7 @@ public class ShrinksafeJSCompressor implements JSCompressor {
 	
 	public ShrinksafeJSCompressor(ResourceLoader resourceLoader) {}
 	
-	public String compress(String src) throws IOException {
+	public String compress(String path, String src) throws IOException {
 		long start = System.currentTimeMillis();
 		Context ctx = null; 
 		try {
@@ -32,5 +32,9 @@ public class ShrinksafeJSCompressor implements JSCompressor {
 		} finally {
 			Context.exit();
 		}
+	}
+
+	public String getSourceMap(String path) {
+		throw new UnsupportedOperationException();
 	}
 }

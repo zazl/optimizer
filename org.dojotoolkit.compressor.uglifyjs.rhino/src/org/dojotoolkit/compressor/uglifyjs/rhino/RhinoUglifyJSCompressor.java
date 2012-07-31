@@ -37,7 +37,7 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 		this.rhinoClassLoader = rhinoClassLoader;
 	}
 
-	public String compress(String src) throws IOException {
+	public String compress(String path, String src) throws IOException {
 		String compressedSrc = null;
 		Context ctx = null; 
 		StringBuffer sb = new StringBuffer();
@@ -54,7 +54,7 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
 			logger.logp(Level.FINE, getClass().getName(), "compress", "time : "+(end-start)+" ms");
 		}
 		catch(Throwable t) {
-			logger.logp(Level.SEVERE, getClass().getName(), "compress", "Exception on compress for ["+sb+"]", t);
+			logger.logp(Level.SEVERE, getClass().getName(), "compress", "Exception on compress for ["+path+"]", t);
 			throw new IOException("Exception on compress for ["+sb+"] : "+t.getMessage());
 		}
 		finally {
@@ -64,6 +64,10 @@ public class RhinoUglifyJSCompressor implements JSCompressor {
         	compressedSrc += ";";
         }
 		return compressedSrc;
+	}
+
+	public String getSourceMap(String path) {
+		throw new UnsupportedOperationException();
 	}
 
 	private void initScope(ScriptableObject scope, ResourceLoader resourceLoader, String src) {

@@ -26,7 +26,7 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 		this.resourceLoader = resourceLoader;
 	}
 	
-	public String compress(String src) throws IOException {
+	public String compress(String path, String src) throws IOException {
 		this.src = src;
 		String compressedSrc = null;
 		StringBuffer sb = new StringBuffer();
@@ -46,7 +46,7 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
 					t.printStackTrace();
 				}
 			}
-			logger.logp(Level.SEVERE, getClass().getName(), "compress", "Exception on compress for ["+sb+"]", e);
+			logger.logp(Level.SEVERE, getClass().getName(), "compress", "Exception on compress for ["+path+"]", e);
 			throw new IOException("Exception on compress for ["+sb+"] : "+e.getMessage());
 		}
         
@@ -54,6 +54,10 @@ public class V8UglifyJSCompressor extends V8JavaBridge implements JSCompressor {
         	compressedSrc += ";";
         }
 		return compressedSrc;
+	}
+
+	public String getSourceMap(String path) {
+		throw new UnsupportedOperationException();
 	}
 
 	public String readResource(String path) throws IOException {

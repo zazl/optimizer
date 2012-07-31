@@ -13,9 +13,15 @@ import java.io.IOException;
  */
 public interface JSCompressor {
 	/**
+	 * @param path String value containing the path to the javascript source
 	 * @param src String value containing the javascript source
 	 * @return String containing compressed javascript source
 	 * @throws IOException
 	 */
-	String compress(String src) throws IOException;
+	String compress(String path, String src) throws IOException;
+	/**
+	 * @param path String value containing the path to the javascript source
+	 * @return String containing source map for the compressed javascript source
+	 */
+	String getSourceMap(String path);
 }
