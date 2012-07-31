@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shrinksafe
 Bundle-SymbolicName: org.dojotoolkit.compressor.shrinksafe
-Bundle-Version: 0.3.2
+Bundle-Version: 0.3.8
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: org.dojotoolkit.compressor,
  org.dojotoolkit.server.util.resource,

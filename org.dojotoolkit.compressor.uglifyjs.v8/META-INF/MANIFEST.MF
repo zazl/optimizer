@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Uglifyjs V8
 Bundle-SymbolicName: org.dojotoolkit.compressor.uglifyjs.v8
-Bundle-Version: 0.3.2
+Bundle-Version: 0.3.8
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Require-Bundle: org.dojotoolkit.compressor.uglifyjs
 Import-Package: org.dojotoolkit.compressor,
