@@ -673,7 +673,7 @@ var define;
 					}
 					cbiterate(exports, itr);
 				} else {
-					delete cblist[mid];
+					cblist[mid] = [];
 				}
 			};
 			for (mid in cblist) {
