@@ -337,7 +337,10 @@ var define;
 			}
 		};
 		req.toUrl = function(moduleResource) {
+			var savedStack = moduleStack;
+			moduleStack = [id];
 			var url = _idToUrl(_expand(moduleResource)); 
+			moduleStack = savedStack;
 			return url;
 		};
 		req.defined = function(moduleName) {
