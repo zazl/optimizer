@@ -30,7 +30,7 @@
 <setAttribute key="selected_features">
 <setEntry value="org.dojotoolkit.compressor.feature:default"/>
 <setEntry value="org.dojotoolkit.optimizer.feature:default"/>
-<setEntry value="org.dojotoolkit.prereq.dojo17:default"/>
+<setEntry value="org.dojotoolkit.prereq.dojo18:default"/>
 <setEntry value="org.dojotoolkit.prereqs.feature:default"/>
 <setEntry value="org.dojotoolkit.server.util.feature:default"/>
 </setAttribute>
