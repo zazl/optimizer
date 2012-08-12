@@ -568,6 +568,7 @@ var define;
 			var resolvedId = _idToUrl(id);
 			var cacheValue = precache[id];
 			cache[resolvedId] = cacheValue;
+			cache["url:"+resolvedId] = cacheValue;
 		}
 		precache = {};
 	};
