@@ -18,7 +18,7 @@
 	
 	<property
 		name="json.dir"
-		value="${target.dir}/plugins/org.json_1.0.0"/>
+		value="${target.dir}/plugins/org.json.js_1.0.0"/>
 	
 	<property
 		name="uglifyjs.dir"

@@ -16,7 +16,7 @@ public class Activator implements BundleActivator {
 		"org.dojotoolkit.optimizer.tests",
 		"org.dojotoolkit.dojo",
 		"org.dojotoolkit.compressor.uglifyjs",
-		"org.json",
+		"org.json.js",
 		"org.uglifyjs",
 		"org.dojotoolkit.server.util.js",
 		"org.requirejs",
@@ -27,7 +27,7 @@ public class Activator implements BundleActivator {
 	private static final String[] ids = {
 		"org.dojotoolkit.optimizer.tests",
 		"org.dojotoolkit.compressor.uglifyjs",
-		"org.json",
+		"org.json.js",
 		"org.uglifyjs",
 		"org.dojotoolkit.server.util.js",
 		"org.requirejs",

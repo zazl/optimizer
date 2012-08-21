@@ -2,7 +2,7 @@
     <!-- Properties -->
 	<property
 		name="version"
-		value="v0.3.8"/>
+		value="v0.3.9"/>
 	
 	<property
 		name="target.dir"
@@ -22,7 +22,7 @@
 	
 	<property
 		name="json.dir"
-		value="${workspace.dir}/../targetplatform/json/plugins/org.json_1.0.0"/>
+		value="${workspace.dir}/../targetplatform/json/plugins/org.json.js_1.0.0"/>
 	
 	<property
 		name="uglifyjs.dir"
