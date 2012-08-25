@@ -19,7 +19,8 @@
             locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
 		};
         var zazlConfig = {
-        	packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
+        	packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}],
+            config: { "amdtest/Calendar": {myconfigval: "My Config Value"}}
         };
 	</script>
 	<%

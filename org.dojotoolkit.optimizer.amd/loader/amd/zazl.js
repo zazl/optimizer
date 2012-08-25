@@ -401,7 +401,7 @@ var define;
 		} else {
 			args = [];
 		}
-		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies};
+		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies, config: function() { return cfg.config[id]; }};
 		if (isFunction(factory)) {
 			var scancjs = cfg ? cfg.scanCJSRequires : false;
 			if (scancjs) {
@@ -508,6 +508,7 @@ var define;
 			cfg.injectUrl = cfg.injectUrl || "_javascript";
 			cfg.scanCJSRequires = cfg.scanCJSRequires || false;
 			cfg.debug = cfg.debug || false;
+			cfg.config = cfg.config || {};
 		}
 	};
 
