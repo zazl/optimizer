@@ -588,6 +588,9 @@ var define;
     
 	document.addEventListener("DOMContentLoaded", function() {
 		domLoaded = true;
+		if (modulesLoaded) {
+			processQueues();
+		}
 	}, false);
 	
 	if (!require) {
