@@ -179,6 +179,7 @@ var define;
 		}
 		if (notLoaded.length < 1) {
 			cb();
+			processQueues();
 			return;
 		}
 		var locale = "en-us";
