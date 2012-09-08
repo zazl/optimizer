@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AMD Map Tes via Zazl Optimizer</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<style type="text/css">
+		@import "dojo/resources/dojo.css";
+		@import "dijit/themes/claro/claro.css";
+	</style>
+	<script type="text/javascript" src="loader/amd/zazl.js"></script>
+	<script type="text/javascript">
+        zazl({
+        	directInject: true,
+            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}],
+            map: { 
+            	"amdtest/MapTest1": {
+            		"amdtest/MappedModule": "amdtest/ModuleV1-0"
+            	},
+            	"amdtest/MapTest2": {
+            		"amdtest/MappedModule": "amdtest/ModuleV1-1"
+            	},
+            	"*": {
+            		"amdtest/MappedModule": "amdtest/ModuleV1-2"
+            	},
+            	"amdtest/subdir": {
+            		"amdtest/MappedModule1": "amdtest/ModuleV1-3",
+                	"amdtest/MappedModule2": "amdtest/ModuleV1-4"
+            	},
+            	"amdtest/subdir/subdir1": {
+            		"amdtest/MappedModule1": "amdtest/ModuleV1-5"
+            	},
+            	"amdtest/MapTest4": {
+            		"amdtest/subdir/subdir2": "amdtest/subdir/subdir1"
+            	}
+        	}
+        }, 
+        ['amdtest/MapTest1', 'amdtest/MapTest2', 'amdtest/MapTest3', 'amdtest/MapTest4', 'amdtest/subdir/MapTest1', 'amdtest/subdir/MapTest2', 'amdtest/subdir/subdir1/MapTest3']);
+	</script>
+</head>
+<body class="claro">
+<div id="mapTest1Node"></div>
+<div id="mapTest2Node"></div>
+<div id="mapTest3Node"></div>
+<div id="mapTest4Node"></div>
+<div id="mapTest5Node"></div>
+<div id="mapTest6Node"></div>
+<div id="mapTest7Node"></div>
+</body>
+</html>
