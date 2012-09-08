@@ -88,9 +88,51 @@ var define;
 		    	return pkgs[pkgName].name + '/' + pkgs[pkgName].main;
 		    }
 		}
+
+		var segments = path.split("/");
+		for (var i = segments.length; i >= 0; i--) {
+            var parent = segments.slice(0, i).join("/");
+			var mapping = findMapping(parent, _getCurrentId());
+        	if (mapping) {
+        		segments.splice(0, i, mapping);
+        		return segments.join("/");
+        	}
+		}
+
 		return path;
 	};
 	
+	function countSegments(path) {
+		var count = 0;
+		for (var i = 0; i < path.length; i++) {
+			if (path.charAt(i) === '/') {
+				count++;
+			}
+		}
+		return count;
+	};
+
+	function findMapping(path, depId) {
+		var mapping;
+		var segmentCount = -1;
+		for (var id in cfg.map) {
+			if (depId.indexOf(id) === 0) {
+				var foundSegmentCount = countSegments(id);
+				if (foundSegmentCount > segmentCount) {
+					var mapEntry = cfg.map[id];
+					if (mapEntry[path] !== undefined) {
+						mapping = mapEntry[path];
+						segmentCount = foundSegmentCount;
+					}
+				}
+			}
+		}
+		if (mapping === undefined && cfg.map["*"] !== undefined && cfg.map["*"][path] !== undefined) {
+			mapping = cfg.map["*"][path];
+		}
+		return mapping;
+	};
+
 	function _idToUrl(path) {
 		var segments = path.split("/");
 		for (var i = segments.length; i >= 0; i--) {
@@ -510,6 +552,7 @@ var define;
 			cfg.scanCJSRequires = cfg.scanCJSRequires || false;
 			cfg.debug = cfg.debug || false;
 			cfg.config = cfg.config || {};
+			cfg.map = cfg.map || {};
 		}
 	};
 

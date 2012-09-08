@@ -79,6 +79,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		Map<String, Object> pkgs = new HashMap<String, Object>();
 		cfg.put("pkgs", pkgs);
 		cfg.put("paths", new HashMap<String, Object>());
+		cfg.put("map", new HashMap<String, Object>());
 		cfg.put("baseUrl", "");
 		for (String key : fullConfig.keySet()) {
 			if (key.equals("packages")) {
@@ -155,6 +156,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
         	if (moduleId.indexOf('!') != -1) {
         		moduleId = moduleId.substring(0, moduleId.indexOf('!'));
         	}
+        	moduleId = expand(moduleId, new Stack<String>(), cfg);
         	Module m = moduleMap.get(moduleId);
             buildDependencyList(m, moduleMap, dependencies, seen);
             scanForCircularDependencies(m, new Stack<String>(), moduleMap);
@@ -177,7 +179,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 	
 	private static void splice(List<String> l, int index, int howMany, String toInsert) {
 		for (int i = index; i < howMany; i++) {
-			l.remove(i);
+			l.remove(index);
 		}
 		l.add(index, toInsert);
 	}
@@ -195,7 +197,42 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			return null;
 		}
 	}
-	
+
+	private static int countSegments(String path) {
+		int count = 0;
+		for (int i = 0; i < path.length(); i++) {
+			if (path.charAt(i) == '/') {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private static String findMapping(String path, String depId, Map<String, Object> config) {
+		Map<String, Object> map = (Map<String, Object>)config.get("map");
+		String mapping = null;
+		int segmentCount = -1;
+		for (String key : map.keySet()) {
+			if (depId.startsWith(key)) {
+				int foundSegmentCount = countSegments(key);
+				if (foundSegmentCount > segmentCount) {
+					Map<String, Object> mapEntry = (Map<String, Object>)map.get(key);
+					if (mapEntry != null && mapEntry.containsKey(path)) {
+						mapping = (String)mapEntry.get(path);
+						segmentCount = foundSegmentCount;
+					}
+				}
+			}
+		}
+		if (mapping == null) {
+			Map<String, Object> mapEntry = (Map<String, Object>)map.get("*");
+			if (mapEntry != null && mapEntry.containsKey(path)) {
+				mapping = (String)mapEntry.get(path);
+			}
+		}
+		return mapping;
+	}
+
 	private static String idToUrl(String path, Map<String, Object> config) {
 		List<String> segments = new ArrayList<String>(Arrays.asList(path.split("/")));
 		Map<String, Object> paths = (Map<String, Object>)config.get("paths");
@@ -245,6 +282,15 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		    if (path.equals(pkgName)) {
 		    	return (String)((Map<String, Object>)packages.get(pkgName)).get("name") + '/' + (String)((Map<String, Object>)packages.get(pkgName)).get("main");
 		    }
+		}
+		List<String> segments = new ArrayList<String>(Arrays.asList(path.split("/")));
+		for (int i = segments.size(); i >= 0; i--) {
+	        String parent = join(segments.subList(0, i), '/');
+	        String mapping = findMapping(parent, getParentId(pathStack), config);
+	        if (mapping != null) {
+	        	splice(segments, 0, i, mapping);
+	        	return join(segments, '/');
+	        }
 		}
 		return path;
 	}
