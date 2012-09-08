@@ -38,6 +38,7 @@ var implemented = {
 	funcString: true,
 	namedWrapped: true,
 	require: true,
-	plugins: true
+	plugins: true,
+	mapConfig: true
 };
 require = undefined;
