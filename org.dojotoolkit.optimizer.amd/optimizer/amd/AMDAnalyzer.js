@@ -109,6 +109,7 @@ AMDAnalyzer.prototype = {
 			if (m.match(".+!")) {
 				m = m.substring(0, m.indexOf('!'));
 			}
+			m = astwalker.expand(m, [], this.config);
 			var module = this.moduleMap.get(m);
 			this._buildDependencyList(module, dependencyList, seen);
 			this._scanForCircularDependencies(module, []);
