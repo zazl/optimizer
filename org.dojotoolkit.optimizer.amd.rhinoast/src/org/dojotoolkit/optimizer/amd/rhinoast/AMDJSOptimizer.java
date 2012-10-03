@@ -587,8 +587,12 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				Map<String, Object> plugin = (Map<String, Object>)plugins.get(pluginName);
 				String proxy = (String)plugin.get("proxy");
 				
-				normalizedName = expand(pluginValue, pathStack, config);
-				moduleUrl = idToUrl(normalizedName, config);
+				if (pluginValue.length() > 0) {
+					normalizedName = expand(pluginValue, pathStack, config);
+					moduleUrl = idToUrl(normalizedName, config);
+				} else {
+					moduleUrl = normalizedName = pluginValue;
+				}
 				
 				Map<String, Object> proxyReturn = callProxy(proxy, pluginName, pluginValue, normalizedName, moduleUrl);
 				if (proxyReturn.get("normalizedName") != null) {
