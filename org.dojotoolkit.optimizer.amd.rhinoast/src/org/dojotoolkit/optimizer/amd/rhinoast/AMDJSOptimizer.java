@@ -37,9 +37,11 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.ConditionalExpression;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NodeVisitor;
+import org.mozilla.javascript.ast.ParenthesizedExpression;
 import org.mozilla.javascript.ast.StringLiteral;
 
 public class AMDJSOptimizer extends CachingJSOptimizer {
@@ -463,15 +465,12 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			if (astNode instanceof FunctionCall) {
 				FunctionCall functionCall = (FunctionCall)astNode;
 				AstNode target = functionCall.getTarget();
-				String callName = "";
-				if (target instanceof Name) {
-					callName = ((Name)target).getIdentifier();
-				}
+				String callName = getCallName(target);
 				if (callName.equals("define") || callName.equals("require")) {
 					List<AstNode> args = functionCall.getArguments();
 					if (callName.equals("define") && args.get(0) instanceof StringLiteral == false) {
 						Map<String, Object> missingName = new HashMap<String, Object>();
-						missingName.put("nameIndex", new Long(functionCall.getAbsolutePosition()+callName.length()+1));
+						missingName.put("nameIndex", new Long(functionCall.getAbsolutePosition()+functionCall.getLp()+1));
 						missingName.put("uri", url);
 						missingName.put("id", this.moduleId);
 						missingNamesList.add(missingName);
@@ -575,6 +574,27 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			return true;
 		}
 		
+		private String getCallName(AstNode target) {
+			String callName = "";
+			if (target instanceof Name) {
+				callName = ((Name)target).getIdentifier();
+			} else if (target instanceof ParenthesizedExpression) {
+				ParenthesizedExpression parenthesizedExpression = (ParenthesizedExpression)target;
+				AstNode expression = parenthesizedExpression.getExpression();
+				if (expression instanceof ConditionalExpression) {
+					ConditionalExpression conditionalExpression = (ConditionalExpression)expression;
+					AstNode trueExpression = conditionalExpression.getTrueExpression();
+					AstNode falseExpression = conditionalExpression.getFalseExpression();
+					if (trueExpression instanceof Name) {
+						callName = ((Name)trueExpression).getIdentifier();
+					} else if (falseExpression instanceof Name) {
+						callName = ((Name)falseExpression).getIdentifier();
+					}
+				}
+			}
+			return callName;
+		}
+
 		private Map<String, String> processPluginRef(String pluginName, String pluginValue) {
 			Map<String, String> pluginRef = new HashMap<String, String>();
 			pluginRef.put("name", pluginValue);
