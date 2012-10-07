@@ -31,7 +31,11 @@ public class JSCompressorContentFilter extends CachingContentFilter {
 			}
 		}
 	}
-	
+
+	public JSCompressor getJSCompressor() {
+		return jsCompressor;
+	}
+
 	protected String _runFilter(String content, String path) {
 		if (doCompress(path)) {
 			try {

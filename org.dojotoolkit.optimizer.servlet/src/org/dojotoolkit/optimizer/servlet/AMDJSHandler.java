@@ -8,6 +8,7 @@ package org.dojotoolkit.optimizer.servlet;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,13 +29,15 @@ public class AMDJSHandler extends JSHandler {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] excludes) throws ServletException, IOException {
-		if (analysisData != null) {	
+	protected void customHandle(HttpServletRequest request, Writer handlerWriter, JSAnalysisData analysisData, JSAnalysisData[] excludes) throws ServletException, IOException {
+		if (analysisData != null) {
+			CountWriter writer = new CountWriter(handlerWriter);
 			writer.write("zazl.addAnalysisKey('"+analysisData.getKey()+"');\n");
 			String suffixCode = (String)config.get("suffixCode");
 			if (suffixCode != null) {
 				writer.write(suffixCode);
 			}
+			writer.write("if (typeof dojoConfig === 'undefined') { dojoConfig = {};}\ndojoConfig.locale = '"+request.getLocale().toString().toLowerCase().replace('_', '-')+"';\n");
 			String[] dependencies = analysisData.getDependencies();
 			Map<String, List<Map<String, String>>> pluginRefs = analysisData.getPluginRefs();
 			List<Localization> localizations = new ArrayList<Localization>();
@@ -81,6 +84,7 @@ public class AMDJSHandler extends JSHandler {
 			if (localizations.size() > 0) {
 				Util.writeAMDLocalizations(resourceLoader, writer, localizations, request.getLocale());
 			}
+			Map<String, Integer> offsetMap = new HashMap<String, Integer>();
 			for (String dependency : dependencies) {
 				String path = Util.normalizePath(dependency);
 				String content = resourceLoader.readResource(path);
@@ -94,9 +98,19 @@ public class AMDJSHandler extends JSHandler {
 						modifiedSrc.append(content.substring(missingNameIndex));
 						content = modifiedSrc.toString();
 					}
-					
-					writer.write(compressorContentFilter.filter(content,path));
+					content = compressorContentFilter.filter(content,path);
+					int offset = writer.getLineCount();
+					offsetMap.put(path, new Integer(offset));
+					writer.write(content);
+					writer.write("\n");
 				}
+			}
+			if (compressorContentFilter.getJSCompressor() != null) {
+				try {
+					compressorContentFilter.getJSCompressor().getSourceMap("");
+					writer.write("//@ sourceMappingURL=_javascript?sourcemap="+analysisData.getKey()+".map\n");
+					sourceMapOffsets.put(analysisData.getKey(), offsetMap);
+				} catch (UnsupportedOperationException e) {}
 			}
 		}
 	}

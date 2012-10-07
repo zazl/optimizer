@@ -18,6 +18,8 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -36,6 +38,7 @@ import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.JSAnalysisData;
 import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
+import org.dojotoolkit.optimizer.Util;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
@@ -52,6 +55,7 @@ public abstract class JSHandler {
 	protected String[] bootstrapModules = null;
 	protected String[] debugBootstrapModules = null;
 	protected JSCompressorContentFilter compressorContentFilter = null;
+	protected Map<String, Map<String, Integer>> sourceMapOffsets = null;
 	
 	public JSHandler(String configFileName) {
 		try {
@@ -89,9 +93,13 @@ public abstract class JSHandler {
 			}
 		}
 		compressorContentFilter = new JSCompressorContentFilter(jsCompressorFactory, resourceLoader);
+		sourceMapOffsets = Collections.synchronizedMap(new HashMap<String, Map<String, Integer>>());
 	}
 	
 	public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (request.getParameter("sourcemap") != null) {
+			return handleSourceMapRequest(request, response);
+		}
 		String[] modules = null;
 		String modulesParam = request.getParameter("modules");
 		String key = request.getParameter("key");
@@ -188,9 +196,32 @@ public abstract class JSHandler {
 		}
         return true;
 	}
-	
+
 	public JSOptimizer getJSOptimizer() {
 		return jsOptimizer;
+	}
+
+	protected boolean handleSourceMapRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String sourcemapKey = request.getParameter("sourcemap");
+		sourcemapKey = sourcemapKey.substring(0, sourcemapKey.indexOf(".map"));
+		JSAnalysisData analysisData = jsOptimizer.getAnalysisData(sourcemapKey);
+		Map<String, Integer> sourceMapOffset = sourceMapOffsets.get(sourcemapKey);
+		StringBuffer sb = new StringBuffer();
+		sb.append("{\"version\": 3, \"file\": \""+sourcemapKey+".js\", \"sections\": [");
+		String[] dependencies = analysisData.getDependencies();
+		for (String dependency : dependencies) {
+			String path = Util.normalizePath(dependency);
+			Integer offset = sourceMapOffset.get(path);
+			String sourcemap = compressorContentFilter.getJSCompressor().getSourceMap(path+".map");
+			sb.append("{\"offset\": {\"line\": "+offset+", \"column\": 0}, \"map\": ");
+			sb.append(sourcemap);
+			sb.append("},");
+		}
+		sb.deleteCharAt(sb.length()-1);
+		sb.append("]}");
+		response.getWriter().write(sb.toString());
+		return true;
+
 	}
 	
 	protected abstract void customHandle(HttpServletRequest request, Writer writer, JSAnalysisData analysisData, JSAnalysisData[] exclude) throws ServletException, IOException;
