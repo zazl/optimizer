@@ -1,11 +1,12 @@
 { 
 	"name" : "zazloptimizer",
-	"version" : "0.4.4",
+	"version" : "0.4.6",
 	"author" : "Richard Backhouse <richardabackhouse@gmail.com>",
 	"main" : "./lib/zazloptimizer.js",
 	"dependencies" : {
 		"connect" : ">= 2.0.0",
 		"uglify-js" : ">= 1.2.5",
+		"esprima" : ">= 1.0.0",
 		"node-static" : ">= 0.5.9"
 	},
 	"license" : "Dojo",

@@ -275,7 +275,7 @@ function handle(request, response, config, compress) {
 Optimizer = function(appdir, compress) {
 	resourceloader.addProvider(appdir);
 	resourceloader.addProvider(path.dirname(module.filename));
-	this.config = JSON.parse(resourceloader.readText("zazl.json"));
+	this.config = JSON.parse(resourceloader.readText("zazlUsingESPrima.json"));
 	this.compress = compress;
 };
 
@@ -324,7 +324,7 @@ exports.createOptimizer = function(appdir, compress) {
 ConnectOptimizer = function(appdir, compress) {
 	resourceloader.addProvider(appdir);
 	resourceloader.addProvider(path.dirname(module.filename));
-	this.config = JSON.parse(resourceloader.readText("zazl.json"));
+	this.config = JSON.parse(resourceloader.readText("zazlUsingESPrima.json"));
 	this.compress = compress;
 };
 

@@ -27,7 +27,7 @@
 				<include name="loader/**"/>
 			</tarfileset>
 			<tarfileset dir="${optimizer.dir}/org.dojotoolkit.optimizer.servlet" uid="1000" gid="1000" prefix="package/lib">
-				<include name="zazl.json"/>
+				<include name="zazlUsingESPrima.json"/>
 			</tarfileset>
 		</tar>
 	</target>

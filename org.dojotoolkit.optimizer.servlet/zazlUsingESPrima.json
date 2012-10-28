@@ -27,5 +27,6 @@
 		"i18nPluginId" : "dojo/i18n",
 		"astparser": "esprima"
     },
-	"type" : "amd"
+	"type" : "amd",
+	"astCache" : false
 }

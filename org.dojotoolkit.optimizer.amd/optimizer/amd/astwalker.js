@@ -190,7 +190,7 @@ function getDependencies(src, expression, scanCJSRequires) {
 	var args = expression.arguments;
 	for (var j = 0; j < args.length; j++) {
 		if (j === 0 && args[j].type !== "Literal") {
-			nameIndex = expression.callee.range[0] + (src.substring(expression.callee.range[0]).indexOf('(')+1);
+			nameIndex = args[j].range[0];
 		}
 		if (args[j].type === "ArrayExpression" && expression.callee.name === "define") {
 			var elements = args[j].elements;
@@ -216,8 +216,16 @@ function findDefine(ast) {
 	for (var p in ast) {
 		if (p === "type" && ast[p] === "ExpressionStatement") {
 			var expression = ast["expression"];
-			if (expression.type === "CallExpression" && expression.callee.name === "define") {
-				return expression;
+			if (expression.type === "CallExpression") { 
+				if (expression.callee.name === "define") {
+					return expression;
+				} else if (expression.callee.type === "ConditionalExpression") {
+			    	left = {type : expression.callee.consequent.type, name : expression.callee.consequent.name === undefined ? "" : expression.callee.consequent.name};
+			    	right = {type : expression.callee.alternate.type, name : expression.callee.alternate.name === undefined ? "" : expression.callee.alternate.name};
+			    	if ((left.type === "Identifier" && left.name === "defined") || (right.type === "Identifier" && right.name === "define")) {
+			    		return {arguments: expression.arguments, callee: {name: "define"}};
+			    	}
+				}
 			}
 		} else {
 			if (isArray(ast[p])) {
@@ -431,6 +439,9 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		moduleMap.add(uri, module);
 		w.with_walkers({
 		    "call": function(expr, args) {
+		    	if (expr[0] == "conditional") {
+			    	print(expr[1]+" : "+expr[2]+" : "+expr[3]+" : "+JSON.stringify(w.parent()[1][2][0], null, " "));
+		    	}
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
                     if (expr[1] === "define" && args[0][0].name !== "string") {

@@ -2,7 +2,7 @@
     <!-- Properties -->
 	<property
 		name="version"
-		value="v0.4.5"/>
+		value="v0.4.6"/>
 	
 	<property
 		name="target.dir"
@@ -34,7 +34,7 @@
 	
 	<property
 		name="esprima.dir"
-		value="${workspace.dir}/../targetplatform/esprima/plugins/org.esprima_0.0.1"/>
+		value="${workspace.dir}/../targetplatform/esprima/plugins/org.esprima_1.0.0"/>
 	
 	<property
 		name="equinox.dir"
