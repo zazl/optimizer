@@ -119,6 +119,8 @@ public class Util {
 	}
 	
 	private static void writeLocalization(Writer w, String content, String moduleName) throws IOException {
+		Matcher m = commentsRegex.matcher(content);
+		content = m.replaceAll("");
 		w.write(content.substring(0, content.indexOf('(')+1));
 		w.write("'");
 		w.write(moduleName);
