@@ -214,18 +214,17 @@ function getDependencies(src, expression, scanCJSRequires) {
 function findDefine(ast) {
 	var expr;
 	for (var p in ast) {
-		if (p === "type" && ast[p] === "ExpressionStatement") {
-			var expression = ast["expression"];
-			if (expression.type === "CallExpression") { 
-				if (expression.callee.name === "define") {
-					return expression;
-				} else if (expression.callee.type === "ConditionalExpression") {
-			    	left = {type : expression.callee.consequent.type, name : expression.callee.consequent.name === undefined ? "" : expression.callee.consequent.name};
-			    	right = {type : expression.callee.alternate.type, name : expression.callee.alternate.name === undefined ? "" : expression.callee.alternate.name};
-			    	if ((left.type === "Identifier" && left.name === "defined") || (right.type === "Identifier" && right.name === "define")) {
-			    		return {arguments: expression.arguments, callee: {name: "define"}};
-			    	}
-				}
+		if (p === "type" && ast[p] === "CallExpression") {
+			var callee = ast["callee"];
+			var arguments = ast["arguments"];
+			if (callee && callee.type === "Identifier" && callee.name && callee.name === "define") {
+				return {arguments: arguments, callee: {name: "define"}};
+			} else if (callee && callee.type === "ConditionalExpression") {
+		    	var left = {type : callee.consequent.type, name : callee.consequent.name === undefined ? "" : callee.consequent.name};
+		    	var right = {type : callee.alternate.type, name : callee.alternate.name === undefined ? "" : callee.alternate.name};
+		    	if ((left.type === "Identifier" && left.name === "define") || (right.type === "Identifier" && right.name === "define")) {
+		    		return {arguments: arguments, callee: {name: "define"}};
+		    	}
 			}
 		} else {
 			if (isArray(ast[p])) {
@@ -439,9 +438,6 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		moduleMap.add(uri, module);
 		w.with_walkers({
 		    "call": function(expr, args) {
-		    	if (expr[0] == "conditional") {
-			    	print(expr[1]+" : "+expr[2]+" : "+expr[3]+" : "+JSON.stringify(w.parent()[1][2][0], null, " "));
-		    	}
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
                     if (expr[1] === "define" && args[0][0].name !== "string") {
