@@ -34,10 +34,11 @@ Dojo Syncloader Optimizer Features
 Getting Started
 ===============
 
-See the Getting Started Wiki Pages for more details :
+See the Getting Started Pages for more details :
 
 :Getting Started with the AMD Optimizer: https://github.com/zazl/optimizer/wiki/Getting-Started-with-the-AMD-Optimizer
 :Getting Started with the Dojo Syncloader Optimizer: https://github.com/zazl/optimizer/wiki/Getting-Started-with-the-Dojo-Syncloader-Optimizer
+:Getting Started via OSGi/Eclipse: https://github.com/zazl/optimizer-osgi-boilerplate
 
 Browser Support
 ===============
