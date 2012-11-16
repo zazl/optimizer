@@ -85,6 +85,7 @@ public class AMDJSHandler extends JSHandler {
 				Util.writeAMDLocalizations(resourceLoader, writer, localizations, request.getLocale());
 			}
 			Map<String, Integer> offsetMap = new HashMap<String, Integer>();
+			Map<String, String> shims = analysisData.getShims();
 			for (String dependency : dependencies) {
 				String path = Util.normalizePath(dependency);
 				String content = resourceLoader.readResource(path);
@@ -97,6 +98,12 @@ public class AMDJSHandler extends JSHandler {
 						modifiedSrc.append("'"+getMissingNameId(uri, analysisData.getModulesMissingNames())+"', ");
 						modifiedSrc.append(content.substring(missingNameIndex));
 						content = modifiedSrc.toString();
+					}
+					if (shims != null) {
+						String shim = shims.get(uri);
+						if (shim != null) {
+							content += shim;
+						}
 					}
 					content = compressorContentFilter.filter(content,path);
 					int offset = writer.getLineCount();

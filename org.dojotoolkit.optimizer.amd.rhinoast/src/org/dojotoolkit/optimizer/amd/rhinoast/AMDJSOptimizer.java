@@ -139,10 +139,11 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		Map<String, List<Map<String, String>>> pluginRefs = new HashMap<String, List<Map<String, String>>>();
 		List<Map<String, Object>> missingNamesList = new ArrayList<Map<String, Object>>();
 		Map<String, Module> moduleMap = new HashMap<String, Module>();
+		Map<String, String> shims = new HashMap<String, String>();
 		
         for (String moduleId : modules) {
         	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing ["+moduleId+"] using the Rhino AST API");
-        	AstVisitor visitor = new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString, scanCJSRequires);
+        	AstVisitor visitor = new AstVisitor(moduleId, moduleMap, pluginRefs, missingNamesList, cfg, new Stack<String>(), excludeList, pageConfigString, scanCJSRequires, shims);
         	if (visitor.getError() != null) {
             	logger.logp(Level.INFO, getClass().getName(), "_getAnalysisData", "AST parsing error for ["+moduleId+"] error : "+visitor.getError());
             	throw new IOException("AST parsing error for ["+moduleId+"] error : "+visitor.getError());
@@ -164,7 +165,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
             scanForCircularDependencies(m, new Stack<String>(), moduleMap);
         }
         
-		jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
+		jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig, shims);
 		return jsAnalysisData;
 	}
 	
@@ -361,7 +362,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		private String pageConfigString = null;
 		private String error = null;
 		private boolean scanCJSRequires = false;
-		
+		private boolean defineFound = false;
+		private Map<String, String> shims = null;
+
 		public AstVisitor(String moduleId, 
 				          Map<String, Module> moduleMap,
 				          Map<String, List<Map<String, String>>> pluginRefList,
@@ -370,7 +373,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				          Stack<String> pathStack,
 				          List<String> excludeList,
 				          String pageConfigString,
-				          boolean scanCJSRequires) {
+				          boolean scanCJSRequires,
+				          Map<String, String> shims) {
 			
 			if (moduleId.equals("require") || moduleId.equals("exports") || moduleId.equals("module")) {
 				moduleMap.put(moduleId, new Module(moduleId, moduleId));
@@ -386,6 +390,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 			this.excludeList = excludeList;
 			this.pageConfigString = pageConfigString;
 			this.scanCJSRequires = scanCJSRequires;
+			this.shims = shims;
 			
 			this.baseUrl = (String)config.get("baseUrl");
 			
@@ -415,7 +420,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					if (addDep) {
 						Stack<String> s = new Stack<String>();
 						s.push(this.moduleId);
-						AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString, scanCJSRequires);
+						AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, s, excludeList, pageConfigString, scanCJSRequires, shims);
 						if (visitor.getError() != null) {
 							error = visitor.getError();
 							return;
@@ -445,6 +450,9 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 						try {
 							ast = parser.parse(source, this.moduleId, 1);
 			                ast.visit(this);
+			                if (!defineFound) {
+			                	findShim();
+			                }
 						} catch (EvaluatorException e) {
 							error = "Failed to parse ["+url+"] [line:"+e.lineNumber()+" column:"+e.columnNumber()+"] reason ["+e.details()+"]";
 						}
@@ -468,12 +476,15 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				String callName = getCallName(target);
 				if (callName.equals("define") || callName.equals("require")) {
 					List<AstNode> args = functionCall.getArguments();
-					if (callName.equals("define") && args.get(0) instanceof StringLiteral == false) {
-						Map<String, Object> missingName = new HashMap<String, Object>();
-						missingName.put("nameIndex", new Long(functionCall.getAbsolutePosition()+functionCall.getLp()+1));
-						missingName.put("uri", url);
-						missingName.put("id", this.moduleId);
-						missingNamesList.add(missingName);
+					if (callName.equals("define")) {
+						defineFound = true;
+						if (args.get(0) instanceof StringLiteral == false) {
+							Map<String, Object> missingName = new HashMap<String, Object>();
+							missingName.put("nameIndex", new Long(functionCall.getAbsolutePosition()+functionCall.getLp()+1));
+							missingName.put("uri", url);
+							missingName.put("id", this.moduleId);
+							missingNamesList.add(missingName);
+						}
 					}
 					List<String> dependencies = new ArrayList<String>();
 					if (callName.equals("require") && args.get(0) instanceof StringLiteral) {
@@ -526,7 +537,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 									}
 									if (addDep) {
 										module.dependencies.add(pluginDep);
-										AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires);
+										AstVisitor visitor = new AstVisitor(pluginDep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires, shims);
 										if (visitor.getError() != null) {
 											error = visitor.getError();
 											return false;
@@ -559,7 +570,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 								}
 								if (addDep) {
 									module.dependencies.add(dependencyId);
-									AstVisitor visitor = new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires);
+									AstVisitor visitor = new AstVisitor(dependencyId, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires, shims);
 									if (visitor.getError() != null) {
 										error = visitor.getError();
 										return false;
@@ -682,6 +693,47 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				Context.exit();
 			}
 			return proxyReturn;
+		}
+		
+		private void findShim() {
+			Map<String, Object> shimConfig = (Map<String, Object>)config.get("shim");
+			if (shimConfig != null) {
+				Map<String, Object> shim = (Map<String, Object>)shimConfig.get(moduleId);
+				if (shim != null) {
+					StringBuffer shimContent = new StringBuffer();
+					shimContent.append("\n(function(root, cfg) {\n");
+					shimContent.append("define('");
+					shimContent.append(moduleId);
+					shimContent.append("', ");
+					List<String> deps = (List<String>)shim.get("deps");
+					if (deps != null) {
+						shimContent.append("[");
+						for (String dep : deps) {
+							module.dependencies.add(dep);
+							shimContent.append("'");
+							shimContent.append(dep);
+							shimContent.append("',");
+						}
+						shimContent.deleteCharAt(shimContent.length()-1);
+						shimContent.append("], ");
+					}
+					shimContent.append("function() {\n");
+					String exports = (String)shim.get("exports");
+					if (shim.containsKey("init")) {
+						shimContent.append("\tvar initFunc = cfg.shim['"+moduleId+"'].init;\n");
+						shimContent.append("\tvar initRet = initFunc.apply(root, arguments);\n");
+						if (exports != null) {
+							shimContent.append("\tif (initRet) { return initRet; } else { return root." + exports + "; }\n");
+						} else {
+							shimContent.append("\tif (initRet) { return initRet; } else { return {}; }\n");
+						}
+					} else if (exports != null) {
+						shimContent.append("return root." + exports + ";\n");
+					}
+					shimContent.append("});\n}(this, zazl._getConfig()));\n");
+					shims.put(this.url, shimContent.toString());
+				}
+			}
 		}
 	}
 	

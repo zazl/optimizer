@@ -199,6 +199,7 @@ function writeResponse(params, analysisData, excludes, request, response, config
 	}
 	
 	for (i = 0; i < analysisData.dependencyList.length; i++) {
+		var uri = path.normalize(analysisData.dependencyList[i]);
         var dependencyPath = path.normalize(analysisData.dependencyList[i])+".js";
         var ts = resourceloader.getTimestamp(dependencyPath);
         if (compressContent) {
@@ -216,6 +217,9 @@ function writeResponse(params, analysisData, excludes, request, response, config
             modifiedContent += "'"+getMissingNameId(analysisData.dependencyList[i], analysisData.missingNamesList)+"', ";
             modifiedContent += content.substring(missingNameIndex);
             content = modifiedContent;
+        }
+        if (analysisData.shims && analysisData.shims[uri]) {
+        	content += analysisData.shims[uri];
         }
         if (compressContent) {
 	        var compressed = compress(content);

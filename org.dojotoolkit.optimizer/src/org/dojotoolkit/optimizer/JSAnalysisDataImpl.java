@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -44,6 +45,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	private String key = null;
 	private String config = null;
 	private boolean checksumStale = false;
+	private Map<String, String>  shims = null;
 	
 	public JSAnalysisDataImpl(String[] modules,
             List<String> dependencies,
@@ -53,8 +55,9 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
             Map<String, List<Map<String, String>>> pluginRefs,
             ResourceLoader resourceLoader,
             String[] excludes,
-            Map<String, Object> pageConfig) throws IOException {
-		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, null, null);
+            Map<String, Object> pageConfig,
+            Map<String, String> shims) throws IOException {
+		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, shims, null, null);
 	}
 
 	private JSAnalysisDataImpl(String[] modules,
@@ -66,6 +69,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  ResourceLoader resourceLoader,
 			                  String[] excludes,
 			                  Map<String, Object> pageConfig,
+			                  Map<String, String> shims,
 			                  String checksum,
 			                  String config) throws IOException {
 		timestampLookup = new HashMap<String, Long>();
@@ -88,6 +92,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 		this.pluginRefs = pluginRefs;
 		this.resourceLoader = resourceLoader;
         this.excludes = excludes;
+        this.shims = shims;
         if (pageConfig != null) {
         	StringWriter sw = new StringWriter();
         	try {
@@ -137,6 +142,10 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 	
 	public String getKey() {
 		return key;
+	}
+	
+	public Map<String, String> getShims() {
+		return shims;
 	}
 	
 	public boolean isStale() {
@@ -196,6 +205,9 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			if (config != null) {
 				implDetails.put("pageConfig", config);
 			}
+			if (shims != null) {
+				implDetails.put("shims", shims);
+			}
 			JSONSerializer.serialize(w, implDetails, true);
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "load", "Failed to save ["+implFile.getPath()+"]", e);
@@ -241,6 +253,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 				}
 				String config = (String)implDetails.get("pageConfig");
 				String checksum = (String)implDetails.get("checksum");
+				Map<String, String> shims = (Map<String, String>)implDetails.get("shims");
 				impl = new JSAnalysisDataImpl(modules, 
 						                      dependencies, 
 						                      localizations, 
@@ -248,8 +261,9 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 						                      modulesMissingNames, 
 						                      pluginRefs, 
 						                      resourceLoader, 
-						                      excludes, 
+						                      excludes,
 						                      null,
+						                      shims,
 						                      checksum,
 						                      config);
 			} catch (IOException e) {

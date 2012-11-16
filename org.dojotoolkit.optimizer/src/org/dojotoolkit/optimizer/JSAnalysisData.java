@@ -49,4 +49,8 @@ public interface JSAnalysisData {
 	 * @return Map of plugin references include any optimized values
 	 */
 	Map<String, List<Map<String, String>>> getPluginRefs();
+	/**
+	 * @return Module Shims
+	 */
+	Map<String, String> getShims();
 }

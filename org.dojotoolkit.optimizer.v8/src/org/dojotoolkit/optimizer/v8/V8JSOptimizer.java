@@ -120,7 +120,7 @@ public class V8JSOptimizer extends CachingJSOptimizer {
 					Localization localization = new Localization((String)localizationMap.get("bundlepackage"), (String)localizationMap.get("modpath"), (String)localizationMap.get("bundlename"));
 					localizationList.add(localization);
 				}
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, localizationList, null, null, null, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, localizationList, null, null, null, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig, null);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {

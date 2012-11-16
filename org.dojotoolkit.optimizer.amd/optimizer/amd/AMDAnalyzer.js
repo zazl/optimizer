@@ -94,9 +94,10 @@ AMDAnalyzer.prototype = {
 	_analyze: function(modules, exclude) {
 		this.pluginRefList = {};
 		this.missingNamesList = [];
+		this.shims = {};
 		this.moduleMap = map.createMap();
 		for (var i = 0; i < modules.length; i++) {
-			astwalker.walker(modules[i], exclude, this.moduleMap, this.pluginRefList, this.missingNamesList, this.config, []);
+			astwalker.walker(modules[i], exclude, this.moduleMap, this.pluginRefList, this.missingNamesList, this.config, this.shims, []);
 		}
 	},
 	
@@ -119,7 +120,7 @@ AMDAnalyzer.prototype = {
 	
 	getAnalysisData: function(modules, exclude) {
 		var dependencyList = this.getDependencyList(modules, exclude);
-		return ({dependencyList: dependencyList, pluginRefs: this.pluginRefList, missingNamesList: this.missingNamesList});
+		return ({dependencyList: dependencyList, pluginRefs: this.pluginRefList, missingNamesList: this.missingNamesList, shims: this.shims});
 	}
 };
 

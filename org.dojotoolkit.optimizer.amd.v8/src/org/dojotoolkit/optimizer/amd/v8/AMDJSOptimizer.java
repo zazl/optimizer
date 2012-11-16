@@ -147,7 +147,8 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					missingNamesList.addAll(modulesMissingNames);
 				}
 				Map<String, List<Map<String, String>>> pluginRefs = (Map<String, List<Map<String, String>>>)analysisData.get("pluginRefs");
-				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig);
+				Map<String, String> shims = (Map<String, String>)analysisData.get("shims");
+				jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig, shims);
 			} catch (Throwable e) {
 				if (compileErrors.size() > 0) {
 					for (Throwable t : compileErrors) {
