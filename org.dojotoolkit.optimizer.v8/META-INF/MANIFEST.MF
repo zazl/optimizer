@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JS Optimizer V8
 Bundle-SymbolicName: org.dojotoolkit.optimizer.v8
-Bundle-Version: 0.3.2
+Bundle-Version: 0.4.8
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Require-Bundle: org.dojotoolkit.optimizer
 Import-Package: org.dojotoolkit.rt.v8,

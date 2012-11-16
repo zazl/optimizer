@@ -2,7 +2,7 @@
     <!-- Properties -->
 	<property
 		name="version"
-		value="v0.4.7"/>
+		value="v0.4.8"/>
 	
 	<property
 		name="target.dir"
