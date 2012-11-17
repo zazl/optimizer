@@ -42,6 +42,9 @@
 	        <fileset dir="${target.dir}/plugins">
 	            <include name="*.jar"/>
 	        </fileset>
+			<fileset dir="${target.dir}/plugins/com.google.javascript_2.1.8.0">
+	            <include name="*.jar"/>
+		    </fileset>
 		</copy>
 		<copy todir="${target.dir}/package/server/jslib">
 			<fileset dir="${json.dir}">

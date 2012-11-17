@@ -20,7 +20,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class JSCompressorFactoryImpl implements JSCompressorFactory {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.compressor");
-	private static final String DEFAULT_JS_COMPRESSOR_CLASS = "org.dojotoolkit.compressor.shrinksafe.ShrinksafeJSCompressor";
+	private static final String DEFAULT_JS_COMPRESSOR_CLASS = "org.dojotoolkit.compressor.closure.ClosureJSCompressor";
 	
 	public static String[] defaultIgnoreList = new String[] {
 		"/dojo/dojo.js", 
