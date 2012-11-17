@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Closure
 Bundle-SymbolicName: org.dojotoolkit.compressor.closure
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.4.9
 Import-Package: com.google.javascript.jscomp,
  org.dojotoolkit.compressor,
  org.dojotoolkit.server.util.osgi,

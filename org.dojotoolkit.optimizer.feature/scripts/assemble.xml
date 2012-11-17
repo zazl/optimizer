@@ -61,7 +61,10 @@
 	        </fileset>
 	        <fileset dir="${target.dir}/plugins">
 	            <include name="*.jar"/>
-	        </fileset>
+		        </fileset>
+			<fileset dir="${target.dir}/plugins/com.google.javascript_2.1.8.0">
+	            <include name="*.jar"/>
+		    </fileset>
 	        <fileset dir="${nekohtml.dir}">
 	            <include name="*.jar"/>
 	        </fileset>
@@ -88,6 +91,7 @@
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
+				<include name="compiler.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
@@ -137,6 +141,7 @@
 				<include name="esprima.jar"/> 
 				<include name="nekohtml.jar"/> 
 				<include name="xercesMinimal.jar"/> 
+				<include name="compiler.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
@@ -185,6 +190,7 @@
 				<include name="esprima.jar"/> 
 				<include name="nekohtml.jar"/> 
 				<include name="xercesMinimal.jar"/> 
+				<include name="compiler.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
@@ -213,6 +219,7 @@
 				<include name="esprima.jar"/> 
 				<include name="nekohtml.jar"/> 
 				<include name="xercesMinimal.jar"/> 
+				<include name="compiler.jar"/> 
 				<exclude name="org.dojotoolkit.compressor.uglifyjs.v8*.jar"/> 
 				<exclude name="*v8*.jar"/> 
 				<exclude name="org.dojotoolkit.optimizer.samples*.jar"/> 
