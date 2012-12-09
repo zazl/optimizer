@@ -709,10 +709,23 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 					if (deps != null) {
 						shimContent.append("[");
 						for (String dep : deps) {
-							module.dependencies.add(dep);
-							shimContent.append("'");
-							shimContent.append(dep);
-							shimContent.append("',");
+							String dependencyUri = idToUrl(dep, config);
+							if (dependencyUri.charAt(0) != '/') {
+								dependencyUri = '/'+dependencyUri;
+							}
+							boolean addDep = true;
+							for (String exclude : excludeList) {
+								if (exclude.equals(dependencyUri)) {
+									addDep = false;
+									break;
+								}
+							}
+							if (addDep) {
+								module.dependencies.add(dep);
+								shimContent.append("'");
+								shimContent.append(dep);
+								shimContent.append("',");
+							}
 						}
 						shimContent.deleteCharAt(shimContent.length()-1);
 						shimContent.append("], ");

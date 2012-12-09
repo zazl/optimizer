@@ -248,7 +248,7 @@ function findDefine(ast) {
 	return expr;
 };
 
-function findShim(module, config, shims) {
+function findShim(module, config, shims, exclude) {
 	if (config.shim) {
 		var shim = config.shim[module.id];
 		if (shim) {
@@ -258,12 +258,25 @@ function findShim(module, config, shims) {
 			if (shim.deps) {
 				shimContent += "[";
 				for (var i = 0; i < shim.deps.length; i++) {
-					module.addDependency(shim.deps[i]);
-					shimContent += "'";
-					shimContent += shim.deps[i];
-					shimContent += "'";
-					if (i < (shim.deps.length-1)) {
-						shimContent += ",";
+					var shimDepUri = idToUrl(shim.deps[i], config);
+					if (shimDepUri.charAt(0) != '/') {
+						shimDepUri = '/'+shimDepUri;
+					}
+					var addDependency = true;
+					for (var k = 0; k < exclude.length; k++) {
+						if (shimDepUri === exclude[k]) {
+							addDependency = false;
+							break;
+						}
+					}
+					if (addDependency) {
+						module.addDependency(shim.deps[i]);
+						shimContent += "'";
+						shimContent += shim.deps[i];
+						shimContent += "'";
+						if (i < (shim.deps.length-1)) {
+							shimContent += ",";
+						}
 					}
 				}
 				shimContent += "], ";
@@ -341,7 +354,7 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
 		if (defineExpr === undefined) {
-			findShim(module, config, shims);
+			findShim(module, config, shims, exclude);
 			return;
 		}
 		var depInfo = getDependencies(src, defineExpr, config.scanCJSRequires);
@@ -578,7 +591,7 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		});
 		
 		if (defineFound === false) {
-			findShim(module, config, shims);
+			findShim(module, config, shims, exclude);
 		}
 	}
 };
