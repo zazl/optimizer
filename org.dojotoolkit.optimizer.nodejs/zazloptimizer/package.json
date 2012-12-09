@@ -5,7 +5,7 @@
 	"main" : "./lib/zazloptimizer.js",
 	"dependencies" : {
 		"connect" : ">= 2.0.0",
-		"uglify-js" : ">= 1.2.5",
+		"uglify-js" : "1.2.5",
 		"esprima" : ">= 1.0.0",
 		"node-static" : ">= 0.5.9"
 	},
