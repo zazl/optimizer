@@ -6,7 +6,9 @@
 package org.dojotoolkit.optimizer.servlet;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +93,7 @@ public class AMDJSHandler extends JSHandler {
 				String content = resourceLoader.readResource(path);
 				if (content != null) {
 					logger.logp(Level.FINE, getClass().getName(), "customHandle", "dependency ["+path+"]");
-					String uri = dependency.substring(0, dependency.indexOf(".js"));
+					String uri = path.substring(0, path.indexOf(".js"));
 					int missingNameIndex = lookForMissingName(uri, analysisData.getModulesMissingNames());
 					if (missingNameIndex != -1) {
 						StringBuffer modifiedSrc = new StringBuffer(content.substring(0, missingNameIndex));
@@ -124,22 +126,34 @@ public class AMDJSHandler extends JSHandler {
 	
 	private int lookForMissingName(String uri, List<Map<String, Object>> modulesMissingNamesList) {
 		int index = -1;
-		for (Map<String, Object> modulesMissingNames : modulesMissingNamesList) {
-			if (modulesMissingNames.get("uri").equals(uri)) {
-				index = ((Long)modulesMissingNames.get("nameIndex")).intValue();
-				break;
+		try {
+			String encoded = URLEncoder.encode(uri, "UTF-8");
+			encoded = encoded.replace("%2F", "/");
+			for (Map<String, Object> modulesMissingNames : modulesMissingNamesList) {
+				if (modulesMissingNames.get("uri").equals(uri) || modulesMissingNames.get("uri").equals(encoded)) {
+					index = ((Long)modulesMissingNames.get("nameIndex")).intValue();
+					break;
+				}
 			}
+		} catch (UnsupportedEncodingException e) {
+			logger.logp(Level.SEVERE, getClass().getName(), "getMissingNameId", "UTF-8 encoding not found",e);
 		}
 		return index;
 	}
 
 	private String getMissingNameId(String uri, List<Map<String, Object>> modulesMissingNamesList) {
 		String id = null;
-		for (Map<String, Object> modulesMissingNames : modulesMissingNamesList) {
-			if (modulesMissingNames.get("uri").equals(uri)) {
-				id = ((String)modulesMissingNames.get("id"));
-				break;
+		try {
+			String encoded = URLEncoder.encode(uri, "UTF-8");
+			encoded = encoded.replace("%2F", "/");
+			for (Map<String, Object> modulesMissingNames : modulesMissingNamesList) {
+				if (modulesMissingNames.get("uri").equals(uri) || modulesMissingNames.get("uri").equals(encoded)) {
+					id = ((String)modulesMissingNames.get("id"));
+					break;
+				}
 			}
+		} catch (UnsupportedEncodingException e) {
+			logger.logp(Level.SEVERE, getClass().getName(), "getMissingNameId", "UTF-8 encoding not found",e);
 		}
 		return id;
 	}
