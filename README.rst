@@ -20,20 +20,13 @@ AMD Optimizer Features
 ======================
 
 * Includes its own AMD Compliant Loader (It passes all the current AMD JS Tests)
-* Can optimize Dojo 1.6.x and 1.7.x based applications.
+* Can optimize Dojo AMD based applications.
 * Optimizes locale messages based on the browsers locale when the dojo/i18n plugin is used.
 * Optimizes text data when the dojo/text plugin is used.
-* Can Optimize jQuery 1.7.x based applications that use AMD.
+* Can Optimize jQuery/Backbone/Underscore based applications that use AMD.
 * Provides a JEE HTML Filter that will parse HTML and insert required javascript tags.
 * Includes a Standalone Jetty Zazl Optimizer Server
 * Includes a NodeJS Zazl Optimizer
-
-Dojo Syncloader Optimizer Features
-==================================
-
-* Can optimize up to Dojo 1.5.x based applications.
-* Optimizes locale messages based on the browsers locale when the dojo i18n support is used.
-* Optimizes dojo widget templates.
 
 Getting Started
 ===============
@@ -41,7 +34,6 @@ Getting Started
 See the Getting Started Pages for more details :
 
 :Getting Started with the AMD Optimizer: https://github.com/zazl/optimizer/wiki/Getting-Started-with-the-AMD-Optimizer
-:Getting Started with the Dojo Syncloader Optimizer: https://github.com/zazl/optimizer/wiki/Getting-Started-with-the-Dojo-Syncloader-Optimizer
 :Getting Started via OSGi/Eclipse: https://github.com/zazl/optimizer-osgi-boilerplate
 
 Browser Support
