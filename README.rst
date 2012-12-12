@@ -5,6 +5,10 @@ Zazl Dynamic JavaScript Optimizer
 The Zazl Javascript Optimizer enables developers to produce optimized JavaScript environments for their AMD based and Dojo syncloader based applications 
 without having to depend on static build/optimizer tools.
 
+Downloads
+=========
+Downloads of the Zazl Optimizer and samples can be found here - http://www.zazl.org/?page_id=5
+
 General Optimizer Features
 ==========================
 
