@@ -469,7 +469,7 @@ var define;
 		} else {
 			args = [];
 		}
-		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies, config: function() { return cfg.config[id]; }};
+		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies, config: function() { if (!cfg.config[id]) { cfg.config[id] = {}; } return cfg.config[id]; }};
 		if (isFunction(factory)) {
 			var scancjs = cfg ? cfg.scanCJSRequires : false;
 			if (scancjs) {
@@ -563,6 +563,8 @@ var define;
 					}
 					if (!pkg.main) {
 						pkg.main = "main";
+					} else if (pkg.main.match(/.js$/g)) {
+						pkg.main = pkg.main.substring(0, pkg.main.lastIndexOf(".js"));
 					}
 					pkgs[pkg.name] = pkg;
 				}
