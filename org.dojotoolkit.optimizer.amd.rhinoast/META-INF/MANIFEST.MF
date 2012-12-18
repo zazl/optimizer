@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Rhinoast
 Bundle-SymbolicName: org.dojotoolkit.optimizer.amd.rhinoast
-Bundle-Version: 0.5.0
+Bundle-Version: 0.5.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.dojotoolkit.optimizer
 Import-Package: org.dojotoolkit.json,
