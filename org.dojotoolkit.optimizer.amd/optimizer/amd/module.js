@@ -6,6 +6,7 @@
 Module = function(id, uri) {
 	this.id = id;
 	this.uri = uri;
+	this.defineFound = false;
 	this.dependencies = [];
 	this.dependents = [];
 };

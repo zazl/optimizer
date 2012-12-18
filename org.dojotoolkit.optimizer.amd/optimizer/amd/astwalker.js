@@ -248,10 +248,13 @@ function findDefine(ast) {
 	return expr;
 };
 
-function findShim(module, config, shims, exclude) {
+function findShim(module, exclude, moduleMap, pluginRefList, missingNamesList, config, shims, pathStack, walker) {
 	if (config.shim) {
 		var shim = config.shim[module.id];
 		if (shim) {
+			if (isArray(shim)) {
+				shim = {deps: shim};
+			}
 			var shimContent = "\n(function(root, cfg) {\ndefine('";
 			shimContent += module.id;
 			shimContent += "', ";
@@ -277,6 +280,7 @@ function findShim(module, config, shims, exclude) {
 						if (i < (shim.deps.length-1)) {
 							shimContent += ",";
 						}
+						walker(shim.deps[i], exclude, moduleMap, pluginRefList, missingNamesList, config, shims, pathStack);
 					}
 				}
 				shimContent += "], ";
@@ -354,8 +358,10 @@ function esprimaWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList,
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
 		if (defineExpr === undefined) {
-			findShim(module, config, shims, exclude);
+			findShim(module, exclude, moduleMap, pluginRefList, missingNamesList, config, shims, pathStack, esprimaWalker);
 			return;
+		} else {
+			module.defineFound = true;
 		}
 		var depInfo = getDependencies(src, defineExpr, config.scanCJSRequires);
 		if (depInfo.nameIndex) {
@@ -491,13 +497,12 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		var id = uri;
 		var module = moduleCreator.createModule(id, url);
 		moduleMap.add(uri, module);
-		var defineFound = false;
 		w.with_walkers({
 		    "call": function(expr, args) {
 				if (expr[0] === "name" && (expr[1] === "define" || expr[1] === "require")) {
 					var dependencyArg;
                     if (expr[1] === "define") {
-                    	defineFound = true;
+                    	module.defineFound = true;
                     	if (args[0][0].name !== "string") {
                     		var start = w.parent()[0].start;
                     		var nameIndex = start.pos + (src.substring(start.pos).indexOf('(')+1);
@@ -590,8 +595,8 @@ function uglifyjsWalker(uri, exclude, moduleMap, pluginRefList, missingNamesList
 		    w.walk(ast);
 		});
 		
-		if (defineFound === false) {
-			findShim(module, config, shims, exclude);
+		if (module.defineFound === false) {
+			findShim(module, exclude, moduleMap, pluginRefList, missingNamesList, config, shims, pathStack, uglifyjsWalker);
 		}
 	}
 };

@@ -49,11 +49,6 @@ AMDAnalyzer.prototype = {
 				var moduleDependency = this.moduleMap.get(module.dependencies[i]);
 				if (moduleDependency !== undefined) {
 					this._buildDependencyList(moduleDependency, dependencyList, seen);
-				} else {
-					if (seen[module.dependencies[i]] === undefined) {
-						dependencyList.push(module.dependencies[i]);
-						seen[module.dependencies[i]] = module.dependencies[i];
-					}
 				}
 			}
 			dependencyList.push(module.uri);
@@ -105,7 +100,7 @@ AMDAnalyzer.prototype = {
 		this._analyze(modules, exclude);
 		var dependencyList = [];
 		var seen = {require: "require", module: "module", exports: "exports"};
-		for (i = 0; i < modules.length; i++) {
+		for (var i = 0; i < modules.length; i++) {
 			var m = modules[i];
 			if (m.match(".+!")) {
 				m = m.substring(0, m.indexOf('!'));
@@ -114,6 +109,18 @@ AMDAnalyzer.prototype = {
 			var module = this.moduleMap.get(m);
 			this._buildDependencyList(module, dependencyList, seen);
 			this._scanForCircularDependencies(module, []);
+		}
+		var allmodules = this.moduleMap.values();
+		for (var i = 0; i < allmodules.length; i++) {
+			var module = allmodules[i];
+			if (module.defineFound === false && this.shims[module.uri] === undefined) {
+				var shimContent = "\n(function(root, cfg) {\ndefine('";
+				shimContent += module.id;
+				shimContent += "', ";
+				shimContent += "function() {\n";
+				shimContent += "});\n}(this, zazl._getConfig()));\n";
+				this.shims[module.uri] = shimContent;
+			}
 		}
 		return dependencyList;
 	},

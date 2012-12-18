@@ -165,6 +165,18 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
             scanForCircularDependencies(m, new Stack<String>(), moduleMap);
         }
         
+        for (Module module : moduleMap.values()) {
+        	if (module.defineFound == false && shims.containsKey(module.uri) == false) {
+				StringBuffer shimContent = new StringBuffer();
+				shimContent.append("\n(function(root, cfg) {\n");
+				shimContent.append("define('");
+				shimContent.append(module.id);
+				shimContent.append("', ");
+				shimContent.append("function() {\n");
+				shimContent.append("});\n}(this, zazl._getConfig()));\n");
+				shims.put(module.uri, shimContent.toString());
+        	}
+        }
 		jsAnalysisData = new JSAnalysisDataImpl(modules, dependencies, null, null, missingNamesList, pluginRefs, resourceLoader, JSAnalysisDataImpl.getExludes(exclude), pageConfig, shims);
 		return jsAnalysisData;
 	}
@@ -306,10 +318,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				if (depModule != null) {
 					buildDependencyList(depModule, moduleMap, dependencyList, seen);
 				} else {
-					if (!seen.containsKey(dep)) {
-						dependencyList.add(dep+".js");
-						seen.put(dep, Boolean.TRUE);
-					}
+					logger.logp(Level.SEVERE, getClass().getName(), "buildDependencyList", "Unable to locate dependency module ["+dep+"] depended on by ["+m.id+"]");
 				}
 			}
 			dependencyList.add(m.uri+".js");
@@ -320,6 +329,10 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		check.push(module.id);
 		for (String dep : module.dependencies) {
 			Module moduleDependency = moduleMap.get(dep);
+			if (moduleDependency == null) {
+				logger.logp(Level.SEVERE, getClass().getName(), "scanForCircularDependencies", "Unable to locate dependency module ["+dep+"] depended on by ["+module.id+"]");
+				continue;
+			}
 			if (moduleDependency.scanned) {
 				continue;
 			}
@@ -362,7 +375,6 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		private String pageConfigString = null;
 		private String error = null;
 		private boolean scanCJSRequires = false;
-		private boolean defineFound = false;
 		private Map<String, String> shims = null;
 
 		public AstVisitor(String moduleId, 
@@ -450,7 +462,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 						try {
 							ast = parser.parse(source, this.moduleId, 1);
 			                ast.visit(this);
-			                if (!defineFound) {
+			                if (!module.defineFound) {
 			                	findShim();
 			                }
 						} catch (EvaluatorException e) {
@@ -477,7 +489,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 				if (callName.equals("define") || callName.equals("require")) {
 					List<AstNode> args = functionCall.getArguments();
 					if (callName.equals("define")) {
-						defineFound = true;
+						module.defineFound = true;
 						if (args.get(0) instanceof StringLiteral == false) {
 							Map<String, Object> missingName = new HashMap<String, Object>();
 							missingName.put("nameIndex", new Long(functionCall.getAbsolutePosition()+functionCall.getLp()+1));
@@ -698,15 +710,22 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		private void findShim() {
 			Map<String, Object> shimConfig = (Map<String, Object>)config.get("shim");
 			if (shimConfig != null) {
-				Map<String, Object> shim = (Map<String, Object>)shimConfig.get(moduleId);
-				if (shim != null) {
+				Object o = shimConfig.get(module.id);
+				if (o != null) {
+					Map<String, Object> shim = null;
+					if (o instanceof List<?>) {
+						shim = new HashMap<String, Object>();
+						shim.put("deps", o);
+					} else {
+						shim = (Map<String, Object>)o;
+					}
 					StringBuffer shimContent = new StringBuffer();
 					shimContent.append("\n(function(root, cfg) {\n");
 					shimContent.append("define('");
 					shimContent.append(moduleId);
 					shimContent.append("', ");
 					List<String> deps = (List<String>)shim.get("deps");
-					if (deps != null) {
+					if (deps != null && deps.size() > 0) {
 						shimContent.append("[");
 						for (String dep : deps) {
 							String dependencyUri = idToUrl(dep, config);
@@ -725,6 +744,11 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 								shimContent.append("'");
 								shimContent.append(dep);
 								shimContent.append("',");
+								AstVisitor visitor = new AstVisitor(dep, moduleMap, pluginRefList, missingNamesList, config, pathStack, excludeList, pageConfigString, scanCJSRequires, shims);
+								if (visitor.getError() != null) {
+									error = visitor.getError();
+									return;
+								}
 							}
 						}
 						shimContent.deleteCharAt(shimContent.length()-1);
@@ -754,6 +778,7 @@ public class AMDJSOptimizer extends CachingJSOptimizer {
 		public String id = null;
 		public String uri = null;
 		public boolean scanned = false;
+		public boolean defineFound = false;
 		public List<String> dependencies = new ArrayList<String>();
 		
 		public Module(String id, String uri) {

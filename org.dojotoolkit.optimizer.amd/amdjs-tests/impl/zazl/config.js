@@ -39,6 +39,10 @@ var implemented = {
 	namedWrapped: true,
 	require: true,
 	plugins: true,
-	mapConfig: true
+	mapConfig: true,
+    pathsConfig: true,
+    packagesConfig: true,
+    moduleConfig: true,
+    shimConfig: true
 };
 require = undefined;
