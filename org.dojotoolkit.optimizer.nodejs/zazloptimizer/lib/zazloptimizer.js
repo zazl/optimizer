@@ -200,7 +200,7 @@ function writeResponse(params, analysisData, excludes, request, response, config
 	
 	for (i = 0; i < analysisData.dependencyList.length; i++) {
 		var uri = path.normalize(analysisData.dependencyList[i]);
-        var dependencyPath = path.normalize(analysisData.dependencyList[i])+".js";
+        var dependencyPath = uri+".js";
         var ts = resourceloader.getTimestamp(dependencyPath);
         if (compressContent) {
 			var cacheEntry = compressedCache[analysisData.dependencyList[i]];
@@ -218,8 +218,8 @@ function writeResponse(params, analysisData, excludes, request, response, config
             modifiedContent += content.substring(missingNameIndex);
             content = modifiedContent;
         }
-        if (analysisData.shims && analysisData.shims[uri]) {
-        	content += analysisData.shims[uri];
+        if (analysisData.shims && analysisData.shims[analysisData.dependencyList[i]]) {
+        	content += analysisData.shims[analysisData.dependencyList[i]];
         }
         if (compressContent) {
 	        var compressed = compress(content);
