@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Optimizer
 Bundle-SymbolicName: org.dojotoolkit.optimizer
-Bundle-Version: 0.4.8
+Bundle-Version: 0.5.2
 Import-Package: org.dojotoolkit.json,
  org.dojotoolkit.server.util.resource,
  org.dojotoolkit.server.util.rhino

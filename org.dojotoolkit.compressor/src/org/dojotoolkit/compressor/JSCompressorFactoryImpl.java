@@ -34,6 +34,9 @@ public class JSCompressorFactoryImpl implements JSCompressorFactory {
 		try {
 			Class<JSCompressor> jsCompressorClass = null;
 			URL propsURL = getClass().getClassLoader().getResource("/org_dojotoolkit_compressor.properties");
+			if (propsURL == null) {
+				propsURL = getClass().getResource("/org_dojotoolkit_compressor.properties");
+			}
 			if (propsURL != null) {
 				logger.logp(Level.FINE, getClass().getName(), "JSCompressorFactoryImpl", "org_dojotoolkit_compressor.properties is available");
 				InputStream is = null;

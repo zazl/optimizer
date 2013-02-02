@@ -20,7 +20,7 @@ import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
 
 public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
-	private static final String DEFAULT_JS_OPTIMIZER_CLASS = "org.dojotoolkit.optimizer.rhinoast.RhinoJSOptimizer"; 
+	private static final String DEFAULT_JS_OPTIMIZER_CLASS = "org.dojotoolkit.optimizer.rhinoast.AMDJSOptimizer"; 
 	private Constructor<JSOptimizer> jsOptimizerConstructor = null;
 	
 	@SuppressWarnings("unchecked")
@@ -28,6 +28,9 @@ public class JSOptimizerFactoryImpl implements JSOptimizerFactory {
 		try {
 			Class<JSOptimizer> jsOptimizerClass = null;
 			URL propsURL = getClass().getClassLoader().getResource("/org_dojotoolkit_optimizer.properties");
+			if (propsURL == null) {
+				propsURL = getClass().getResource("/org_dojotoolkit_optimizer.properties");
+			}
 			if (propsURL != null) {
 				logger.logp(Level.FINE, getClass().getName(), "JSOptimizerFactoryImpl", "org_dojotoolkit_optimizer.properties is available");
 				InputStream is = null;
