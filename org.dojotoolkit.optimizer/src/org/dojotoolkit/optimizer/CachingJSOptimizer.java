@@ -65,6 +65,22 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 				}
 			}
 			if (jsAnalysisData == null || jsAnalysisData.isStale()) {
+				if (logger.isLoggable(Level.FINE)) {
+					boolean stale = jsAnalysisData  == null ? false :  jsAnalysisData.isStale();
+					StringBuffer moduleList = new StringBuffer();
+					for (String module: modules) {
+						moduleList.append(module);
+						moduleList.append(" ");
+					}
+					StringBuffer excludeList = new StringBuffer();
+					for (JSAnalysisData excluded: exclude) {
+				        for (String excludeModule : excluded.getDependencies()) {
+				        	excludeList.append(excludeModule);
+				        	excludeList.append(" ");
+				        }
+					}
+					logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "creating Analysis Data for modules["+moduleList+"] stale["+stale+"] key["+key+"] excluded["+excludeList+"]");
+				}
 				jsAnalysisData = _getAnalysisData(modules, exclude, pageConfig);
 				jsAnalysisData.save(tempDir);
 				cache.put(key, jsAnalysisData);
