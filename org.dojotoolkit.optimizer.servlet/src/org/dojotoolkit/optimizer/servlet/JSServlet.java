@@ -151,6 +151,10 @@ public class JSServlet extends HttpServlet {
 	}
 	
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		jsHandler.handle(request, response);
+		if (request.getMethod().equals("HEAD")) {
+			jsHandler.handleHeadRequest(request, response);
+		} else {
+			jsHandler.handle(request, response);
+		}
 	}
 }

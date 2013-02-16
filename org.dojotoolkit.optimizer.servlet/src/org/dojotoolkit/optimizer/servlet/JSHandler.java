@@ -36,6 +36,7 @@ import org.dojotoolkit.compressor.JSCompressorFactory;
 import org.dojotoolkit.json.JSONParser;
 import org.dojotoolkit.optimizer.CachingJSOptimizer;
 import org.dojotoolkit.optimizer.JSAnalysisData;
+import org.dojotoolkit.optimizer.JSAnalysisDataImpl;
 import org.dojotoolkit.optimizer.JSOptimizer;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.optimizer.Util;
@@ -137,8 +138,8 @@ public abstract class JSHandler {
             }
             String configString = request.getParameter("config");
             @SuppressWarnings("unchecked")
-			Map<String, Object> config = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
-            analysisData = jsOptimizer.getAnalysisData(modules, exclude, config);
+			Map<String, Object> pageConfig = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
+            analysisData = jsOptimizer.getAnalysisData(modules, exclude, pageConfig);
         } else if (key != null) {
 			analysisData = jsOptimizer.getAnalysisData(key);
 		}
@@ -200,6 +201,42 @@ public abstract class JSHandler {
 	public JSOptimizer getJSOptimizer() {
 		return jsOptimizer;
 	}
+	
+	public void handleHeadRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String[] modules = null;
+		String modulesParam = request.getParameter("modules");
+        JSAnalysisData[] exclude = EMPTY_ARRAY;
+		if (modulesParam != null) {
+            modules = getAsList(modulesParam);
+            String configString = request.getParameter("config");
+            @SuppressWarnings("unchecked")
+			Map<String, Object> pageConfig = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
+            String key = JSAnalysisDataImpl.getKey(modules, exclude, pageConfig);
+            JSAnalysisData analysisData = jsOptimizer.getAnalysisData(key);
+            if (analysisData != null) {
+    			String checksum = analysisData.getChecksum();
+    		    String ifNoneMatch = request.getHeader("If-None-Match");
+
+    		    if (ifNoneMatch != null && ifNoneMatch.equals(checksum)) {
+    		    	response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+    		        return;
+    		    }
+
+     			response.setHeader("ETag", checksum);
+
+    			String version = request.getParameter("version");
+    			if (version != null && version.equals(checksum)) {
+    				Calendar calendar = Calendar.getInstance();
+    				calendar.add(Calendar.YEAR, 1);
+    				response.setDateHeader("Expires", calendar.getTimeInMillis());
+    			}
+		    	response.setStatus(HttpServletResponse.SC_OK);
+		    	return;
+            }
+        	new Thread(new OptimizerRunnable(jsOptimizer, modules, pageConfig)).start();
+		}
+    	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+	}
 
 	protected boolean handleSourceMapRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String sourcemapKey = request.getParameter("sourcemap");
@@ -258,6 +295,7 @@ public abstract class JSHandler {
 		private JSOptimizer optimizer = null;
 		private String[] modules = null;
 		private String modulesAsString = "";
+		private Map<String, Object> pageConfig = null;
 		
 		public OptimizerRunnable(JSOptimizer optimizer, List<String> modules) {
 			this.optimizer = optimizer;
@@ -269,10 +307,24 @@ public abstract class JSHandler {
 			}
 		}
 		
+		public OptimizerRunnable(JSOptimizer optimizer, String[] modules, Map<String, Object> pageConfig) {
+			this.optimizer = optimizer;
+			this.modules = modules;
+			for (String module : modules) {
+				modulesAsString	+= module;
+				modulesAsString += ' ';
+			}
+			this.pageConfig = pageConfig;
+		}
+		
 		public void run() {
 			try {
 				logger.logp(Level.INFO, getClass().getName(), "run", "Obtaining Optimization Data for ["+modulesAsString+"]");
-				optimizer.getAnalysisData(modules);
+				if (config == null) {
+					optimizer.getAnalysisData(modules);
+				} else {
+					optimizer.getAnalysisData(modules, EMPTY_ARRAY, pageConfig);
+				}
 				logger.logp(Level.INFO, getClass().getName(), "run", "Obtained Optimization Data for ["+modulesAsString+"]");
 			} catch (IOException e) {
 				logger.logp(Level.SEVERE, getClass().getName(), "OptimizerRunnable", "IOException while attempting to obtain Optimization Data for ["+modulesAsString+"]", e);
