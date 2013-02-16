@@ -31,20 +31,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.dojotoolkit.compressor.uglifyjs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dojotoolkit.compressor.uglifyjs.rhino"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dojotoolkit.compressor.closure"
          download-size="0"
          install-size="0"

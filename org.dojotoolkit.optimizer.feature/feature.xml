@@ -28,13 +28,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.dojotoolkit.optimizer.rhino"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dojotoolkit.optimizer.servlet"
          download-size="0"
          install-size="0"
@@ -43,13 +36,6 @@
 
    <plugin
          id="org.dojotoolkit.optimizer.amd"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dojotoolkit.optimizer.amd.rhino"
          download-size="0"
          install-size="0"
          version="0.0.0"

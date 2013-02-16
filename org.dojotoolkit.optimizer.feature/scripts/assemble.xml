@@ -2,7 +2,7 @@
     <!-- Properties -->
 	<property
 		name="version"
-		value="v0.5.2"/>
+		value="v0.5.3"/>
 	
 	<property
 		name="target.dir"
@@ -46,12 +46,6 @@
 		<mkdir dir="${target.dir}/package/warlib"/>
 		<jar destfile="${target.dir}/package/warlib/jsonjs.jar">
 			<zipfileset dir="${json.dir}/json" prefix="json"/>
-		</jar>
-		<jar destfile="${target.dir}/package/warlib/uglifyjs.jar">
-			<zipfileset dir="${uglifyjs.dir}/uglifyjs" prefix="uglifyjs"/>
-		</jar>
-		<jar destfile="${target.dir}/package/warlib/esprima.jar">
-			<zipfileset dir="${esprima.dir}/esprima" prefix="esprima"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
 	        <fileset dir="${equinox.dir}">
@@ -202,6 +196,7 @@
 			</fileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd" prefix="loader/amd">
 				<include name="zazl.js"/>
+				<include name="zazlwarmup.js"/>
 			</zipfileset>	
 		</war>
 		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml" tofile="${target.dir}/package/inject_web.xml"/>
@@ -241,6 +236,7 @@
 			</zipfileset>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd">
 				<include name="zazl.js"/>
+				<include name="zazlwarmup.js"/>
 			</fileset>
 		</zip>
 		<zip destfile="${target.dir}/package/amdjs-tests.zip">
