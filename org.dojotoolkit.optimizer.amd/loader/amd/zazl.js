@@ -462,6 +462,7 @@ var define;
 	}
 	
 	define = function (id, dependencies, factory) {
+		var simpleCJS = false;
 		if (!isString(id)) { 
 			factory = dependencies;
 			dependencies = id;
@@ -473,6 +474,7 @@ var define;
 		}
 		var args;
 		if (!isArray(dependencies)) {
+			simpleCJS = true;
 			factory = dependencies;
 			dependencies = [];
 		} else {
@@ -481,7 +483,7 @@ var define;
 		modules[id] = {id: id, exports: {}, args: args, deploaded: {}, dependencies: dependencies, config: function() { if (!cfg.config[id]) { cfg.config[id] = {}; } return cfg.config[id]; }};
 		if (isFunction(factory)) {
 			var scancjs = cfg ? cfg.scanCJSRequires : false;
-			if (scancjs) {
+			if (scancjs && simpleCJS) {
 				factory.toString().replace(commentRegExp, "").replace(cjsRequireRegExp, function (match, dep) {
 					modules[id].dependencies.push("~#"+dep);
 	            });
