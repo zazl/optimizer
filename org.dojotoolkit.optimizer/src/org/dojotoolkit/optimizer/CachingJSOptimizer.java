@@ -126,7 +126,6 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 				return false;
 			}
 		}
-		System.out.println("lock = "+lock.isLocked()+" for key ["+key+"]");
 		return lock.isLocked();
 	}
 	
