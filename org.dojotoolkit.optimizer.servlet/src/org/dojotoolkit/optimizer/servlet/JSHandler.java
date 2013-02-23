@@ -212,6 +212,10 @@ public abstract class JSHandler {
             @SuppressWarnings("unchecked")
 			Map<String, Object> pageConfig = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
             String key = JSAnalysisDataImpl.getKey(modules, exclude, pageConfig);
+            if (jsOptimizer.analysisInProcess(key)) {
+            	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            	return;
+            }
             JSAnalysisData analysisData = jsOptimizer.getAnalysisData(key);
             if (analysisData != null) {
     			String checksum = analysisData.getChecksum();

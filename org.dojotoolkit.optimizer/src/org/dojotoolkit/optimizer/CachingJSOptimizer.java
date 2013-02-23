@@ -18,7 +18,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 public abstract class CachingJSOptimizer implements JSOptimizer {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
 	protected Map<String, JSAnalysisDataImpl> cache = null;
-	protected Map<String, Object> lockMap = null;
+	protected Map<String, Lock> lockMap = null;
 	protected File tempDir = null;
 	protected ResourceLoader resourceLoader = null;
 	
@@ -28,7 +28,7 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 		this.tempDir = tempDir;
 		this.resourceLoader = resourceLoader;
 		cache = Collections.synchronizedMap(new HashMap<String, JSAnalysisDataImpl>());
-		lockMap = new HashMap<String, Object>();
+		lockMap = new HashMap<String, Lock>();
 	}
 	
 	public JSAnalysisData getAnalysisData(String[] modules) throws IOException {
@@ -46,11 +46,11 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 	public JSAnalysisData getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> pageConfig) throws IOException {
 		String key = JSAnalysisDataImpl.getKey(modules, exclude, pageConfig);
 		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
-		Object lock = null;
+		Lock lock = null;
 		synchronized (lockMap) {
 			lock = lockMap.get(key);
 			if (lock == null) {
-				lock = new Object();
+				lock = new Lock(false);
 				lockMap.put(key, lock);
 			}
 		}
@@ -81,9 +81,14 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 					}
 					logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "creating Analysis Data for modules["+moduleList+"] stale["+stale+"] key["+key+"] excluded["+excludeList+"]");
 				}
-				jsAnalysisData = _getAnalysisData(modules, exclude, pageConfig);
-				jsAnalysisData.save(tempDir);
-				cache.put(key, jsAnalysisData);
+				lock.locked = true;
+				try {
+					jsAnalysisData = _getAnalysisData(modules, exclude, pageConfig);
+					jsAnalysisData.save(tempDir);
+					cache.put(key, jsAnalysisData);
+				} finally {
+					lock.locked = false;
+				}
 			}
 			logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] out lock");
 		}
@@ -94,11 +99,11 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 	
 	public JSAnalysisData getAnalysisData(String key) throws UnsupportedOperationException {
 		logger.logp(Level.FINE, getClass().getName(), "getAnalysisData", "modules ["+key+"] in");
-		Object lock = null;
+		Lock lock = null;
 		synchronized (lockMap) {
 			lock = lockMap.get(key);
 			if (lock == null) {
-				lock = new Object();
+				lock = new Lock(false);
 				lockMap.put(key, lock);
 			}
 		}
@@ -113,5 +118,29 @@ public abstract class CachingJSOptimizer implements JSOptimizer {
 		return jsAnalysisData;
 	}
 	
+	public boolean analysisInProcess(String key) {
+		Lock lock = null;
+		synchronized (lockMap) {
+			lock = lockMap.get(key);
+			if (lock == null) {
+				return false;
+			}
+		}
+		System.out.println("lock = "+lock.isLocked()+" for key ["+key+"]");
+		return lock.isLocked();
+	}
+	
 	protected abstract JSAnalysisDataImpl _getAnalysisData(String[] modules, JSAnalysisData[] exclude, Map<String, Object> config) throws IOException;
+	
+	private class Lock {
+		boolean locked = false;
+		
+		public Lock(boolean locked) {
+			this.locked = locked;
+		}
+		
+		boolean isLocked() {
+			return locked;
+		}
+	}
 }

@@ -52,4 +52,10 @@ public interface JSOptimizer {
 	 * @throws IOException
 	 */
 	Map<String, Object> getConfig();
+	/**
+	 * @param key String value that can be used to identify what this analyisData is for
+	 * @return boolean indicates if an analysis is in process for the given key
+	 * @throws UnsupportedOperationException if optimizer does not support retrieval by key.
+	 */
+	boolean analysisInProcess(String key);
 }
