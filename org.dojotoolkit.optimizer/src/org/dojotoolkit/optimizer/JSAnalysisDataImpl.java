@@ -56,7 +56,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
             String[] excludes,
             Map<String, Object> pageConfig,
             Map<String, String> shims) throws IOException {
-		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, shims, null, null);
+		this(modules, dependencies, localizations, textDependencies, modulesMissingNames, pluginRefs, resourceLoader, excludes, pageConfig, shims, null, null, null);
 	}
 
 	private JSAnalysisDataImpl(String[] modules,
@@ -70,16 +70,26 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			                  Map<String, Object> pageConfig,
 			                  Map<String, String> shims,
 			                  String checksum,
-			                  String config) throws IOException {
-		timestampLookup = new HashMap<String, Long>();
+			                  String config,
+			                  Map<String, Long> timestamps) throws IOException {
 		this.modules = modules;
 		this.dependencies = new String[dependencies.size()];
 		int i = 0;
-		for (String dependency : dependencies) {
-			String normalized = Util.normalizePath(dependency);
-			resourceLoader.getResource(normalized);
-			timestampLookup.put(normalized, resourceLoader.getTimestamp(normalized));
-			this.dependencies[i++] = normalized; 
+		if (timestamps == null) {
+			timestampLookup = new HashMap<String, Long>();
+			for (String dependency : dependencies) {
+				String normalized = Util.normalizePath(dependency);
+				resourceLoader.getResource(normalized);
+				timestampLookup.put(normalized, resourceLoader.getTimestamp(normalized));
+				this.dependencies[i++] = normalized; 
+			}
+		} else {
+			timestampLookup = timestamps;
+			for (String dependency : dependencies) {
+				String normalized = Util.normalizePath(dependency);
+				resourceLoader.getResource(normalized);
+				this.dependencies[i++] = normalized; 
+			}
 		}
 		this.checksum = ChecksumCreator.createChecksum(this.dependencies, resourceLoader);
 		if (checksum != null && this.checksum.equals(checksum) == false) {
@@ -177,6 +187,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			implDetails.put("modules", Arrays.asList(modules));
 			implDetails.put("dependencies", Arrays.asList(dependencies));
 			implDetails.put("checksum", checksum);
+			implDetails.put("timestamps", timestampLookup);
 			if (localizations != null) {
 				List<Map<String, Object>> localizationsList = new ArrayList<Map<String, Object>>();
 				for (Localization localization : localizations) {
@@ -253,6 +264,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 				String config = (String)implDetails.get("pageConfig");
 				String checksum = (String)implDetails.get("checksum");
 				Map<String, String> shims = (Map<String, String>)implDetails.get("shims");
+				Map<String, Long> timestamps = (Map<String, Long>)implDetails.get("timestamps");
 				impl = new JSAnalysisDataImpl(modules, 
 						                      dependencies, 
 						                      localizations, 
@@ -264,7 +276,8 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 						                      null,
 						                      shims,
 						                      checksum,
-						                      config);
+						                      config,
+						                      timestamps);
 			} catch (IOException e) {
 				logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "load", "Failed to load ["+implFile.getPath()+"]", e);
 			} finally {
