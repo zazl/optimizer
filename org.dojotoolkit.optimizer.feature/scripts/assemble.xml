@@ -200,6 +200,9 @@
 				<include name="zazl.js"/>
 				<include name="zazlwarmup.js"/>
 			</zipfileset>	
+			<zipfileset dir="${json.dir}/json" prefix="loader/amd">
+				<include name="json2.js"/>
+			</zipfileset>	
 		</war>
 		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml" tofile="${target.dir}/package/inject_web.xml"/>
 		<copy file="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/filter_amdoptimizer_web.xml" tofile="${target.dir}/package/filter_web.xml"/>
@@ -236,10 +239,13 @@
 				<include name="filter_web.xml"/>
 				<include name="inject_web.xml"/>
 			</zipfileset>
-			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd">
+			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd" prefix="loader/amd">
 				<include name="zazl.js"/>
 				<include name="zazlwarmup.js"/>
-			</fileset>
+			</zipfileset>
+			<zipfileset dir="${json.dir}/json" prefix="loader/amd">
+				<include name="json2.js"/>
+			</zipfileset>	
 		</zip>
 		<zip destfile="${target.dir}/package/amdjs-tests.zip">
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.compressor/src" prefix="WEB-INF/classes">
