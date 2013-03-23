@@ -144,6 +144,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
 				<include name="filter_*.html"/>
+				<include name="index.html"/>
 				<include name="amdcalendar.jsp"/>
 				<include name="amddeclarative.jsp"/>
 			</fileset>
@@ -193,6 +194,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
 				<include name="inject_*.html"/>
+				<include name="index.html"/>
 			</fileset>
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.amd/loader/amd" prefix="loader/amd">
 				<include name="zazl.js"/>
@@ -294,6 +296,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
 				<include name="inject_*.html"/>
+				<include name="index.html"/>
 			</fileset>
 		</zip>
 	</target>
