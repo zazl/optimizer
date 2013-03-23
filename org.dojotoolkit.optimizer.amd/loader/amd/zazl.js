@@ -663,12 +663,20 @@ var define;
 		analysisKeys.push(key);
 	};
 	
-	document.addEventListener("DOMContentLoaded", function() {
-		domLoaded = true;
-		if (modulesLoaded) {
-			processQueues();
+	function domReady() {
+		if (domLoaded === false) {
+			domLoaded = true;
+			if (modulesLoaded) {
+				processQueues();
+			}
 		}
-	}, false);
+	}
+	
+	if (document.addEventListener) {
+		document.addEventListener("DOMContentLoaded", domReady, false);
+	} else if (document.attachEvent)  {
+		document.attachEvent( "onreadystatechange", domReady);
+	} 
 	
 	if (!require) {
 		require = zazl;
