@@ -611,7 +611,7 @@ var define;
 				if (isFunction(callback)) {
 					callback.apply(null, arguments);
 				}
-				requireInProcess = false;
+				fireIdleEvent();
 			});
 			processCache();
 			queueProcessor();
@@ -774,7 +774,7 @@ var define;
 		} catch (e) {
 			console.log("queueProcessor error : "+e);
 			allLoaded = true;
-			if (requireInProcess) { requireInProcess = false; }
+			if (requireInProcess) { fireIdleEvent(); }
 		}
 		return allLoaded;
 	}
@@ -785,5 +785,14 @@ var define;
 			setTimeout(poller, 0);
 		};
 		poller();
+	}
+	
+	function fireIdleEvent() {
+		requireInProcess = false;
+		if (window.addEventListener) {
+			var zazlIdleEvt = document.createEvent('Event');
+			zazlIdleEvt.initEvent('zazlIdle', true, true);
+			window.dispatchEvent(zazlIdleEvt);
+		}
 	}
 }());

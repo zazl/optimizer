@@ -9,6 +9,9 @@
 	</style>
 	<script type="text/javascript" src="loader/amd/zazl.js"></script>
 	<script type="text/javascript">
+		window.addEventListener("zazlIdle", function(evt) {
+            console.log("Zazl is idle");
+		}, false);
         require({
         	directInject: true,
             packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}],
