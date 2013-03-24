@@ -45,7 +45,8 @@ var define;
 	var modulesLoaded = false;
 	var domLoaded = false;
 	var readyCallbacks = [];
-    
+	var reqQueue = [];
+
 	var opts = Object.prototype.toString;
 	
 	var geval = window.execScript || eval;
@@ -619,8 +620,8 @@ var define;
 			cfg.config = cfg.config || {};
 			cfg.map = cfg.map || {};
 		}
-	};
-
+	}
+	
 	zazl = function(config, dependencies, callback) {
 		if (!isArray(config) && typeof config === "object") {
 			processConfig(config);
@@ -634,41 +635,39 @@ var define;
 			callback = dependencies;
 			dependencies = [];
 		}
-
-		function _callRequire() {
-			_require(dependencies, function() {
-				if (isFunction(callback)) {
-					callback.apply(null, arguments);
+		
+		function _callRequire(mods, cb) {
+			var _cb = cb;
+			_require(mods, function() {
+				if (isFunction(_cb)) {
+					_cb.apply(null, arguments);
 				}
 				fireIdleEvent();
+				var qe = reqQueue.shift();
+				if (qe) {
+					_load(qe.mods, qe.cb);
+				}
 			});
-			processCache();
-			queueProcessor();
 		}
 
-		function _load() {
+		function _load(mods, cb) {
 			requireInProcess = true;
 
-			if (cfg.directInject && dependencies.length > 0) {
-				_inject(dependencies, function(){
-					_callRequire();
+			if (cfg.directInject && mods.length > 0) {
+				_inject(mods, function(){
+					_callRequire(mods, cb);
 				});
 			} else {
-				_callRequire();
+				_callRequire(mods, cb);
+				processCache();
+				queueProcessor();
 			}
 		}
 
 		if (requireInProcess) {
-			var poller = function() {
-				if (requireInProcess) {
-					setTimeout(poller, 100);
-				} else {
-					_load();
-				}
-			};
-			poller();
+			reqQueue.push({mods: dependencies, cb: callback});
 		} else {
-			_load();
+			_load(dependencies, callback);
 		}
 	};
 	
@@ -777,13 +776,16 @@ var define;
 			var cbiterate = function(exports, itr) {
 				if (itr.hasMore()) {
 					var cbinst = itr.next();
-					if (cbinst.mid !== "") {
-						savedStack = moduleStack;
-						moduleStack = [cbinst.mid];
-					}
-					cbinst.cb(exports);
-					if (cbinst.mid !== "") {
-						moduleStack = savedStack;
+					if (!cbinst.called) {
+						cbinst.called = true;
+						if (cbinst.mid !== "") {
+							savedStack = moduleStack;
+							moduleStack = [cbinst.mid];
+						}
+						cbinst.cb(exports);
+						if (cbinst.mid !== "") {
+							moduleStack = savedStack;
+						}
 					}
 					cbiterate(exports, itr);
 				} else {

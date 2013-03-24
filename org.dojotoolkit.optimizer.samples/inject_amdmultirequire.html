@@ -27,14 +27,29 @@
 	<script type="text/javascript">
         require(["dojo/dom", "dijit/ColorPalette","dojo/domReady!"],
         function(dom, ColorPalette) {
-            var colorPalette = new ColorPalette({}, dom.byId("colorPaletteNode"));
             console.log("ColorPalette loaded");
+            var colorPalette = new ColorPalette({}, dom.byId("colorPaletteNode"));
             return colorPalette;
+        });
+	</script>
+	<script type="text/javascript">
+        require(["dojo/dom", "dijit/form/Button", "dojo/domReady!"],
+        function(dom, Button) {
+            console.log("Button loaded");
+        	var myButton = new Button({
+                label: "Click me!",
+                onClick: function(){
+                    dom.byId("result").innerHTML += "Thank you! ";
+                }
+            }, "buttonNode");        	
+            return myButton;
         });
 	</script>
 </head>
 <body class="claro">
 <div id="calendarNode"></div>
 <div id="colorPaletteNode"></div>
+<div id="buttonNode"></div>
+<div id="result"></div>
 </body>
 </html>
