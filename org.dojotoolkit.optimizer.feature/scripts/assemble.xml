@@ -36,10 +36,6 @@
 		name="esprima.dir"
 		value="${workspace.dir}/../targetplatform/esprima/plugins/org.esprima_1.0.0"/>
 	
-	<property
-		name="equinox.dir"
-		value="${workspace.dir}/../targetplatform/equinox-SDK-3.7/plugins"/>
-	
 	<!-- Export the feature -->
 	<target name="assemble">
 		<mkdir dir="${target.dir}/package"/>
@@ -48,11 +44,6 @@
 			<zipfileset dir="${json.dir}/json" prefix="json"/>
 		</jar>
 		<copy todir="${target.dir}/package/warlib">
-	        <fileset dir="${equinox.dir}">
-	            <include name="javax.servlet_2.5.0*.jar"/>
-	            <include name="org.mortbay.jetty.server_6.*.jar"/>
-	            <include name="org.mortbay.jetty.util_6.*.jar"/>
-	        </fileset>
 	        <fileset dir="${target.dir}/plugins">
 	            <include name="*.jar"/>
 		        </fileset>

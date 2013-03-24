@@ -26,7 +26,7 @@
 	
 	<property
 		name="equinox.dir"
-		value="${targetplatform.dir}/equinox-SDK-3.7/plugins"/>
+		value="${targetplatform.dir}/equinox-SDK-3.8.2/plugins"/>
 	
 	<target name="assemble">
 		<mkdir dir="${target.dir}/package"/>
@@ -35,9 +35,13 @@
 		<mkdir dir="${target.dir}/package/server/jslib"/>
 		<copy todir="${target.dir}/package/server/lib">
 	        <fileset dir="${equinox.dir}">
-	            <include name="javax.servlet_2.5.0*.jar"/>
-	            <include name="org.mortbay.jetty.server_6.*.jar"/>
-	            <include name="org.mortbay.jetty.util_6.*.jar"/>
+	            <include name="javax.servlet_3.0.0*.jar"/>
+	            <include name="org.eclipse.jetty.continuation_8.*.jar"/>
+	            <include name="org.eclipse.jetty.http_8.*.jar"/>
+	            <include name="org.eclipse.jetty.io_8.*.jar"/>
+	            <include name="org.eclipse.jetty.security_8.*.jar"/>
+	            <include name="org.eclipse.jetty.server_8.*.jar"/>
+	            <include name="org.eclipse.jetty.util_8.*.jar"/>
 	        </fileset>
 	        <fileset dir="${target.dir}/plugins">
 	            <include name="*.jar"/>

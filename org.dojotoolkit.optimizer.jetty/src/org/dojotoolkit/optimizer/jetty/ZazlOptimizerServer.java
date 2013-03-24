@@ -13,12 +13,12 @@ import org.dojotoolkit.compressor.JSCompressorFactoryImpl;
 import org.dojotoolkit.optimizer.JSOptimizerFactory;
 import org.dojotoolkit.server.util.resource.MultiRootResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.resource.FileResource;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.FileResource;
 
 public class ZazlOptimizerServer {
 	private Server server = new Server();

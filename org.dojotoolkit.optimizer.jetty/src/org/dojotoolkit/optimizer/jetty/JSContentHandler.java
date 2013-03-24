@@ -18,9 +18,9 @@ import org.dojotoolkit.optimizer.servlet.AMDJSHandler;
 import org.dojotoolkit.optimizer.servlet.JSHandler;
 import org.dojotoolkit.server.util.resource.ResourceLoader;
 import org.dojotoolkit.server.util.rhino.RhinoClassLoader;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
+import org.eclipse.jetty.server.AbstractHttpConnection;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class JSContentHandler extends AbstractHandler {
 	private JSHandler jsHandler = null;
@@ -30,13 +30,12 @@ public class JSContentHandler extends AbstractHandler {
 		jsHandler.initialize(resourceLoader, rhinoClassLoader, jsOptimizerFactory, null, jsCompressorFactory, tempDir);
 	}
 
-	public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
+	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		if (target.startsWith("/_javascript")) {
 			if (jsHandler.handle(request, response)) {
-				Request jettyRequest = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+				Request jettyRequest = (request instanceof Request) ? (Request)request:AbstractHttpConnection.getCurrentConnection().getRequest();
 				jettyRequest.setHandled(true);
 			}
 		}
 	}
-
 }

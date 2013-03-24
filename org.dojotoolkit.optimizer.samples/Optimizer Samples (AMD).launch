@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
 <setAttribute key="additional_plugins">
-<setEntry value="org.apache.commons.el:1.0.0.v201004212143:default:true"/>
-<setEntry value="org.apache.jasper:5.5.17.v201004212143:default:true"/>
+<setEntry value="org.apache.felix.gogo.shell:0.8.0.v201110170705:default:true"/>
 <setEntry value="org.dojotoolkit.optimizer.samples:0.3.2:default:true"/>
-<setEntry value="org.eclipse.equinox.http.jetty:2.0.100.v20110502:default:true"/>
-<setEntry value="org.eclipse.equinox.http.registry:1.1.100.v20110502:default:true"/>
-<setEntry value="org.eclipse.equinox.http.servlet:1.1.200.v20110502:default:true"/>
-<setEntry value="org.eclipse.equinox.jsp.jasper.registry:1.0.200.v20100503:default:true"/>
-<setEntry value="org.eclipse.equinox.jsp.jasper:1.0.300.v20110502:default:true"/>
+<setEntry value="org.eclipse.equinox.console:1.0.0.v20120522-1841:default:true"/>
+<setEntry value="org.eclipse.equinox.http.jetty:3.0.1.v20121109-203239:default:true"/>
+<setEntry value="org.eclipse.equinox.http.registry:1.1.200.v20120912-130548:default:true"/>
+<setEntry value="org.eclipse.equinox.http.servlet:1.1.300.v20120912-130548:default:true"/>
+<setEntry value="org.eclipse.equinox.jsp.jasper.registry:1.0.300.v20120912-130548:default:true"/>
+<setEntry value="org.eclipse.equinox.jsp.jasper:1.0.400.v20120912-130548:default:true"/>
 </setAttribute>
 <booleanAttribute key="append.args" value="true"/>
 <booleanAttribute key="automaticAdd" value="false"/>
@@ -23,7 +23,7 @@
 <stringAttribute key="featureDefaultLocation" value="workspace"/>
 <stringAttribute key="featurePluginResolution" value="workspace"/>
 <booleanAttribute key="includeOptional" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console -consolelog"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true  -Djava.util.logging.config.file=${workspace_loc}/optimizer/org.dojotoolkit.optimizer.samples/logging.properties -Dorg.osgi.service.http.port=8080 -DV8=false -DcompressorType=shrinksafe -DsearchBundleIds=org.dojotoolkit.dojo,org.json.js,org.dojotoolkit.server.util.js,org.dojotoolkit.optimizer.amd,org.dojotoolkit.optimizer.servlet,org.dojotoolkit.optimizer.samples,org.dojotoolkit.optimizer.amd.rhinoast -DjsHandlerType=zazl"/>
 <stringAttribute key="pde.version" value="3.3"/>
