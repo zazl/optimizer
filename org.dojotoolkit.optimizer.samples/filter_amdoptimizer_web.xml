@@ -27,4 +27,7 @@
 	   <filter-name>JSFilter</filter-name>
 	   <url-pattern>*.html</url-pattern>
 	</filter-mapping>
+	<welcome-file-list>
+		<welcome-file>filter_index.html</welcome-file>
+	</welcome-file-list>
 </web-app>
