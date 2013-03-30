@@ -576,6 +576,7 @@ var define;
 				}
 			};
 			iterate(new Iterator(dependencies));
+			queueProcessor();
 			return undefined;
 		}
 	};
