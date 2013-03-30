@@ -10,12 +10,13 @@
     	html, body { width: 100%; height: 100%; margin: 0; overflow:hidden; }
     	#borderContainerTwo { width: 100%; height: 100%; visibility:hidden; }
 	</style>
-	<script type="text/javascript" src="loader/amd/zazlwarmup.js"></script>
+	<script type="text/javascript" src="loader/amd/zazl.js"></script>
 	<script type="text/javascript">
 		var packages = [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}];
 		var zazlConfig = {
 	        directInject: true,
-	        packages: packages 	
+	        warmupLoader: "dojo/dojo.js",
+	        packages: packages
 		}
 		var dojoConfig = {
 			baseUrl: './',	
@@ -23,13 +24,10 @@
 	        packages: packages, 	
 	        paths: {"amdtest": "./amdtest"}
 		}
-		var modules = ["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'];
-		zazlWarmup("loader/amd/zazl.js", "dojo/dojo.js", modules, function() {
-	        require(modules, function(declarative, dom, domStyle) {
-            	domStyle.set(dom.byId("borderContainerTwo"), "visibility", "visible");
-                console.log("done");
-            });
-		});
+        require(["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], function(declarative, dom, domStyle) {
+			domStyle.set(dom.byId("borderContainerTwo"), "visibility", "visible");
+			console.log("done");
+        });
 	</script>
 
 </head>

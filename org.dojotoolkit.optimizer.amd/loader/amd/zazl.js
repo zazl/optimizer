@@ -46,7 +46,8 @@ var define;
 	var domLoaded = false;
 	var readyCallbacks = [];
 	var reqQueue = [];
-
+	var warmupState = 0;
+	
 	var opts = Object.prototype.toString;
 	
 	var geval = window.execScript || eval;
@@ -321,7 +322,7 @@ var define;
 	    }
 	    throw new Error("Unable to clone");
 	}
-	
+
 	function _createScriptTag(url, cb) {
 		var script = document.createElement('script');
 		script.type = "text/javascript";
@@ -622,6 +623,42 @@ var define;
 		}
 	}
 	
+	function _loadScriptViaXHR(url, cb) {
+		var xhr = new XMLHttpRequest();
+		if (xhr === null) {
+			throw new Error("Unable to load ["+url+"] : XHR unavailable");
+		}
+		xhr.open("GET", url, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					cb(xhr.responseText);
+				} else {
+					throw new Error("Unable to load ["+url+"]:"+xhr.status);
+				}
+			}
+		};
+		xhr.send(null);
+	}
+	
+	function doHeadRequest(mods, cb) {
+		var xhr = new XMLHttpRequest();
+		var zazlUrl = _createZazlUrl(mods);
+		xhr.open("HEAD", zazlUrl, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200 || xhr.status === 304) {
+					cb(true);
+				} else if (xhr.status === 404) {
+					cb(false);
+				} else {
+					throw new Error("Zazl Servlet Head request failed : "+xhr.status);
+				}
+			}
+		};
+		xhr.send(null);
+	}
+	
 	zazl = function(config, dependencies, callback) {
 		if (!isArray(config) && typeof config === "object") {
 			processConfig(config);
@@ -649,10 +686,17 @@ var define;
 				}
 			});
 		}
+		
+		function _loadViaWarmup(mods, cb) {
+			require(mods, cb);
+			requireInProcess = false;
+			var qe = reqQueue.shift();
+			if (qe) {
+				_load(qe.mods, qe.cb);
+			}
+		}
 
-		function _load(mods, cb) {
-			requireInProcess = true;
-
+		function _loadViaZazl(mods, cb) {
 			if (cfg.directInject && mods.length > 0) {
 				_inject(mods, function(){
 					_callRequire(mods, cb);
@@ -661,6 +705,36 @@ var define;
 				_callRequire(mods, cb);
 				processCache();
 				queueProcessor();
+			}
+		}
+		
+		function _load(mods, cb) {
+			requireInProcess = true;
+			if (cfg.warmupLoader) {
+				if (warmupState === 0) {
+					_checkForJSON(function() {
+						doHeadRequest(mods, function(useZazl) {
+							if (useZazl) {
+								warmupState = 1;
+								_loadViaZazl(mods, cb);
+							} else {
+								warmupState = 2;
+								_loadScriptViaXHR(cfg.warmupLoader, function(scriptText) {
+									window.require = undefined;
+									window.define = undefined;
+									geval(scriptText);
+									_loadViaWarmup(mods, cb);
+								});
+							}
+						});
+					});
+				} else if (warmupState === 1) {
+					_loadViaZazl(mods, cb);
+				} else if (warmupState === 2) {
+					_loadViaWarmup(mods, cb);
+				}
+			} else {
+				_loadViaZazl(mods, cb);
 			}
 		}
 

@@ -7,7 +7,11 @@ define([
 	'dojo/domReady!'
 ], function (dojo, Calendar, module) {
 	    var calendar = new Calendar({}, dojo.byId("calendarNode"));
-	    console.log(module.config().myconfigval);
+	    if (module.config() !== undefined) {
+		    console.log(module.config().myconfigval);
+	    } else {
+		    console.log("config not available");
+	    }
 	    return calendar;
 	
 });
