@@ -429,7 +429,7 @@ var define;
 		});
 	}
 	
-	function _createRequire(id) {
+	function _createRequire(id, doQueues) {
 		var req = function(dependencies, callback) {
 			var savedStack = moduleStack;
 			moduleStack = [id];
@@ -438,6 +438,9 @@ var define;
 					callback.apply(null, arguments);
 				});
 				moduleStack = savedStack;
+				if (doQueues) {
+					processQueues();
+				}
 			} else {
 				var mod = _require(dependencies, callback);
 				moduleStack = savedStack;
@@ -581,7 +584,7 @@ var define;
 	};
 	
 	modules["require"] = {};
-	modules["require"].exports = _require;
+	modules["require"].exports = _createRequire("require", true);
 	modules["require"].loaded = true;
 	modules["require"].dependencies = [];
 
