@@ -2,7 +2,7 @@
     <!-- Properties -->
 	<property
 		name="version"
-		value="v0.5.3"/>
+		value="v0.5.4"/>
 	
 	<property
 		name="target.dir"
@@ -50,6 +50,12 @@
 			<fileset dir="${target.dir}/plugins/com.google.javascript_2.1.8.0">
 	            <include name="*.jar"/>
 		    </fileset>
+			<fileset dir="${target.dir}/plugins/org.mozilla.javascript_1.7.4">
+	            <include name="*.jar"/>
+		    </fileset>
+			<fileset dir="${target.dir}/plugins/org.dojotoolkit.shrinksafe_1.0.2">
+	            <include name="*.jar"/>
+		    </fileset>
 	        <fileset dir="${nekohtml.dir}">
 	            <include name="*.jar"/>
 	        </fileset>
@@ -71,8 +77,8 @@
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
-				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
-				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="shrinksafe.jar"/> 
+				<include name="js.jar"/> 
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
@@ -118,8 +124,8 @@
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
-				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
-				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="shrinksafe.jar"/> 
+				<include name="js.jar"/> 
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
@@ -167,8 +173,8 @@
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
-				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
-				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="shrinksafe.jar"/> 
+				<include name="js.jar"/> 
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
@@ -201,8 +207,8 @@
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
-				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
-				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="shrinksafe.jar"/> 
+				<include name="js.jar"/> 
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
@@ -251,8 +257,8 @@
 				<include name="org.dojotoolkit.json*.jar"/> 
 				<include name="org.dojotoolkit.optimizer*.jar"/> 
 				<include name="org.dojotoolkit.compressor*.jar"/> 
-				<include name="org.dojotoolkit.shrinksafe*.jar"/> 
-				<include name="org.mozilla.javascript*.jar"/> 
+				<include name="shrinksafe.jar"/> 
+				<include name="js.jar"/> 
 				<include name="org.dojotoolkit.server.util*.jar"/> 
 				<include name="json*.jar"/> 
 				<include name="uglifyjs*.jar"/> 
