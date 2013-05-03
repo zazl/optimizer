@@ -17,8 +17,8 @@
 		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.5.0"/>
 	
 	<property
-		name="dojo18.dir"
-		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.8.0"/>
+		name="dojo19.dir"
+		value="${workspace.dir}/../targetplatform/dojo/plugins/org.dojotoolkit.dojo_1.9.0"/>
 	
 	<property
 		name="json.dir"
@@ -97,16 +97,16 @@
 			</fileset>
 		</war>
 		<war destfile="${target.dir}/package/filter_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/filter_amdoptimizer_web.xml">
-			<zipfileset dir="${dojo18.dir}/dojo" prefix="dojo">
+			<zipfileset dir="${dojo19.dir}/dojo" prefix="dojo">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
-			<zipfileset dir="${dojo18.dir}/dijit" prefix="dijit">
+			<zipfileset dir="${dojo19.dir}/dijit" prefix="dijit">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
 			<!--
-			<zipfileset dir="${dojo18.dir}/dojox" prefix="dojox">
+			<zipfileset dir="${dojo19.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
@@ -146,16 +146,16 @@
 			</fileset>
 		</war>
 		<war destfile="${target.dir}/package/inject_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml">
-			<zipfileset dir="${dojo18.dir}/dojo" prefix="dojo">
+			<zipfileset dir="${dojo19.dir}/dojo" prefix="dojo">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
-			<zipfileset dir="${dojo18.dir}/dijit" prefix="dijit">
+			<zipfileset dir="${dojo19.dir}/dijit" prefix="dijit">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
 			<!--
-			<zipfileset dir="${dojo18.dir}/dojox" prefix="dojox">
+			<zipfileset dir="${dojo19.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
@@ -280,16 +280,16 @@
 			</zipfileset>
 		</zip>	
 		<zip destfile="${target.dir}/package/examples.zip">
-			<zipfileset dir="${dojo18.dir}/dojo" prefix="dojo">
+			<zipfileset dir="${dojo19.dir}/dojo" prefix="dojo">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
-			<zipfileset dir="${dojo18.dir}/dijit" prefix="dijit">
+			<zipfileset dir="${dojo19.dir}/dijit" prefix="dijit">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
 			<!--
-			<zipfileset dir="${dojo18.dir}/dojox" prefix="dojox">
+			<zipfileset dir="${dojo19.dir}/dojox" prefix="dojox">
 				<exclude name="**/tests/**"/>
 				<exclude name="**/demos**"/>
 			</zipfileset>
