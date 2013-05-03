@@ -703,6 +703,8 @@ var define;
 			if (cfg.directInject && mods.length > 0) {
 				_inject(mods, function(){
 					_callRequire(mods, cb);
+					processCache();
+					queueProcessor();
 				});
 			} else {
 				_callRequire(mods, cb);
