@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
@@ -49,7 +51,7 @@ public class HTMLParser extends DefaultFilter {
 	private String scriptURL = null;
 	private Locale locale = null;
 	private String path = null;
-	private String contextRoot = null;
+	private HttpServletRequest request = null;
 	private Map<String, Object> config = null;
 	
     public HTMLParser(java.io.Writer out, 
@@ -58,19 +60,19 @@ public class HTMLParser extends DefaultFilter {
     	RhinoClassLoader rhinoClassLoader, 
     	JSOptimizer jsOptimizer, 
     	Locale locale,
-    	String contextRoot,
+    	HttpServletRequest request,
     	String path) {
     	this.encoding = encoding; 
 		this.resourceLoader = resourceLoader;
 		this.rhinoClassLoader = rhinoClassLoader;
 		this.locale = locale;
 		this.path = path;
-		this.contextRoot = contextRoot;
+		this.request = request;
 		parser = new HTMLConfiguration();
         parser.setFeature(AUGMENTATIONS, true);
         XMLDocumentFilter[] filters = { this, new Identity(), new HTMLWriter(out, encoding) };
         parser.setProperty(FILTERS, filters);
-        urlGenerator = new JSURLGenerator(jsOptimizer, locale, contextRoot);
+        urlGenerator = new JSURLGenerator(jsOptimizer, locale, request.getContextPath());
     }
     
     public void parse(String html) throws IOException {
@@ -91,6 +93,7 @@ public class HTMLParser extends DefaultFilter {
             		if (src.charAt(0) != ('/')) {
             			url = path + url;
             		}
+            		String contextRoot = request.getContextPath();
             		if (url.startsWith(contextRoot)) {
             			url = url.substring(contextRoot.length());
             		}
@@ -142,7 +145,7 @@ public class HTMLParser extends DefaultFilter {
     		if (depList.size() > 0) {
     			String[] deps = new String[depList.size()];
     			deps = depList.toArray(deps);
-    			url = urlGenerator.generateURL(deps, config);
+    			url = urlGenerator.generateURL(deps, config, request);
     		}
 		} catch (IOException e) {
 			logger.logp(Level.SEVERE, "HTMLParser", "analyzeScript", "Exception on script analyze", e);

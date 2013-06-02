@@ -89,7 +89,7 @@ public class JSFilter implements Filter {
 					                           rhinoClassLoader, 
 					                           jsOptimizer, 
 					                           request.getLocale(), 
-					                           ((HttpServletRequest)request).getContextPath(),
+					                           (HttpServletRequest)request,
 					                           path);
 			parser.parse(responseText);
 			String result = caw.toString();

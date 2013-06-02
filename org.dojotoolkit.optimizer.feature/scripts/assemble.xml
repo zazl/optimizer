@@ -141,8 +141,7 @@
 			<zipfileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/css" prefix="css"/>
 			<fileset dir="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples">
 				<include name="filter_*.html"/>
-				<include name="amdcalendar.jsp"/>
-				<include name="amddeclarative.jsp"/>
+				<include name="amd*.jsp"/>
 			</fileset>
 		</war>
 		<war destfile="${target.dir}/package/inject_amdsamples.war" webxml="${workspace.dir}/optimizer/org.dojotoolkit.optimizer.samples/inject_amdoptimizer_web.xml">
