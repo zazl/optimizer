@@ -1,9 +1,5 @@
 <%@ page import="org.dojotoolkit.optimizer.JSOptimizer" %>
 <%@ page import="org.dojotoolkit.optimizer.servlet.JSURLGenerator" %>
-<%@ page import="org.dojotoolkit.json.JSONParser" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.io.StringReader" %>
-<%@ page import="java.io.IOException" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,33 +12,21 @@
     	html, body { width: 100%; height: 100%; margin: 0; overflow:hidden; }
     	#borderContainerTwo { width: 100%; height: 100%; visibility:hidden; }
 	</style>
-	<script type="text/javascript">
-        var dojoConfig = {
-            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
-		};
-        var zazlConfig = {
-            packages: [{name: 'dojo'}, {name: 'dijit'}, {name: 'dojox'}]
-        };
-	</script>
 	<%
 		JSOptimizer jsOptimizer = (JSOptimizer)pageContext.getServletContext().getAttribute("org.dojotoolkit.optimizer.JSOptimizer");
 		if (jsOptimizer == null) {
 			throw new JspException("A JSOptimizer  has not been loaded into the servlet context");
 		}
 		JSURLGenerator urlGenerator = new JSURLGenerator(jsOptimizer, request.getLocale(), request.getContextPath()); 
-		String configString = "{'packages': ["+
-                "{'name': 'dojo', 'location': 'dojo', 'main':'main'},"+
-                "{'name': 'dijit', 'location': 'dijit', 'main':'main'},"+
-                "{'name': 'dojox', 'location': 'dojox', 'main':'main'}"+
-                "]}";
-        Map<String, Object> cfg = null;        
-        try {        
-        	cfg = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
-        } catch (IOException e) {
-        	throw new JspException(e);
-        }
+		String configString = "{\"packages\": [{\"name\": \"dojo\"},{\"name\": \"dijit\"},{\"name\": \"dojox\"}]}";
 	%>
-	<script type="text/javascript" src="<%=urlGenerator.generateURL("amdtest/Declarative", cfg)%>"></script>
+	<script type="text/javascript">
+        var dojoConfig = {
+            locale : "<%=request.getLocale().toString().toLowerCase().replace('_', '-')%>"
+		};
+        var zazlConfig = <%=configString%>;
+	</script>
+	<script type="text/javascript" src="<%=urlGenerator.generateURL("amdtest/Declarative", configString)%>"></script>
 	<script type="text/javascript">
         require(["amdtest/Declarative", 'dojo/dom', 'dojo/dom-style'], 
         function(declarative, dom, domStyle) {
