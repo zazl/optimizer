@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dojo Toolkit Optimizer Servlet
 Bundle-SymbolicName: org.dojotoolkit.optimizer.servlet
-Bundle-Version: 0.5.3
+Bundle-Version: 0.5.4
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: javax.servlet,
  javax.servlet.http,
