@@ -291,6 +291,7 @@ public class ZazlServicesTracker {
 				os = response.getOutputStream();
 				try {
 					urlConnection = url.openConnection();
+					is = urlConnection.getInputStream();
 					long lastModifed = urlConnection.getLastModified();
 					if (lastModifed > 0) {
 					    String ifNoneMatch = request.getHeader("If-None-Match");
@@ -302,7 +303,6 @@ public class ZazlServicesTracker {
 
 			 			response.setHeader("ETag", Long.toString(lastModifed));
 					}
-					is = urlConnection.getInputStream();
 					byte[] buffer = new byte[4096];
 					int len = 0;
 					while((len = is.read(buffer)) != -1) {
