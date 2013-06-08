@@ -71,11 +71,17 @@ public class JSServlet extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-
+		
+		boolean useTimestamps = true;
+		String strUseTimestamps = getServletContext().getInitParameter("useTimestamps");
+		if (strUseTimestamps != null && strUseTimestamps.equalsIgnoreCase("false")) {
+			useTimestamps = false;
+		}
+		
 		if (resourceLoader == null) {
 			resourceLoader = (ResourceLoader)getServletContext().getAttribute("org.dojotoolkit.ResourceLoader");
 			if (resourceLoader == null) {
-				resourceLoader = new ServletResourceLoader(getServletContext());
+				resourceLoader = new ServletResourceLoader(getServletContext(), useTimestamps);
 				getServletContext().setAttribute("org.dojotoolkit.ResourceLoader", resourceLoader);
 			}
 		}

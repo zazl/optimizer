@@ -20,6 +20,11 @@ public class ServletResourceLoader extends CachingResourceLoader {
 	private String contextPath = null;
 
 	public ServletResourceLoader(ServletContext servletContext) {
+		this(servletContext, true);
+	}
+	
+	public ServletResourceLoader(ServletContext servletContext, boolean useTimestamps) {
+		super(useTimestamps);
 		this.servletContext = servletContext;
 		this.contextPath = servletContext.getContextPath();
 	}
