@@ -138,8 +138,12 @@ public class ZazlServicesTracker {
 					e.printStackTrace();
 				}
 			}
-
-			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory);
+			boolean useTimestamps = true;
+			String useTimestampsString = System.getProperty("useTimestamps");
+			if (useTimestampsString != null && useTimestampsString.equalsIgnoreCase("false")) {
+				useTimestamps = false;
+			}
+			JSServlet jsServlet = new JSServlet(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, null, rhinoJSClasses, jsCompressorFactory, useTimestamps);
 			useHTMLFilter = Boolean.valueOf(System.getProperty("useHTMLFilter", "false"));
 			if (useHTMLFilter) {
 				jsFilter = new JSFilter(resourceLoader, rhinoClassLoader);

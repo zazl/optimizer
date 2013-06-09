@@ -38,6 +38,7 @@ public class JSServlet extends HttpServlet {
 	protected List<List<String>> warmupValues = null;
 	protected List<String> rhinoJSClasses = null;
 	protected JSCompressorFactory jsCompressorFactory = null;
+	protected boolean useTimestamps = true;
 	
 	public JSServlet() {}
 	
@@ -48,7 +49,7 @@ public class JSServlet extends HttpServlet {
 	                 String jsHandlerType,
 	                 List<List<String>> warmupValues,
 	                 JSCompressorFactory jsCompressorFactory) {
-		this(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, warmupValues, null, jsCompressorFactory);
+		this(resourceLoader, jsOptimizerFactory, rhinoClassLoader, jsHandlerType, warmupValues, null, jsCompressorFactory, true);
 	}
 
 	public JSServlet(ResourceLoader resourceLoader, 
@@ -57,7 +58,8 @@ public class JSServlet extends HttpServlet {
 			         String jsHandlerType,
 			         List<List<String>> warmupValues,
 			         List<String> rhinoJSClasses,
-			         JSCompressorFactory jsCompressorFactory) {
+			         JSCompressorFactory jsCompressorFactory,
+			         boolean useTimestamps) {
 		this();
 		this.jsOptimizerFactory = jsOptimizerFactory;
 		this.resourceLoader = resourceLoader;
@@ -66,15 +68,15 @@ public class JSServlet extends HttpServlet {
 		this.warmupValues = warmupValues;
 		this.rhinoJSClasses = rhinoJSClasses;
 		this.jsCompressorFactory = jsCompressorFactory;
+		this.useTimestamps = useTimestamps;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		
-		boolean useTimestamps = true;
-		String strUseTimestamps = getServletContext().getInitParameter("useTimestamps");
-		if (strUseTimestamps != null && strUseTimestamps.equalsIgnoreCase("false")) {
+		String useTimestampsString = getConfigValue("useTimestamps");
+		if (useTimestampsString != null && useTimestampsString.equalsIgnoreCase("false")) {
 			useTimestamps = false;
 		}
 		
@@ -92,7 +94,7 @@ public class JSServlet extends HttpServlet {
 				getServletContext().setAttribute("org.dojotoolkit.RhinoClassLoader", rhinoClassLoader);
 			}
 		}
-		String stringRhinoJSClasses = getServletContext().getInitParameter("rhinoJSClasses");
+		String stringRhinoJSClasses = getConfigValue("rhinoJSClasses");
 		if (rhinoJSClasses == null && stringRhinoJSClasses != null) {
 			try {
 				rhinoJSClasses = (List<String>)JSONParser.parse(new StringReader(stringRhinoJSClasses));
@@ -119,25 +121,25 @@ public class JSServlet extends HttpServlet {
 		}
 		getServletContext().setAttribute("org.dojotoolkit.optimizer.JSOptimizerFactory", jsOptimizerFactory);
 		if (jsHandlerType == null) {
-			jsHandlerType = getServletContext().getInitParameter("jsHandlerType");
+			jsHandlerType = getConfigValue("jsHandlerType");
 			if (jsHandlerType == null) {
 				jsHandlerType = JSHandler.SYNCLOADER_HANDLER_TYPE;
 			}
 		}
 		if (jsHandlerType.equals(JSHandler.SYNCLOADER_HANDLER_TYPE)) {
 			boolean inlineTemplateHTML = true;
-			if (getServletContext().getInitParameter("inlineTemplateHTML") != null) {
-				inlineTemplateHTML = Boolean.valueOf(getServletContext().getInitParameter("inlineTemplateHTML"));
+			if (getConfigValue("inlineTemplateHTML") != null) {
+				inlineTemplateHTML = Boolean.valueOf(getConfigValue("inlineTemplateHTML"));
 			}
 			boolean removeDojoRequires = false;
-			if (getServletContext().getInitParameter("removeDojoRequires") != null) {
-				removeDojoRequires = Boolean.valueOf(getServletContext().getInitParameter("removeDojoRequires"));
+			if (getConfigValue("removeDojoRequires") != null) {
+				removeDojoRequires = Boolean.valueOf(getConfigValue("removeDojoRequires"));
 			}
 			jsHandler = new SyncLoaderJSHandler(inlineTemplateHTML, removeDojoRequires);
 		} else {
 			jsHandler = new AMDJSHandler(jsHandlerType+".json");
 		}
-		String stringWarmupValues = getServletContext().getInitParameter("optimizerWarmup");
+		String stringWarmupValues = getConfigValue("optimizerWarmup");
 		if (warmupValues == null && stringWarmupValues != null) {
 			try {
 				warmupValues = (List<List<String>>)JSONParser.parse(new StringReader(stringWarmupValues));
@@ -146,7 +148,7 @@ public class JSServlet extends HttpServlet {
 			}
 		}
 		if (jsCompressorFactory == null) {
-			String compressJS = getServletContext().getInitParameter("compressJS");
+			String compressJS = getConfigValue("compressJS");
 			if (compressJS != null && compressJS.equalsIgnoreCase("true")) {
 				jsCompressorFactory = new JSCompressorFactoryImpl();
 			}
@@ -162,5 +164,13 @@ public class JSServlet extends HttpServlet {
 		} else {
 			jsHandler.handle(request, response);
 		}
+	}
+	
+	private String getConfigValue(String name) {
+		String configValue = getInitParameter(name);
+		if (configValue == null) {
+			configValue = getServletContext().getInitParameter(name);
+		}
+		return configValue;
 	}
 }
