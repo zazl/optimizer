@@ -351,7 +351,11 @@ var define;
 		if (window.dojoConfig && window.dojoConfig.locale) {
 			locale = dojoConfig.locale;
 		}
-		var configString = JSON.stringify(_clone(cfg));
+		var clonedCfg = _clone(cfg);
+		if (clonedCfg.config) {
+			clonedCfg.config = undefined;
+		}
+		var configString = JSON.stringify(clonedCfg);
 		var zazlUrl = cfg.injectUrl+"?modules=";
 		for (var i = 0; i < modules.length; i++) {
 			zazlUrl += modules[i];
