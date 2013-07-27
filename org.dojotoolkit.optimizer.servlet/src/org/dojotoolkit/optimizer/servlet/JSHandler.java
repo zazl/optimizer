@@ -131,15 +131,39 @@ public abstract class JSHandler {
             if (excludeParam != null) {
                 String[] keys = getAsList(excludeParam);
                 exclude = new JSAnalysisData[keys.length];
+                JSAnalysisData excludeAnalysis = null;
                 int count = 0;
                 for (String excludeKey : keys) {
-                    exclude[count++] = jsOptimizer.getAnalysisData(excludeKey);
+                	excludeAnalysis = jsOptimizer.getAnalysisData(excludeKey);
+                	if (excludeAnalysis == null) {
+                		StringBuffer msg = new StringBuffer();
+                		msg.append("Request for [");
+                		msg.append(modulesParam);
+                		msg.append("] failed. Anaylysis with exclude key [");
+                		msg.append(excludeKey);
+                		msg.append("] could not be located");
+            			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg.toString());
+            			response.getWriter().write("location.reload(true);");
+            			return true;
+                	}
+                    exclude[count++] = excludeAnalysis;
                 }
             }
             String configString = request.getParameter("config");
             @SuppressWarnings("unchecked")
 			Map<String, Object> pageConfig = (Map<String, Object>)JSONParser.parse(new StringReader(configString));
-            analysisData = jsOptimizer.getAnalysisData(modules, exclude, pageConfig);
+            try {
+            	analysisData = jsOptimizer.getAnalysisData(modules, exclude, pageConfig);
+            } catch(IOException e) {
+    			StringBuffer msg = new StringBuffer(); 
+    			msg.append("Exception on request for [");
+    			msg.append(modulesParam);
+    			msg.append("]");
+    			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg.toString(), e);
+    			msg.append(" "+e.getMessage());
+    			response.getWriter().write("alert('"+msg+"');");
+    			return true;
+            }
         } else if (key != null) {
 			analysisData = jsOptimizer.getAnalysisData(key);
 		}
@@ -180,15 +204,17 @@ public abstract class JSHandler {
  			}
  			customHandle(request, osw, analysisData, exclude);
 		} catch (IOException e) {
-			String msg = "Exception on request for [";
+			StringBuffer msg = new StringBuffer(); 
+			msg.append("Exception on request for [");
 			if (key == null) {
-				msg += modulesParam;
+				msg.append(modulesParam);
 			} else {
-				msg += key;
+				msg.append(key);
 			}
-			msg += "]";
-			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg, e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			msg.append("]");
+			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg.toString(), e);
+			msg.append(" "+e.getMessage());
+			response.getWriter().write("alert('"+msg+"');");
 		} finally {
 			osw.flush();
  			if (gzip) {
