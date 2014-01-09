@@ -145,6 +145,19 @@ var define;
 		return path;
 	}
 	
+	function _pluginExpand(path) {
+		var pluginName;
+		if (path.match(".+!")) {
+			pluginName = path.substring(0, path.indexOf('!'));
+			path = path.substring(path.indexOf('!')+1);
+		}
+		var expanded = _expand(path);
+		if (pluginName) {
+			expanded = pluginName+"!"+expanded;
+		}
+		return expanded;
+	}
+	
 	function _idToUrl(path) {
 		var segments = path.split("/");
 		for (var i = segments.length; i >= 0; i--) {
@@ -410,9 +423,9 @@ var define;
 	function _loadPlugin(pluginName, pluginModuleName, cb) {
 		_loadModule(pluginName, function(plugin){
 			if (plugin.normalize) {
-				pluginModuleName = plugin.normalize(pluginModuleName, _expand); 
+				pluginModuleName = plugin.normalize(pluginModuleName, _pluginExpand); 
 			} else {
-				pluginModuleName = _expand(pluginModuleName);
+				pluginModuleName = _pluginExpand(pluginModuleName);
 			}
 			var isDynamic = plugin.dynamic || false; 
 			if (modules[pluginName+"!"+pluginModuleName] !== undefined && !isDynamic) {
