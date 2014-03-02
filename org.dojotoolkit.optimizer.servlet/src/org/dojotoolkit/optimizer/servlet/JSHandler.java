@@ -143,7 +143,7 @@ public abstract class JSHandler {
                 		msg.append(excludeKey);
                 		msg.append("] could not be located");
             			logger.logp(Level.SEVERE, getClass().getName(), "handle", msg.toString());
-            			response.getWriter().write("location.reload(true);");
+            			response.getWriter().write("alert('"+msg+"');");
             			return true;
                 	}
                     exclude[count++] = excludeAnalysis;

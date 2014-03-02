@@ -91,7 +91,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 				this.dependencies[i++] = normalized; 
 			}
 		}
-		this.checksum = ChecksumCreator.createChecksum(this.dependencies, resourceLoader);
+		this.checksum = ChecksumCreator.createChecksum(this.dependencies, excludes, resourceLoader);
 		if (checksum != null && this.checksum.equals(checksum) == false) {
 			checksumStale = true;
 		}
@@ -166,7 +166,7 @@ public class JSAnalysisDataImpl implements JSAnalysisData {
 			if (timestamp != null) {
 				if (timestamp.longValue() != resourceLoader.getTimestamp(dependency)) {
 					try {
-						checksum = ChecksumCreator.createChecksum(this.dependencies, resourceLoader);
+						checksum = ChecksumCreator.createChecksum(this.dependencies, this.excludes, resourceLoader);
 					} catch (IOException e) {
 						logger.logp(Level.SEVERE, JSAnalysisDataImpl.class.getName(), "getChecksum", "Failed to calculate checksum", e);
 					}

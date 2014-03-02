@@ -16,7 +16,7 @@ import org.dojotoolkit.server.util.resource.ResourceLoader;
 
 public class ChecksumCreator {
 	private static Logger logger = Logger.getLogger("org.dojotoolkit.optimizer");
-	public static String createChecksum(String[] dependencies, ResourceLoader resourceLoader) throws IOException {
+	public static String createChecksum(String[] dependencies, String[] excludes, ResourceLoader resourceLoader) throws IOException {
 		long start = System.currentTimeMillis();
 		String checksum = null;
 		StringBuffer content = new StringBuffer();
@@ -28,6 +28,13 @@ public class ChecksumCreator {
 				throw new IOException("Unable to locate resource ["+dependency+"]");
 			}
 		}
+		if (excludes != null) {
+			content.append("excludes:");
+			for (String exclude: excludes) {
+				content.append(exclude);
+			}
+		}
+		
 		try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(content.toString().getBytes());
@@ -38,7 +45,7 @@ public class ChecksumCreator {
         }
 		
 		long end = System.currentTimeMillis();
-		logger.logp(Level.FINE, ChecksumCreator.class.getName(), "createChecksum", "time : "+(end-start)+" ms");
+		logger.logp(Level.FINE, ChecksumCreator.class.getName(), "createChecksum", "time : "+(end-start)+" ms checksum="+checksum);
 		return checksum;
 	}
 }
